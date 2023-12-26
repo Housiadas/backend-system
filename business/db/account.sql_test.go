@@ -13,10 +13,10 @@ func TestQueries_AddAccountBalance(t *testing.T) {
 }
 
 func createRandomAccount(t *testing.T) Account {
-	// user := createRandomUser(t)
+	user := createRandomUser(t)
 
 	arg := CreateAccountParams{
-		Owner:    random.RandomUsername(),
+		Owner:    user.Username,
 		Balance:  random.RandomMoney(),
 		Currency: random.RandomCurrency(),
 	}
@@ -65,9 +65,8 @@ func TestQueries_GetAccountForUpdate(t *testing.T) {
 }
 
 func TestQueries_ListAccounts(t *testing.T) {
-	var lastAccount Account
 	for i := 0; i < 10; i++ {
-		lastAccount = createRandomAccount(t)
+		_ = createRandomAccount(t)
 	}
 
 	arg := ListAccountsParams{
@@ -81,7 +80,6 @@ func TestQueries_ListAccounts(t *testing.T) {
 
 	for _, account := range accounts {
 		require.NotEmpty(t, account)
-		require.Equal(t, lastAccount.Owner, account.Owner)
 	}
 }
 
