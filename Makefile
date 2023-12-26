@@ -3,7 +3,7 @@ include ./.docker/local/.env
 
 DOCKER_COMPOSE_LOCAL := docker-compose -f ./.docker/local/docker-compose.yml
 MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm app migrate
-
+INPUT ?= $(shell bash -c 'read -p "Insert name: " name; echo $$name')
 # ==================================================================================== #
 # HELPERS
 # ==================================================================================== #
@@ -49,10 +49,9 @@ docker/clean:
     docker volume prune
 
 ## db/migrations/create name=$1: create new migration files
-.PHONY: db/migrations/create
+.PHONY: db/migrate/create
 db/migrate/create:
-	@echo 'Creating migration files for ${name}...'
-	$(MIGRATE) create -seq -ext=.sql -dir=./migrations ${name}
+	$(MIGRATE) create -seq -ext=.sql -dir=./migrations $(INPUT)
 
 ## db/migrations/up: apply all up database migrations
 .PHONY: db/migrate/up
