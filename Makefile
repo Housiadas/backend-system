@@ -3,7 +3,9 @@ include ./.docker/local/.env
 
 DOCKER_COMPOSE_LOCAL := docker-compose -f ./.docker/local/docker-compose.yml
 MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm app migrate
+SQLC := $(DOCKER_COMPOSE_LOCAL) run --rm app sqlc
 INPUT ?= $(shell bash -c 'read -p "Insert name: " name; echo $$name')
+
 # ==================================================================================== #
 # HELPERS
 # ==================================================================================== #
@@ -48,20 +50,34 @@ docker/clean:
     docker image prune && \
     docker volume prune
 
+# ==================================================================================== #
+# DATABASE
+# ==================================================================================== #
+
 ## db/migrations/create name=$1: create new migration files
 .PHONY: db/migrate/create
 db/migrate/create:
-	$(MIGRATE) create -seq -ext=.sql -dir=./migrations $(INPUT)
+	$(MIGRATE) create -seq -ext=.sql -dir=./database/migrations $(INPUT)
 
 ## db/migrations/up: apply all up database migrations
 .PHONY: db/migrate/up
 db/migrate/up: confirm
-	$(MIGRATE) -path=./migrations -database=${DB_DSN} up
+	$(MIGRATE) -path=./database/migrations -database=${DB_DSN} up
 
 ## db/migrations/down: apply all down database migrations (DROP Database)
 .PHONY: db/migrate/down
 db/migrate/down: confirm
-	$(MIGRATE) -path=./migrations -database=${DB_DSN} down
+	$(MIGRATE) -path=./database/migrations -database=${DB_DSN} down
+
+## db/sqlc/init: Create an empty sqlc.yaml settings file
+.PHONY: db/sqlc/init
+db/sqlc/init:
+	$(SQLC) init
+
+## db/sqlc/init: Create an empty sqlc.yaml settings file
+.PHONY: db/sqlc/generate
+db/sqlc/generate:
+	$(SQLC) generate
 
 # ==================================================================================== #
 # QUALITY CONTROL

@@ -16,6 +16,9 @@ RUN curl -s https://packagecloud.io/install/repositories/golang-migrate/migrate/
     apt-get update && \
     apt-get install -y migrate
 
+# Install sqlc/sqlc
+RUN go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+
 WORKDIR /app
 
 COPY ../../ .
