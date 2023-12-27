@@ -1,5 +1,5 @@
 # Include variables from the local .env file
-include ./.docker/local/.env
+include ./.env
 
 DOCKER_COMPOSE_LOCAL := docker-compose -f ./.docker/local/docker-compose.yml
 MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm app migrate
@@ -61,12 +61,12 @@ db/migrate/create:
 
 ## db/migrations/up: apply all up database migrations
 .PHONY: db/migrate/up
-db/migrate/up: confirm
+db/migrate/up:
 	$(MIGRATE) -path=./database/migrations -database=${DB_DSN} up
 
 ## db/migrations/down: apply all down database migrations (DROP Database)
 .PHONY: db/migrate/down
-db/migrate/down: confirm
+db/migrate/down:
 	$(MIGRATE) -path=./database/migrations -database=${DB_DSN} down
 
 ## db/sqlc/init: Create an empty sqlc.yaml settings file
@@ -78,6 +78,11 @@ db/sqlc/init:
 .PHONY: db/sqlc/generate
 db/sqlc/generate:
 	$(SQLC) generate
+
+## db/migrate/local/up: apply all up database migrations local
+.PHONY: db/migrate/local/up
+db/migrate/local/up:
+	migrate -path=./database/migrations -database=${DB_DSN} up
 
 # ==================================================================================== #
 # QUALITY CONTROL
@@ -92,9 +97,9 @@ vendor:
 	@echo 'Vendoring dependencies...'
 	go mod vendor
 
-# test: run tests
-.PHONY: test
-test:
+# tests: run tests
+.PHONY: tests
+tests:
 	go test -v -cover -short ./...
 
 ## audit: tidy dependencies and format, vet and test all code
