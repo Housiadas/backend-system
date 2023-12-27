@@ -13,7 +13,7 @@ const (
 	dbSource = "postgres://housi:secret123@localhost/housi_db?sslmode=disable"
 )
 
-var testStore *Queries
+var testStore Store
 
 func TestMain(m *testing.M) {
 	connPool, err := pgxpool.New(context.Background(), dbSource)
@@ -21,6 +21,6 @@ func TestMain(m *testing.M) {
 		log.Fatal("cannot connect to db:", err)
 	}
 
-	testStore = New(connPool)
+	testStore = NewStore(connPool)
 	os.Exit(m.Run())
 }
