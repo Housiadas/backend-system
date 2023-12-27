@@ -61,12 +61,12 @@ db/migrate/create:
 
 ## db/migrations/up: apply all up database migrations
 .PHONY: db/migrate/up
-db/migrate/up: confirm
+db/migrate/up:
 	$(MIGRATE) -path=./database/migrations -database=${DB_DSN} up
 
 ## db/migrations/down: apply all down database migrations (DROP Database)
 .PHONY: db/migrate/down
-db/migrate/down: confirm
+db/migrate/down:
 	$(MIGRATE) -path=./database/migrations -database=${DB_DSN} down
 
 ## db/sqlc/init: Create an empty sqlc.yaml settings file
