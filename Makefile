@@ -79,6 +79,11 @@ db/sqlc/init:
 db/sqlc/generate:
 	$(SQLC) generate
 
+## db/migrate/local/up: apply all up database migrations local
+.PHONY: db/migrate/local/up
+db/migrate/local/up:
+	migrate -path=./database/migrations -database=${DB_DSN} up
+
 # ==================================================================================== #
 # QUALITY CONTROL
 # ==================================================================================== #
