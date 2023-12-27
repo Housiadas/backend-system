@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	dbSource = "postgres://housi:secret123@localhost/housi_db?sslmode=disable"
+	dbSource = "postgres://housi:secret123@localhost:5432/housi_db?sslmode=disable"
 )
 
 var testStore Store
