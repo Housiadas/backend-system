@@ -52,6 +52,9 @@ func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (Tr
 		}
 
 		// Update account balance
+		// We check the order of the ids between the transactions, and we arrange them in the same order!!
+		// With this we are avoiding deadlock between transactions
+		// e.g. account1 -> account2, account2 -> account1
 		if arg.FromAccountID < arg.ToAccountID {
 			result.FromAccount, result.ToAccount, err = addMoney(ctx, q, arg.FromAccountID, -arg.Amount, arg.ToAccountID, arg.Amount)
 		} else {
