@@ -43,6 +43,9 @@ jobs:
                     sudo mv migrate.linux-amd64 /usr/bin/migrate
                     which migrate
 
+            -   name: Copy .env file
+                run: cp .env.example .env
+
             -   name: Run migrations
                 run: make db/migrate/up
 

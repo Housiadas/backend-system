@@ -1,5 +1,5 @@
 # Include variables from the local .env file
-include ./.docker/local/.env
+include ./.env
 
 DOCKER_COMPOSE_LOCAL := docker-compose -f ./.docker/local/docker-compose.yml
 MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm app migrate
