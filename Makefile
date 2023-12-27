@@ -92,9 +92,9 @@ vendor:
 	@echo 'Vendoring dependencies...'
 	go mod vendor
 
-# test: run tests
-.PHONY: test
-test:
+# tests: run tests
+.PHONY: tests
+tests:
 	go test -v -cover -short ./...
 
 ## audit: tidy dependencies and format, vet and test all code
