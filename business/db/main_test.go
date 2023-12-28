@@ -6,17 +6,18 @@ import (
 	"os"
 	"testing"
 
+	"github.com/Housiadas/simple-banking-system/foundation/config"
 	"github.com/jackc/pgx/v5/pgxpool"
-)
-
-const (
-	dbSource = "postgres://housi:secret123@localhost:5432/housi_db?sslmode=disable"
 )
 
 var testStore Store
 
 func TestMain(m *testing.M) {
-	connPool, err := pgxpool.New(context.Background(), dbSource)
+	cfg, err := config.LoadConfig("../../")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+	connPool, err := pgxpool.New(context.Background(), cfg.DBSource)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}

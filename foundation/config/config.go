@@ -10,8 +10,9 @@ import (
 // The values are read by viper from a config file or environment variable.
 type Config struct {
 	Environment          string        `mapstructure:"APP_ENV"`
-	DBSource             string        `mapstructure:"DB_SOURCE"`
+	DBSource             string        `mapstructure:"DB_DSN"`
 	MigrationURL         string        `mapstructure:"MIGRATION_URL"`
+	MigrationDBSource    string        `mapstructure:"MIGRATION_DB_DSN"`
 	HTTPServerAddress    string        `mapstructure:"APP_HTTP_SERVER_ADDRESS"`
 	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`

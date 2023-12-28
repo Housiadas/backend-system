@@ -70,12 +70,17 @@ db/migrate/create:
 ## db/migrations/up: apply all up database migrations
 .PHONY: db/migrate/up
 db/migrate/up:
-	$(MIGRATE) -path=./database/migrations -database=${DB_DSN} up
+	$(MIGRATE) -path=./database/migrations -database=${MIGRATION_DB_DSN} up
 
 ## db/migrations/down: apply all down database migrations (DROP Database)
 .PHONY: db/migrate/down
 db/migrate/down:
-	$(MIGRATE) -path=./database/migrations -database=${DB_DSN} down
+	$(MIGRATE) -path=./database/migrations -database=${MIGRATION_DB_DSN} down
+
+## db/migrations/local/up: apply all up database migrations local command
+.PHONY: db/migrate/local/up
+db/migrate/local/up:
+	go -path=./database/migrations -database=${MIGRATION_DB_DSN} up
 
 ## db/sqlc/init: Create an empty sqlc.yaml settings file
 .PHONY: db/sqlc/init
