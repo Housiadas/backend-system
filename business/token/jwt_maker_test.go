@@ -6,7 +6,7 @@ import (
 
 	"github.com/Housiadas/simple-banking-system/business/role"
 	"github.com/Housiadas/simple-banking-system/foundation/random"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/require"
 )
 
