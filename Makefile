@@ -1,9 +1,12 @@
+# ==================================================================================== #
+# VARIABLES
+# ==================================================================================== #
 # Include variables from the local .env file
-include ./.env
+include ./app.env
 
 DOCKER_COMPOSE_LOCAL := docker-compose -f ./.docker/local/docker-compose.yml
-MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm app migrate
-SQLC := $(DOCKER_COMPOSE_LOCAL) run --rm app sqlc
+MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm utility migrate
+SQLC := $(DOCKER_COMPOSE_LOCAL) run --rm utility sqlc
 INPUT ?= $(shell bash -c 'read -p "Insert name: " name; echo $$name')
 
 # ==================================================================================== #
@@ -31,7 +34,7 @@ docker/build:
 ## docker/up: Start all the containers for the app
 .PHONY: docker/up
 docker/up:
-	$(DOCKER_COMPOSE_LOCAL) up -d app
+	$(DOCKER_COMPOSE_LOCAL) up -d db redis
 
 ## docker/stop: stop all containers
 .PHONY: docker/stop
@@ -49,6 +52,11 @@ docker/clean:
 	docker system prune && \
     docker image prune && \
     docker volume prune
+
+## go/run: Run main.go locally
+.PHONY: go/run
+go/run:
+	go run app/main.go
 
 # ==================================================================================== #
 # DATABASE
@@ -78,11 +86,6 @@ db/sqlc/init:
 .PHONY: db/sqlc/generate
 db/sqlc/generate:
 	$(SQLC) generate
-
-## db/migrate/local/up: apply all up database migrations local
-.PHONY: db/migrate/local/up
-db/migrate/local/up:
-	migrate -path=./database/migrations -database=${DB_DSN} up
 
 # ==================================================================================== #
 # QUALITY CONTROL

@@ -37,17 +37,17 @@ jobs:
             -   name: Checkout code into the Go
                 uses: actions/checkout@v3
 
-            -   name: Install golang-migrate
+            -   name: Install golang-utility
                 run: |
                     curl -L https://github.com/golang-migrate/migrate/releases/download/v4.14.1/migrate.linux-amd64.tar.gz | tar xvz
                     sudo mv migrate.linux-amd64 /usr/bin/migrate
                     which migrate
 
             -   name: Copy .env file
-                run: cp .env.example .env
+                run: cp app.env.example app.env
 
             -   name: Run migrations
-                run: make db/migrate/local/up
+                run: make db/utility/local/up
 
             -   name: Test
                 run: make tests

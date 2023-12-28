@@ -1,29 +1,6 @@
 version: '3.8'
 
 services:
-    app:
-        container_name: simple-banking-app-container
-        image: simple-banking/go-image
-        build:
-            args:
-                USER: "localdev"
-                UID: "${UID:-1000}"
-            context: ../../
-            target: dev
-            dockerfile: .docker/local/Dockerfile
-        restart: unless-stopped
-        env_file:
-            - ../../.env
-        depends_on:
-            - db
-            - redis
-        volumes:
-            - ../../:/app
-        ports:
-            - "4000:4000"
-        networks:
-            - simple_banking_local_network
-
     db:
         image: postgres:13
         container_name: simple-banking-db-container
@@ -47,6 +24,20 @@ services:
             - simple_banking_redis_data:/var/lib/redis/data
         ports:
             - "6379:6379"
+        networks:
+            - simple_banking_local_network
+
+    utility:
+        container_name: utility-container
+        image: simple-banking/utility
+        build:
+            args:
+                USER: "localdev"
+                UID: "${UID:-1000}"
+            context: ../../
+            dockerfile: .docker/local/utility/Dockerfile
+        volumes:
+            - ../../:/app
         networks:
             - simple_banking_local_network
 
