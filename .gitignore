@@ -5,3 +5,6 @@ tmp
 
 .env
 app.env
+
+cover.out
+cover.html

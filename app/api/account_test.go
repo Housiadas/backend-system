@@ -12,9 +12,13 @@ import (
 	"time"
 
 	"github.com/Housiadas/simple-banking-system/business/db"
+	mockdb "github.com/Housiadas/simple-banking-system/business/db/mock"
+	"github.com/Housiadas/simple-banking-system/business/role"
 	"github.com/Housiadas/simple-banking-system/business/token"
+	"github.com/Housiadas/simple-banking-system/foundation/random"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 func TestGetAccountAPI(t *testing.T) {
@@ -49,7 +53,7 @@ func TestGetAccountAPI(t *testing.T) {
 			name:      "UnauthorizedUser",
 			accountID: account.ID,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "unauthorized_user", util.DepositorRole, time.Minute)
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "unauthorized_user", role.DepositorRole, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -419,10 +423,10 @@ func TestListAccountsAPI(t *testing.T) {
 
 func randomAccount(owner string) db.Account {
 	return db.Account{
-		ID:       util.RandomInt(1, 1000),
+		ID:       random.RandomInt(1, 1000),
 		Owner:    owner,
-		Balance:  util.RandomMoney(),
-		Currency: util.RandomCurrency(),
+		Balance:  random.RandomMoney(),
+		Currency: random.RandomCurrency(),
 	}
 }
 

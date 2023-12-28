@@ -4,6 +4,7 @@
 # Include variables from the local .env file
 include ./app.env
 
+APP_MODULE := github.com/Housiadas/simple-banking-system
 DOCKER_COMPOSE_LOCAL := docker-compose -f ./.docker/local/docker-compose.yml
 MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm utility migrate
 SQLC := $(DOCKER_COMPOSE_LOCAL) run --rm utility sqlc
@@ -52,6 +53,11 @@ docker/clean:
 	docker system prune && \
     docker image prune && \
     docker volume prune
+
+## go/mock/store: Go mock Store interface
+.PHONY: go/mock/store
+go/mock/store:
+	mockgen -package mockdb -destination business/db/mock/store.go $(APP_MODULE)/business/db Store
 
 ## go/run: Run main.go locally
 .PHONY: go/run
@@ -105,11 +111,6 @@ vendor:
 	@echo 'Vendoring dependencies...'
 	go mod vendor
 
-# tests: run tests
-.PHONY: tests
-tests:
-	go test -v -cover -short ./...
-
 ## audit: tidy dependencies and format, vet and test all code
 .PHONY: audit
 audit:
@@ -123,6 +124,18 @@ audit:
 	staticcheck ./...
 	@echo 'Running tests...'
 	go test -race -vet=off ./...
+
+# tests: run tests
+.PHONY: tests
+tests:
+	go test -v -cover -short ./...
+
+# coverage: Inspect coverage
+.PHONY: coverage
+coverage:
+	go test -v -coverprofile cover.out ./...
+	go tool cover -html cover.out -o cover.html
+	open cover.html
 
 # ==================================================================================== #
 # BUILD

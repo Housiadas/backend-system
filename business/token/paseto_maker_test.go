@@ -4,15 +4,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Housiadas/simple-banking-system/business/role"
+	"github.com/Housiadas/simple-banking-system/foundation/random"
 	"github.com/stretchr/testify/require"
 )
 
 func TestPasetoMaker(t *testing.T) {
-	maker, err := NewPasetoMaker(util.RandomString(32))
+	maker, err := NewPasetoMaker(random.RandomString(32))
 	require.NoError(t, err)
 
-	username := util.RandomOwner()
-	role := util.DepositorRole
+	username := random.RandomUsername()
+	role := role.DepositorRole
 	duration := time.Minute
 
 	issuedAt := time.Now()
@@ -35,10 +37,10 @@ func TestPasetoMaker(t *testing.T) {
 }
 
 func TestExpiredPasetoToken(t *testing.T) {
-	maker, err := NewPasetoMaker(util.RandomString(32))
+	maker, err := NewPasetoMaker(random.RandomString(32))
 	require.NoError(t, err)
 
-	token, payload, err := maker.CreateToken(util.RandomOwner(), util.DepositorRole, -time.Minute)
+	token, payload, err := maker.CreateToken(random.RandomUsername(), role.DepositorRole, -time.Minute)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	require.NotEmpty(t, payload)

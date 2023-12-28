@@ -12,10 +12,13 @@ import (
 	"testing"
 
 	"github.com/Housiadas/simple-banking-system/business/db"
+	mockdb "github.com/Housiadas/simple-banking-system/business/db/mock"
 	"github.com/Housiadas/simple-banking-system/foundation/password"
+	p "github.com/Housiadas/simple-banking-system/foundation/password"
 	"github.com/Housiadas/simple-banking-system/foundation/random"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 type eqCreateUserParamsMatcher struct {
@@ -317,14 +320,14 @@ func TestLoginUserAPI(t *testing.T) {
 
 func randomUser(t *testing.T) (user db.User, password string) {
 	password = random.RandomString(6)
-	hashedPassword, err := util.HashPassword(password)
+	hashedPassword, err := p.HashPassword(password)
 	require.NoError(t, err)
 
 	user = db.User{
-		Username:       util.RandomOwner(),
+		Username:       random.RandomUsername(),
 		HashedPassword: hashedPassword,
-		FullName:       util.RandomOwner(),
-		Email:          util.RandomEmail(),
+		FullName:       random.RandomUsername(),
+		Email:          random.RandomEmail(),
 	}
 	return
 }

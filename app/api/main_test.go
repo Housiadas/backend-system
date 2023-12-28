@@ -5,17 +5,20 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Housiadas/simple-banking-system/business/db"
+	"github.com/Housiadas/simple-banking-system/foundation/config"
+	"github.com/Housiadas/simple-banking-system/foundation/random"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 )
 
 func newTestServer(t *testing.T, store db.Store) *Server {
-	config := util.Config{
-		TokenSymmetricKey:   util.RandomString(32),
+	cfg := config.Config{
+		TokenSymmetricKey:   random.RandomString(32),
 		AccessTokenDuration: time.Minute,
 	}
 
-	server, err := NewServer(config, store)
+	server, err := NewServer(cfg, store)
 	require.NoError(t, err)
 
 	return server

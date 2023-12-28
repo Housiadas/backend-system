@@ -4,16 +4,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Housiadas/simple-banking-system/business/role"
+	"github.com/Housiadas/simple-banking-system/foundation/random"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/require"
 )
 
 func TestJWTMaker(t *testing.T) {
-	maker, err := NewJWTMaker(util.RandomString(32))
+	maker, err := NewJWTMaker(random.RandomString(32))
 	require.NoError(t, err)
 
-	username := util.RandomOwner()
-	role := util.DepositorRole
+	username := random.RandomUsername()
+	role := role.DepositorRole
 	duration := time.Minute
 
 	issuedAt := time.Now()
@@ -36,10 +38,10 @@ func TestJWTMaker(t *testing.T) {
 }
 
 func TestExpiredJWTToken(t *testing.T) {
-	maker, err := NewJWTMaker(util.RandomString(32))
+	maker, err := NewJWTMaker(random.RandomString(32))
 	require.NoError(t, err)
 
-	token, payload, err := maker.CreateToken(util.RandomOwner(), util.DepositorRole, -time.Minute)
+	token, payload, err := maker.CreateToken(random.RandomUsername(), role.DepositorRole, -time.Minute)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	require.NotEmpty(t, payload)
@@ -51,14 +53,14 @@ func TestExpiredJWTToken(t *testing.T) {
 }
 
 func TestInvalidJWTTokenAlgNone(t *testing.T) {
-	payload, err := NewPayload(util.RandomOwner(), util.DepositorRole, time.Minute)
+	payload, err := NewPayload(random.RandomUsername(), role.DepositorRole, time.Minute)
 	require.NoError(t, err)
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodNone, payload)
 	token, err := jwtToken.SignedString(jwt.UnsafeAllowNoneSignatureType)
 	require.NoError(t, err)
 
-	maker, err := NewJWTMaker(util.RandomString(32))
+	maker, err := NewJWTMaker(random.RandomString(32))
 	require.NoError(t, err)
 
 	payload, err = maker.VerifyToken(token)

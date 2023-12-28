@@ -7,6 +7,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Housiadas/simple-banking-system/business/role"
+	"github.com/Housiadas/simple-banking-system/business/token"
+	"github.com/Housiadas/simple-banking-system/foundation/random"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 )
@@ -29,8 +32,8 @@ func addAuthorization(
 }
 
 func TestAuthMiddleware(t *testing.T) {
-	username := util.RandomOwner()
-	role := util.DepositorRole
+	username := random.RandomUsername()
+	role := role.DepositorRole
 
 	testCases := []struct {
 		name          string

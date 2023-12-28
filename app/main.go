@@ -10,6 +10,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	_ "go.uber.org/mock/gomock"
+	_ "go.uber.org/mock/mockgen/model"
 )
 
 func main() {
