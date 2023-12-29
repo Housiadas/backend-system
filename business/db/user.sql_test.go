@@ -2,13 +2,15 @@ package db
 
 import (
 	"context"
+	"testing"
+
+	"github.com/Housiadas/simple-banking-system/foundation/password"
 	"github.com/Housiadas/simple-banking-system/foundation/random"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func createRandomUser(t *testing.T) User {
-	hashedPassword, err := random.HashPassword(random.RandomString(6))
+	hashedPassword, err := password.HashPassword(random.RandomString(6))
 	require.NoError(t, err)
 
 	arg := CreateUserParams{

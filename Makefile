@@ -1,9 +1,13 @@
+# ==================================================================================== #
+# VARIABLES
+# ==================================================================================== #
 # Include variables from the local .env file
-include ./.env
+include ./app.env
 
+APP_MODULE := github.com/Housiadas/simple-banking-system
 DOCKER_COMPOSE_LOCAL := docker-compose -f ./.docker/local/docker-compose.yml
-MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm app migrate
-SQLC := $(DOCKER_COMPOSE_LOCAL) run --rm app sqlc
+MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm utility migrate
+SQLC := $(DOCKER_COMPOSE_LOCAL) run --rm utility sqlc
 INPUT ?= $(shell bash -c 'read -p "Insert name: " name; echo $$name')
 
 # ==================================================================================== #
@@ -31,7 +35,7 @@ docker/build:
 ## docker/up: Start all the containers for the app
 .PHONY: docker/up
 docker/up:
-	$(DOCKER_COMPOSE_LOCAL) up -d app
+	$(DOCKER_COMPOSE_LOCAL) up -d db redis
 
 ## docker/stop: stop all containers
 .PHONY: docker/stop
@@ -50,6 +54,16 @@ docker/clean:
     docker image prune && \
     docker volume prune
 
+## go/mock/store: Go mock Store interface
+.PHONY: go/mock/store
+go/mock/store:
+	mockgen -package mockdb -destination business/db/mock/store.go $(APP_MODULE)/business/db Store
+
+## go/run: Run main.go locally
+.PHONY: go/run
+go/run:
+	go run app/main.go
+
 # ==================================================================================== #
 # DATABASE
 # ==================================================================================== #
@@ -62,12 +76,17 @@ db/migrate/create:
 ## db/migrations/up: apply all up database migrations
 .PHONY: db/migrate/up
 db/migrate/up:
-	$(MIGRATE) -path=./database/migrations -database=${DB_DSN} up
+	$(MIGRATE) -path=./database/migrations -database=${MIGRATION_DB_DSN} up
 
 ## db/migrations/down: apply all down database migrations (DROP Database)
 .PHONY: db/migrate/down
 db/migrate/down:
-	$(MIGRATE) -path=./database/migrations -database=${DB_DSN} down
+	$(MIGRATE) -path=./database/migrations -database=${MIGRATION_DB_DSN} down
+
+## db/migrations/local/up: apply all up database migrations local command
+.PHONY: db/migrate/local/up
+db/migrate/local/up:
+	go -path=./database/migrations -database=${MIGRATION_DB_DSN} up
 
 ## db/sqlc/init: Create an empty sqlc.yaml settings file
 .PHONY: db/sqlc/init
@@ -78,11 +97,6 @@ db/sqlc/init:
 .PHONY: db/sqlc/generate
 db/sqlc/generate:
 	$(SQLC) generate
-
-## db/migrate/local/up: apply all up database migrations local
-.PHONY: db/migrate/local/up
-db/migrate/local/up:
-	migrate -path=./database/migrations -database=${DB_DSN} up
 
 # ==================================================================================== #
 # QUALITY CONTROL
@@ -97,11 +111,6 @@ vendor:
 	@echo 'Vendoring dependencies...'
 	go mod vendor
 
-# tests: run tests
-.PHONY: tests
-tests:
-	go test -v -cover -short ./...
-
 ## audit: tidy dependencies and format, vet and test all code
 .PHONY: audit
 audit:
@@ -115,6 +124,18 @@ audit:
 	staticcheck ./...
 	@echo 'Running tests...'
 	go test -race -vet=off ./...
+
+# tests: run tests
+.PHONY: tests
+tests:
+	go test -v -cover -short ./...
+
+# coverage: Inspect coverage
+.PHONY: coverage
+coverage:
+	go test -v -coverprofile cover.out ./...
+	go tool cover -html cover.out -o cover.html
+	open cover.html
 
 # ==================================================================================== #
 # BUILD
