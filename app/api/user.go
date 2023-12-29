@@ -9,16 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func newUserResponse(user db.User) userResponse {
-	return userResponse{
-		Username:          user.Username,
-		FullName:          user.FullName,
-		Email:             user.Email,
-		PasswordChangedAt: user.PasswordChangedAt,
-		CreatedAt:         user.CreatedAt,
-	}
-}
-
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -119,4 +109,14 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		User:                  newUserResponse(user),
 	}
 	ctx.JSON(http.StatusOK, rsp)
+}
+
+func newUserResponse(user db.User) userResponse {
+	return userResponse{
+		Username:          user.Username,
+		FullName:          user.FullName,
+		Email:             user.Email,
+		PasswordChangedAt: user.PasswordChangedAt,
+		CreatedAt:         user.CreatedAt,
+	}
 }
