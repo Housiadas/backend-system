@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Housiadas/simple-banking-system/business/role"
+	r "github.com/Housiadas/simple-banking-system/business/role"
 	"github.com/Housiadas/simple-banking-system/foundation/random"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/require"
@@ -15,9 +15,8 @@ func TestJWTMaker(t *testing.T) {
 	require.NoError(t, err)
 
 	username := random.RandomUsername()
-	role := role.DepositorRole
+	role := r.DepositorRole
 	duration := time.Minute
-
 	issuedAt := time.Now()
 	expiredAt := issuedAt.Add(duration)
 
@@ -41,7 +40,7 @@ func TestExpiredJWTToken(t *testing.T) {
 	maker, err := NewJWTMaker(random.RandomString(32))
 	require.NoError(t, err)
 
-	token, payload, err := maker.CreateToken(random.RandomUsername(), role.DepositorRole, -time.Minute)
+	token, payload, err := maker.CreateToken(random.RandomUsername(), r.DepositorRole, -time.Minute)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	require.NotEmpty(t, payload)
@@ -53,7 +52,7 @@ func TestExpiredJWTToken(t *testing.T) {
 }
 
 func TestInvalidJWTTokenAlgNone(t *testing.T) {
-	payload, err := NewPayload(random.RandomUsername(), role.DepositorRole, time.Minute)
+	payload, err := NewPayload(random.RandomUsername(), r.DepositorRole, time.Minute)
 	require.NoError(t, err)
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodNone, payload)
