@@ -102,33 +102,33 @@ db/sqlc/generate:
 # QUALITY CONTROL
 # ==================================================================================== #
 
+# update: update dependeniecs
+.PHONY: update
+update:
+	go get -u ./...
+	go mod verify
+
 # vendor: tidy and vendor dependencies
 .PHONY: vendor
 vendor:
-	@echo 'Tidying and verifying module dependencies...'
 	go mod tidy
-	go mod verify
-	@echo 'Vendoring dependencies...'
 	go mod vendor
+	go mod verify
 
 ## audit: tidy dependencies and format, vet and test all code
 .PHONY: audit
 audit:
-	@echo 'Tidying and verifying module dependencies...'
 	go mod tidy
 	go mod verify
-	@echo 'Formatting code...'
 	go fmt ./...
-	@echo 'Vetting code...'
 	go vet ./...
 	staticcheck ./...
-	@echo 'Running tests...'
-	go test -race -vet=off ./...
+	go test ./... --vet --cover --short --race
 
 # tests: run tests
 .PHONY: tests
 tests:
-	go test -v -cover -short ./...
+	go test ./... -v --cover --short --race
 
 # coverage: Inspect coverage
 .PHONY: coverage
