@@ -32,13 +32,14 @@ help:
 # DEVELOPMENT
 # ==================================================================================== #
 
-## docker/build: Build all the containers
+## docker/build: Build the application
 .PHONY: docker/build
 docker/build:
-	export LINKER_FLAGS=$(LINKER_FLAGS) && \
-	$(DOCKER_COMPOSE_LOCAL) build --no-cache --pull
+	docker build --target application -t banking-api:local \
+		--build-arg VERSION=$(VERSION) \
+ 		-f .docker/app/Dockerfile .
 
-## docker/up: Start all the containers for the app
+## docker/up: Start all the containers for the application
 .PHONY: docker/up
 docker/up:
 	$(DOCKER_COMPOSE_LOCAL) up -d db redis
