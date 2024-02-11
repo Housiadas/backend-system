@@ -1,6 +1,21 @@
 version: '3.8'
 
 services:
+    api:
+        container_name: api-container
+        build:
+            args:
+                UID: "${UID:-1000}"
+                GID: "${GID:-1000}"
+                VERSION: "${VERSION:-1.22}"
+                LINKER_FLAGS: "${LINKER_FLAGS}"
+            context: .
+            dockerfile: .docker/api/Dockerfile
+        volumes:
+            - .:/api
+        networks:
+            - simple_banking_local_network
+
     db:
         image: postgres:13
         container_name: simple-banking-db-container
@@ -27,17 +42,29 @@ services:
         networks:
             - simple_banking_local_network
 
-    utility:
-        container_name: utility-container
-        image: simple-banking/utility
+    migrate:
+        container_name: migrate-container
         build:
             args:
-                USER: "localdev"
                 UID: "${UID:-1000}"
-            context: ../../
-            dockerfile: .docker/local/utility/Dockerfile
+                GID: "${GID:-1000}"
+            context: .
+            dockerfile: .docker/migrate/Dockerfile
         volumes:
-            - ../../:/app
+            - .:/app
+        networks:
+            - simple_banking_local_network
+
+    sqlc:
+        container_name: sqlc-container
+        build:
+            args:
+                UID: "${UID:-1000}"
+                GID: "${GID:-1000}"
+            context: .
+            dockerfile: .docker/sqlc/Dockerfile
+        volumes:
+            - .:/app
         networks:
             - simple_banking_local_network
 
