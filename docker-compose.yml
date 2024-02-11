@@ -13,6 +13,8 @@ services:
             dockerfile: .docker/api/Dockerfile
         volumes:
             - .:/api
+        ports:
+            - '4000:4000'
         networks:
             - simple_banking_local_network
 
