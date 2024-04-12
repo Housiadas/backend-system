@@ -6,7 +6,7 @@ import (
 
 	"github.com/Housiadas/simple-banking-system/app/api"
 	"github.com/Housiadas/simple-banking-system/business/db"
-	"github.com/Housiadas/simple-banking-system/foundation/config"
+	"github.com/Housiadas/simple-banking-system/database/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

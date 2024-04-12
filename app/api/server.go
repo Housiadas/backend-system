@@ -3,12 +3,13 @@ package api
 import (
 	"fmt"
 
-	"github.com/Housiadas/simple-banking-system/business/db"
-	"github.com/Housiadas/simple-banking-system/business/token"
-	"github.com/Housiadas/simple-banking-system/foundation/config"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+
+	"github.com/Housiadas/simple-banking-system/business/db"
+	"github.com/Housiadas/simple-banking-system/business/token"
+	"github.com/Housiadas/simple-banking-system/database/config"
 )
 
 // Server serves HTTP requests for our banking service.

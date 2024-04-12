@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/Housiadas/simple-banking-system/business/db"
-	"github.com/Housiadas/simple-banking-system/foundation/config"
+	"github.com/Housiadas/simple-banking-system/database/config"
 	"github.com/Housiadas/simple-banking-system/foundation/random"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"

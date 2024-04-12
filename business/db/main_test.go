@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Housiadas/simple-banking-system/foundation/config"
+	"github.com/Housiadas/simple-banking-system/database/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
