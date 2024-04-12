@@ -1,6 +1,6 @@
-ARG VERSION
+ARG GO_VERSION
 # Build the Go Binary.
-FROM golang:$VERSION as build_stage
+FROM golang:$GO_VERSION as build_stage
 
 WORKDIR /home
 # Copy the source code into the container.

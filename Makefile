@@ -4,7 +4,7 @@
 # Include variables from the local .env file
 include ./app.env
 
-VERSION := 1.22
+GO_VERSION := 1.22
 UID := $(shell id -u)
 GID := $(shell id -g)
 
@@ -35,8 +35,9 @@ help:
 ## docker/build: Build the application
 .PHONY: docker/build
 docker/build:
-	docker build --target application -t banking-api:local \
-		--build-arg VERSION=$(VERSION) \
+	docker build --target application \
+		-t banking-api:local \
+		--build-arg GO_VERSION=$(GO_VERSION) \
  		-f .docker/app/Dockerfile .
 
 ## docker/up: Start all the containers for the application
