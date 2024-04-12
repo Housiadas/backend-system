@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    container_name: simple-banking-db-container
+    restart: always
+    environment:
+      POSTGRES_DB: "${DB_DATABASE:-housi_db}"
+      POSTGRES_USER: "${DB_USER:-housi}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD:-secret123}"
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    volumes:
+      - simple_banking_db_data:/var/lib/postgresql/data
+    networks:
+      - simple_banking_local_network
+
+  redis:
+    image: redis:latest
+    container_name: simple-banking-redis-container
+    command: /bin/sh -c 'redis-server --requirepass ${REDIS_PASSWORD:-secret123}'
+    volumes:
+      - simple_banking_redis_data:/var/lib/redis/data
+    ports:
+      - "6379:6379"
+    networks:
+      - simple_banking_local_network
+
+  migrate:
+    container_name: migrate-container
+    build:
+      args:
+        UID: "${UID:-1000}"
+        GID: "${GID:-1000}"
+      context: .
+      dockerfile: .docker/migrate/Dockerfile
+    volumes:
+      - .:/app
+    networks:
+      - simple_banking_local_network
+
+  sqlc:
+    container_name: sqlc-container
+    build:
+      args:
+        UID: "${UID:-1000}"
+        GID: "${GID:-1000}"
+      context: .
+      dockerfile: .docker/sqlc/Dockerfile
+    volumes:
+      - .:/app
+    networks:
+      - simple_banking_local_network
+
+networks:
+  simple_banking_local_network:
+
+volumes:
+  simple_banking_db_data:
+  simple_banking_redis_data:
