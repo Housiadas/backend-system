@@ -5,7 +5,7 @@ import (
 	"net/mail"
 	"time"
 
-	"github.com/Housiadas/simple-banking-system/foundation/validate"
+	"github.com/Housiadas/backend-system/foundation/validate"
 	"github.com/google/uuid"
 )
 

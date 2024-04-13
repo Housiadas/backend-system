@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Housiadas/simple-banking-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/business/domain/userbus"
 )
 
 func applyFilter(filter userbus.QueryFilter, data map[string]interface{}, buf *bytes.Buffer) {

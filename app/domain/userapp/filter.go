@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/Housiadas/simple-banking-system/business/domain/userbus"
-	"github.com/Housiadas/simple-banking-system/foundation/validate"
+	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/foundation/validate"
 )
 
 func parseFilter(qp QueryParams) (userbus.QueryFilter, error) {

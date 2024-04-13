@@ -5,9 +5,9 @@ import (
 	"net/mail"
 	"time"
 
-	"github.com/Housiadas/simple-banking-system/business/domain/userbus"
-	"github.com/Housiadas/simple-banking-system/business/sys/errs"
-	"github.com/Housiadas/simple-banking-system/foundation/validate"
+	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/foundation/validate"
 )
 
 // QueryParams represents the set of possible query strings.

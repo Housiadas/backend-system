@@ -5,8 +5,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Housiadas/simple-banking-system/foundation/logger"
-	"github.com/Housiadas/simple-banking-system/foundation/web"
+	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/foundation/web"
 )
 
 // Config contains all the mandatory systems required by handlers.

@@ -12,9 +12,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Housiadas/simple-banking-system/business/domain/userbus"
-	"github.com/Housiadas/simple-banking-system/business/sys/auth"
-	"github.com/Housiadas/simple-banking-system/foundation/logger"
+	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/business/sys/auth"
+	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
 func Test_Auth(t *testing.T) {

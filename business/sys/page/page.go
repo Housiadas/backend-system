@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Housiadas/simple-banking-system/foundation/validate"
+	"github.com/Housiadas/backend-system/foundation/validate"
 )
 
 // Page represents the requested page and rows per page.

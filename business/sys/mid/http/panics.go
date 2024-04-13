@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"github.com/Housiadas/simple-banking-system/foundation/metrics"
-	"github.com/Housiadas/simple-banking-system/foundation/web"
+	"github.com/Housiadas/backend-system/foundation/metrics"
+	"github.com/Housiadas/backend-system/foundation/web"
 )
 
 // Panics recovers from panics and converts the panic to an error, so it is

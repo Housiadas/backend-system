@@ -3,7 +3,7 @@ package userbus
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Housiadas/simple-banking-system/business/sys/delegate"
+	"github.com/Housiadas/backend-system/business/sys/delegate"
 
 	"github.com/google/uuid"
 )

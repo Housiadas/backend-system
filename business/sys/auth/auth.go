@@ -14,9 +14,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/open-policy-agent/opa/rego"
 
-	"github.com/Housiadas/simple-banking-system/business/domain/userbus"
-	"github.com/Housiadas/simple-banking-system/business/domain/userbus/stores/userdb"
-	"github.com/Housiadas/simple-banking-system/foundation/logger"
+	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
+	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
 // ErrForbidden is returned when a auth issue is identified.

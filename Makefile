@@ -6,7 +6,8 @@ GO_VERSION := 1.22
 UID := $(shell id -u)
 GID := $(shell id -g)
 
-APP_MODULE := github.com/Housiadas/simple-banking-system
+APP_MODULE := github.com/Housiadas/backend-system
+MIGRATION_DB_DSN := postgres://housi:secret123@localhost:5432/housi?sslmode=disable
 INPUT ?= $(shell bash -c 'read -p "Insert name: " name; echo $$name')
 CURRENT_TIME := $(shell date --iso-8601=seconds)
 GIT_VERSION := $(shell git describe --always --dirty --tags --long)

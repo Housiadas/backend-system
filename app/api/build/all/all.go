@@ -2,10 +2,10 @@
 package all
 
 import (
-	"github.com/Housiadas/simple-banking-system/app/api/mux"
-	"github.com/Housiadas/simple-banking-system/app/api/route/sys"
-	"github.com/Housiadas/simple-banking-system/app/api/route/userapi"
-	"github.com/Housiadas/simple-banking-system/foundation/web"
+	"github.com/Housiadas/backend-system/app/api/mux"
+	"github.com/Housiadas/backend-system/app/api/route/sys"
+	"github.com/Housiadas/backend-system/app/api/route/userapi"
+	"github.com/Housiadas/backend-system/foundation/web"
 )
 
 // Routes constructs the add value which provides the implementation of

@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Housiadas/simple-banking-system/foundation/web"
+	"github.com/Housiadas/backend-system/foundation/web"
 )
 
 // Cors sets the response headers needed for Cross-Origin Resource Sharing

@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Housiadas/simple-banking-system/business/sys/errs"
-	"github.com/Housiadas/simple-banking-system/foundation/logger"
-	"github.com/Housiadas/simple-banking-system/foundation/web"
+	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/foundation/web"
 )
 
 // Errors handles errors coming out of the call chain. It detects normal

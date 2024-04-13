@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Housiadas/simple-banking-system/foundation/logger"
+	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
 // Transaction represents a value that can commit or rollback a transaction.

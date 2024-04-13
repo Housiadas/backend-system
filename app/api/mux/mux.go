@@ -9,11 +9,11 @@ import (
 	"github.com/jmoiron/sqlx"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/Housiadas/simple-banking-system/business/domain/userbus"
-	"github.com/Housiadas/simple-banking-system/business/sys/delegate"
-	midhttp "github.com/Housiadas/simple-banking-system/business/sys/mid/http"
-	"github.com/Housiadas/simple-banking-system/foundation/logger"
-	"github.com/Housiadas/simple-banking-system/foundation/web"
+	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/business/sys/delegate"
+	midhttp "github.com/Housiadas/backend-system/business/sys/mid/http"
+	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/foundation/web"
 )
 
 // Options represent optional parameters.

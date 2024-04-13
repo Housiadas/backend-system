@@ -3,7 +3,7 @@ package sqldb
 import (
 	"fmt"
 
-	"github.com/Housiadas/simple-banking-system/business/data/transaction"
+	"github.com/Housiadas/backend-system/business/data/transaction"
 	"github.com/jmoiron/sqlx"
 )
 

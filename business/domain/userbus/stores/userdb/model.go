@@ -6,8 +6,8 @@ import (
 	"net/mail"
 	"time"
 
-	"github.com/Housiadas/simple-banking-system/business/data/sqldb/dbarray"
-	"github.com/Housiadas/simple-banking-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/business/data/sqldb/dbarray"
+	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/google/uuid"
 )
 

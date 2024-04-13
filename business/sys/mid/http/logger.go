@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Housiadas/simple-banking-system/foundation/logger"
-	"github.com/Housiadas/simple-banking-system/foundation/web"
+	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/foundation/web"
 )
 
 // Logger writes information about the request to the logs.

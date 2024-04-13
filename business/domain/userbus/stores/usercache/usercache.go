@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/Housiadas/simple-banking-system/business/data/transaction"
-	"github.com/Housiadas/simple-banking-system/business/domain/userbus"
-	"github.com/Housiadas/simple-banking-system/business/sys/order"
-	"github.com/Housiadas/simple-banking-system/foundation/logger"
+	"github.com/Housiadas/backend-system/business/data/transaction"
+	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/business/sys/order"
+	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
 // Store manages the set of APIs for user data and caching.

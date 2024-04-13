@@ -15,8 +15,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"go.opentelemetry.io/otel/attribute"
 
-	"github.com/Housiadas/simple-banking-system/foundation/logger"
-	"github.com/Housiadas/simple-banking-system/foundation/web"
+	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/foundation/web"
 )
 
 // lib/pq errorCodeNames

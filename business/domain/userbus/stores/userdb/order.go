@@ -3,8 +3,8 @@ package userdb
 import (
 	"fmt"
 
-	"github.com/Housiadas/simple-banking-system/business/domain/userbus"
-	"github.com/Housiadas/simple-banking-system/business/sys/order"
+	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/business/sys/order"
 )
 
 var orderByFields = map[string]string{

@@ -1,4 +1,4 @@
-module github.com/Housiadas/simple-banking-system
+module github.com/Housiadas/backend-system
 
 go 1.22
 

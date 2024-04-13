@@ -3,8 +3,8 @@ package userapi
 import (
 	"net/http"
 
-	"github.com/Housiadas/simple-banking-system/app/domain/userapp"
-	"github.com/Housiadas/simple-banking-system/business/sys/page"
+	"github.com/Housiadas/backend-system/app/domain/userapp"
+	"github.com/Housiadas/backend-system/business/sys/page"
 )
 
 func parseQueryParams(r *http.Request) (userapp.QueryParams, error) {

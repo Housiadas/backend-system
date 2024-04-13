@@ -5,7 +5,7 @@ package delegate
 import (
 	"context"
 
-	"github.com/Housiadas/simple-banking-system/foundation/logger"
+	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
 // These types are just for documentation, so we know what keys go

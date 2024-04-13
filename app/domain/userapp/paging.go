@@ -2,7 +2,7 @@ package userapp
 
 import (
 	"errors"
-	"github.com/Housiadas/simple-banking-system/foundation/validate"
+	"github.com/Housiadas/backend-system/foundation/validate"
 )
 
 var errNotProvided = errors.New("not provided")

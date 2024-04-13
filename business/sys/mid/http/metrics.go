@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Housiadas/simple-banking-system/foundation/metrics"
-	"github.com/Housiadas/simple-banking-system/foundation/web"
+	"github.com/Housiadas/backend-system/foundation/metrics"
+	"github.com/Housiadas/backend-system/foundation/web"
 )
 
 // Metrics updates program counters.

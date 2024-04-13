@@ -5,16 +5,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Housiadas/simple-banking-system/business/sys/delegate"
+	"github.com/Housiadas/backend-system/business/sys/delegate"
 	"net/mail"
 	"time"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/Housiadas/simple-banking-system/business/data/transaction"
-	"github.com/Housiadas/simple-banking-system/business/sys/order"
-	"github.com/Housiadas/simple-banking-system/foundation/logger"
+	"github.com/Housiadas/backend-system/business/data/transaction"
+	"github.com/Housiadas/backend-system/business/sys/order"
+	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
 // Set of error variables for CRUD operations.

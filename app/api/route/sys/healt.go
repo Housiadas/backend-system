@@ -10,9 +10,9 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Housiadas/simple-banking-system/business/data/sqldb"
-	"github.com/Housiadas/simple-banking-system/foundation/logger"
-	"github.com/Housiadas/simple-banking-system/foundation/web"
+	"github.com/Housiadas/backend-system/business/data/sqldb"
+	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/foundation/web"
 )
 
 type api struct {
