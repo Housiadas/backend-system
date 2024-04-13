@@ -65,10 +65,21 @@ docker/clean:
 go/mock/store:
 	mockgen -package mockdb -destination business/db/mock/store.go $(APP_MODULE)/business/db Store
 
-## go/run: Run main.go locally
-.PHONY: go/run
-go/run:
-	go run app/api/main.go
+## go/api/run: Run main.go locally
+.PHONY: go/api/run
+go/api/run:
+	go run app/api/main.go -o cmd
+
+## go/cmd/build: Build cmd application
+.PHONY: go/cmd/build
+go/cmd/build:
+	go build -o app/cmd/cmd app/cmd/main.go
+
+## go/cmd/run: Seed db
+.PHONY: go/cmd/seed
+go/cmd/seed:
+	make go/cmd/build
+	app/cmd/cmd seed
 
 # ==================================================================================== #
 # DATABASE

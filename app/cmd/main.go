@@ -86,23 +86,24 @@ func processCommands(args []string, log *logger.Logger, c Config) error {
 		DisableTLS:   c.DB.DisableTLS,
 	}
 
-	switch args[0] {
+	fmt.Println(args)
+	switch args[1] {
 	case "seed":
 		if err := commands.Seed(dbConfig); err != nil {
 			return fmt.Errorf("seeding database: %w", err)
 		}
 
 	case "useradd":
-		name := args[1]
-		email := args[2]
-		password := args[3]
+		name := args[2]
+		email := args[3]
+		password := args[4]
 		if err := commands.UserAdd(log, dbConfig, name, email, password); err != nil {
 			return fmt.Errorf("adding user: %w", err)
 		}
 
 	case "users":
-		pageNumber := args[1]
-		rowsPerPage := args[2]
+		pageNumber := args[2]
+		rowsPerPage := args[3]
 		if err := commands.Users(log, dbConfig, pageNumber, rowsPerPage); err != nil {
 			return fmt.Errorf("getting users: %w", err)
 		}
@@ -113,11 +114,11 @@ func processCommands(args []string, log *logger.Logger, c Config) error {
 		}
 
 	case "gentoken":
-		userID, err := uuid.Parse(args[1])
+		userID, err := uuid.Parse(args[2])
 		if err != nil {
 			return fmt.Errorf("generating token: %w", err)
 		}
-		kid := args[2]
+		kid := args[3]
 		if kid == "" {
 			kid = c.Auth.DefaultKID
 		}
