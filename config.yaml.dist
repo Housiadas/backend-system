@@ -7,11 +7,11 @@ server:
   shutdownTimeout: "20s"
   corsAllowedOrigins: "*"
 db:
-  name: "housi"
+  name: "housi_db"
   user: "housi"
   password: "secret123"
-  host: "postgres://housi:secret123@localhost:5432/housi_db?sslmode=disable"
-  maxOpenConnections: "0"
-  maxIdleConnections: "2"
+  host: "localhost:5432"
+  maxOpenConnections: "25"
+  maxIdleConnections: "25"
   connectionIdleTime: "30s"
   disableTLS: true
