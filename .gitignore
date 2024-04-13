@@ -5,6 +5,7 @@ tmp
 
 .env
 app.env
+config.yaml
 
 cover.out
 cover.html

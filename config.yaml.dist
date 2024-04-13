@@ -1,0 +1,17 @@
+server:
+  api: "localhost:4000"
+  debug: "localhost:4010"
+  readTimeout: "5s"
+  writeTimeout: "10s"
+  idleTimeout: "120s"
+  shutdownTimeout: "20s"
+  corsAllowedOrigins: "*"
+db:
+  name: "housi"
+  user: "housi"
+  password: "secret123"
+  host: "postgres://housi:secret123@localhost:5432/housi_db?sslmode=disable"
+  maxOpenConnections: "0"
+  maxIdleConnections: "2"
+  connectionIdleTime: "30s"
+  disableTLS: true
