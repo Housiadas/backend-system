@@ -1,5 +1,4 @@
-// Package all binds all the routes into the specified app.
-package all
+package route
 
 import (
 	"github.com/Housiadas/backend-system/app/api/mux"

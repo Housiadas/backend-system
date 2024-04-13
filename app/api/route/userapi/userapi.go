@@ -69,21 +69,21 @@ func (api *api) create(ctx context.Context, w http.ResponseWriter, r *http.Reque
 //
 //	return web.Respond(ctx, w, nil, http.StatusNoContent)
 //}
-//
-//func (api *api) query(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-//	qp, err := parseQueryParams(r)
-//	if err != nil {
-//		return err
-//	}
-//
-//	usr, err := api.userApp.Query(ctx, qp)
-//	if err != nil {
-//		return err
-//	}
-//
-//	return web.Respond(ctx, w, usr, http.StatusOK)
-//}
-//
+
+func (api *api) query(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	qp, err := parseQueryParams(r)
+	if err != nil {
+		return err
+	}
+
+	usr, err := api.userApp.Query(ctx, qp)
+	if err != nil {
+		return err
+	}
+
+	return web.Respond(ctx, w, usr, http.StatusOK)
+}
+
 //func (api *api) queryByID(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 //	usr, err := api.userApp.QueryByID(ctx)
 //	if err != nil {

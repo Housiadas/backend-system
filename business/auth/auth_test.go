@@ -12,8 +12,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
+	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/sys/auth"
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
 

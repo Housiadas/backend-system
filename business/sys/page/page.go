@@ -47,18 +47,15 @@ func ParseHTTP(r *http.Request) (Page, error) {
 
 // Document is the form used for API responses from query API calls.
 type Document[T any] struct {
-	Data        []T `json:"data"`
-	Total       int `json:"total"`
-	Page        int `json:"page"`
-	RowsPerPage int `json:"rowsPerPage"`
+	Data     []T      `json:"data"`
+	Metadata Metadata `json:"metadata"`
 }
 
 // NewDocument constructs a response value for a web paging trusted.
 func NewDocument[T any](data []T, total int, page int, rowsPerPage int) Document[T] {
+	metadata := CalculateMetadata(total, page, rowsPerPage)
 	return Document[T]{
-		Data:        data,
-		Total:       total,
-		Page:        page,
-		RowsPerPage: rowsPerPage,
+		Data:     data,
+		Metadata: metadata,
 	}
 }

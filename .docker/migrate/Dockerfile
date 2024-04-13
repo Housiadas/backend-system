@@ -5,7 +5,7 @@ FROM migrate/migrate
 
 WORKDIR /app
 
-COPY .. .
+COPY . .
 
 USER $UID:$GID
 

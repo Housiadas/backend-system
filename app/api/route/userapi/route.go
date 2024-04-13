@@ -25,7 +25,7 @@ func Routes(app *web.App, cfg Config) {
 	//ruleAuthorizeAdmin := mid.AuthorizeUser(cfg.Log, cfg.AuthSrv, cfg.UserBus, auth.RuleAdminOnly)
 
 	api := newAPI(userapp.NewCore(cfg.UserBus))
-	//app.Handle(http.MethodGet, version, "/users", api.query)
+	app.Handle(http.MethodGet, version, "/users", api.query)
 	//app.Handle(http.MethodGet, version, "/users/{user_id}", api.queryByID)
 	app.Handle(http.MethodPost, version, "/users", api.create)
 	//app.Handle(http.MethodPut, version, "/users/role/{user_id}", api.updateRole)

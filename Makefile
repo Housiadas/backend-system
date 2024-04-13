@@ -7,7 +7,6 @@ UID := $(shell id -u)
 GID := $(shell id -g)
 
 APP_MODULE := github.com/Housiadas/backend-system
-MIGRATION_DB_DSN := postgres://housi:secret123@localhost:5432/housi?sslmode=disable
 INPUT ?= $(shell bash -c 'read -p "Insert name: " name; echo $$name')
 CURRENT_TIME := $(shell date --iso-8601=seconds)
 GIT_VERSION := $(shell git describe --always --dirty --tags --long)
@@ -15,6 +14,7 @@ LINKER_FLAGS := "-s -X main.buildTime=${CURRENT_TIME} -X main.version=${GIT_VERS
 
 DOCKER_COMPOSE_LOCAL := docker-compose -f ./docker-compose.yml
 MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm migrate
+MIGRATION_DB_DSN := "postgres://housi:secret123@db:5432/housi_db?sslmode=disable"
 
 # ==================================================================================== #
 # HELPERS
@@ -65,10 +65,21 @@ docker/clean:
 go/mock/store:
 	mockgen -package mockdb -destination business/db/mock/store.go $(APP_MODULE)/business/db Store
 
-## go/run: Run main.go locally
-.PHONY: go/run
-go/run:
+## go/api/run: Run main.go locally
+.PHONY: go/api/run
+go/api/run:
 	go run app/api/main.go
+
+## go/cmd/build: Build cmd application
+.PHONY: go/cmd/build
+go/cmd/build:
+	go build -o app/cmd/cmd app/cmd/main.go
+
+## go/cmd/run: Seed db
+.PHONY: go/cmd/seed
+go/cmd/seed:
+	make go/cmd/build
+	app/cmd/cmd seed
 
 # ==================================================================================== #
 # DATABASE

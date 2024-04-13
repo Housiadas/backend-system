@@ -4,6 +4,7 @@ import (
 	"context"
 	"expvar"
 	"fmt"
+	"github.com/Housiadas/backend-system/app/api/route"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,7 +12,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Housiadas/backend-system/app/api/build/all"
 	"github.com/Housiadas/backend-system/app/api/mux"
 	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/data/sqldb"
@@ -36,7 +36,6 @@ import (
 */
 
 var build = "develop"
-var routes = "all" // go build -ldflags "-X main.routes=crud"
 
 func main() {
 	var log *logger.Logger
@@ -158,7 +157,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	api := http.Server{
 		Addr:         cfg.Server.Api,
-		Handler:      mux.WebAPI(cfgMux, buildRoutes(), mux.WithCORS(cfg.Server.CorsAllowedOrigins)),
+		Handler:      mux.WebAPI(cfgMux, route.Routes(), mux.WithCORS(cfg.Server.CorsAllowedOrigins)),
 		ReadTimeout:  cfg.Server.ReadTimeout,
 		WriteTimeout: cfg.Server.WriteTimeout,
 		IdleTimeout:  cfg.Server.IdleTimeout,
@@ -193,30 +192,6 @@ func run(ctx context.Context, log *logger.Logger) error {
 	}
 
 	return nil
-}
-
-func buildRoutes() mux.RouteAdder {
-
-	// The idea here is that we can build different versions of the binary
-	// with different sets of exposed web APIs. By default, we build a single
-	// an instance with all the web APIs.
-	//
-	// Here is the scenario. It would be nice to build two binaries, one for the
-	// transactional APIs (CRUD) and one for the reporting APIs. This would allow
-	// the system to run two instances of the database. One instance tuned for the
-	// transactional database calls and the other tuned for the reporting calls.
-	// Tuning meaning indexing and memory requirements. The two databases can be
-	// kept in sync with replication.
-
-	//switch routes {
-	//case "crud":
-	//	return crud.Routes()
-	//
-	//case "reporting":
-	//	return reporting.Routes()
-	//}
-
-	return all.Routes()
 }
 
 // startTracing configure open telemetry to be used with Grafana Tempo.

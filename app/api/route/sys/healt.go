@@ -38,7 +38,8 @@ func (a *api) readiness(ctx context.Context, w http.ResponseWriter, _ *http.Requ
 
 	status := "ok"
 	statusCode := http.StatusOK
-	if err := sqldb.StatusCheck(ctx, a.db); err != nil {
+	err := sqldb.StatusCheck(ctx, a.db)
+	if err != nil {
 		status = "db not ready"
 		statusCode = http.StatusInternalServerError
 		a.log.Info(ctx, "readiness failure", "status", status)
