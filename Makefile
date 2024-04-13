@@ -1,8 +1,6 @@
 # ==================================================================================== #
 # VARIABLES
 # ==================================================================================== #
-# Include variables from the local .env file
-include ./app.env
 
 GO_VERSION := 1.22
 UID := $(shell id -u)
@@ -16,7 +14,6 @@ LINKER_FLAGS := "-s -X main.buildTime=${CURRENT_TIME} -X main.version=${GIT_VERS
 
 DOCKER_COMPOSE_LOCAL := docker-compose -f ./docker-compose.yml
 MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm migrate
-SQLC := $(DOCKER_COMPOSE_LOCAL) run --rm sqlc
 
 # ==================================================================================== #
 # HELPERS
@@ -70,7 +67,7 @@ go/mock/store:
 ## go/run: Run main.go locally
 .PHONY: go/run
 go/run:
-	go run app/main.go
+	go run app/api/main.go
 
 # ==================================================================================== #
 # DATABASE
@@ -79,32 +76,17 @@ go/run:
 ## db/migrations/create name=$1: create new migration files
 .PHONY: db/migrate/create
 db/migrate/create:
-	$(MIGRATE) create -seq -ext=.sql -dir=./database/migrations $(INPUT)
+	$(MIGRATE) create -seq -ext=.sql -dir=./business/data/migrations $(INPUT)
 
 ## db/migrations/up: apply all up database migrations
 .PHONY: db/migrate/up
 db/migrate/up:
-	$(MIGRATE) -path=./database/migrations -database=${MIGRATION_DB_DSN} up
+	$(MIGRATE) -path=./business/data/migrations -database=${MIGRATION_DB_DSN} up
 
 ## db/migrations/down: apply all down database migrations (DROP Database)
 .PHONY: db/migrate/down
 db/migrate/down:
-	$(MIGRATE) -path=./database/migrations -database=${MIGRATION_DB_DSN} down
-
-## db/migrations/local/up: apply all up database migrations local command
-.PHONY: db/migrate/local/up
-db/migrate/local/up:
-	go -path=./database/migrations -database=${MIGRATION_DB_DSN} up
-
-## db/sqlc/init: Create an empty sqlc.yaml settings file
-.PHONY: db/sqlc/init
-db/sqlc/init:
-	$(SQLC) init
-
-## db/sqlc/init: Create an empty sqlc.yaml settings file
-.PHONY: db/sqlc/generate
-db/sqlc/generate:
-	$(SQLC) generate
+	$(MIGRATE) -path=./business/data/migrations -database=${MIGRATION_DB_DSN} down
 
 # ==================================================================================== #
 # QUALITY CONTROL

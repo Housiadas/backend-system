@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ardanlabs/service/foundation/worker"
+	"github.com/Housiadas/simple-banking-system/foundation/worker"
 )
 
 func Test_Worker(t *testing.T) {
