@@ -7,7 +7,6 @@ UID := $(shell id -u)
 GID := $(shell id -g)
 
 APP_MODULE := github.com/Housiadas/backend-system
-MIGRATION_DB_DSN := postgres://housi:secret123@localhost:5432/housi?sslmode=disable
 INPUT ?= $(shell bash -c 'read -p "Insert name: " name; echo $$name')
 CURRENT_TIME := $(shell date --iso-8601=seconds)
 GIT_VERSION := $(shell git describe --always --dirty --tags --long)
@@ -15,6 +14,7 @@ LINKER_FLAGS := "-s -X main.buildTime=${CURRENT_TIME} -X main.version=${GIT_VERS
 
 DOCKER_COMPOSE_LOCAL := docker-compose -f ./docker-compose.yml
 MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm migrate
+MIGRATION_DB_DSN := "postgres://housi:secret123@localhost:5432/housi_db?sslmode=disable"
 
 # ==================================================================================== #
 # HELPERS

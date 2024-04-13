@@ -6,13 +6,13 @@ services:
     container_name: db-container
     restart: always
     environment:
-      POSTGRES_DB: "${DB_DATABASE:-housi}"
-      POSTGRES_USER: "${DB_USER:-housi}"
-      POSTGRES_PASSWORD: "${DB_PASSWORD:-secret123}"
+      POSTGRES_DB: "housi_db"
+      POSTGRES_USER: "housi"
+      POSTGRES_PASSWORD: "secret123"
     ports:
-      - '${DB_PORT:-5432}:5432'
+      - "5432:5432"
     volumes:
-      - app_db_data:/var/lib/postgresql/data
+      - db_data_v:/var/lib/postgresql/data
     networks:
       - app_local_network
 
@@ -21,7 +21,7 @@ services:
     container_name: redis-container
     command: /bin/sh -c 'redis-server --requirepass ${REDIS_PASSWORD:-secret123}'
     volumes:
-      - app_redis_data:/var/lib/redis/data
+      - redis_data_v:/var/lib/redis/data
     ports:
       - "6379:6379"
     networks:
@@ -44,5 +44,5 @@ networks:
   app_local_network:
 
 volumes:
-  app_db_data:
-  app_redis_data:
+  db_data_v:
+  redis_data_v:
