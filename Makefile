@@ -68,7 +68,7 @@ go/mock/store:
 ## go/api/run: Run main.go locally
 .PHONY: go/api/run
 go/api/run:
-	go run app/api/main.go -o cmd
+	go run app/api/main.go
 
 ## go/cmd/build: Build cmd application
 .PHONY: go/cmd/build
