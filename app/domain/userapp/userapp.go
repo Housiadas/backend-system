@@ -4,12 +4,14 @@ package userapp
 import (
 	"context"
 	"errors"
+	"net/mail"
 
 	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/mid"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/business/sys/page"
+	"github.com/Housiadas/backend-system/foundation/validate"
 )
 
 // Core manages the set of app layer api functions for the user domain.
@@ -31,6 +33,21 @@ func NewCoreWithAuth(userBus *userbus.Core, auth *auth.Auth) *Core {
 		auth:    auth,
 		userBus: userBus,
 	}
+}
+
+// Authenticate provides an API to authenticate the user.
+func (c *Core) Authenticate(ctx context.Context, authUser AuthenticateUser) (User, error) {
+	addr, err := mail.ParseAddress(authUser.Email)
+	if err != nil {
+		return User{}, validate.NewFieldsError("email", err)
+	}
+
+	usr, err := c.userBus.Authenticate(ctx, *addr, authUser.Password)
+	if err != nil {
+		return User{}, err
+	}
+
+	return toAppUser(usr), nil
 }
 
 // Token provides an API token for the authenticated user.

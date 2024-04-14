@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Housiadas/backend-system/business/sys/delegate"
 	"net/mail"
 	"time"
 
@@ -13,6 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/Housiadas/backend-system/business/data/transaction"
+	"github.com/Housiadas/backend-system/business/sys/delegate"
 	"github.com/Housiadas/backend-system/business/sys/order"
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
@@ -68,6 +68,22 @@ func (c *Core) ExecuteUnderTransaction(tx transaction.Transaction) (*Core, error
 	}
 
 	return &core, nil
+}
+
+// Authenticate finds a user by their email and verifies their password. On
+// success, it returns a Claims User representing this user. The claims can be
+// used to generate a token for future authentication.
+func (c *Core) Authenticate(ctx context.Context, email mail.Address, password string) (User, error) {
+	usr, err := c.QueryByEmail(ctx, email)
+	if err != nil {
+		return User{}, fmt.Errorf("query: email[%s]: %w", email, err)
+	}
+
+	if err := bcrypt.CompareHashAndPassword(usr.PasswordHash, []byte(password)); err != nil {
+		return User{}, fmt.Errorf("comparehashandpassword: %w", ErrAuthenticationFailure)
+	}
+
+	return usr, nil
 }
 
 // Create adds a new user to the system.
@@ -202,20 +218,4 @@ func (c *Core) QueryByEmail(ctx context.Context, email mail.Address) (User, erro
 	}
 
 	return user, nil
-}
-
-// Authenticate finds a user by their email and verifies their password. On
-// success, it returns a Claims User representing this user. The claims can be
-// used to generate a token for future authentication.
-func (c *Core) Authenticate(ctx context.Context, email mail.Address, password string) (User, error) {
-	usr, err := c.QueryByEmail(ctx, email)
-	if err != nil {
-		return User{}, fmt.Errorf("query: email[%s]: %w", email, err)
-	}
-
-	if err := bcrypt.CompareHashAndPassword(usr.PasswordHash, []byte(password)); err != nil {
-		return User{}, fmt.Errorf("comparehashandpassword: %w", ErrAuthenticationFailure)
-	}
-
-	return usr, nil
 }

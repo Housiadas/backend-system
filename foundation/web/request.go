@@ -12,6 +12,11 @@ func Param(r *http.Request, key string) string {
 	return r.PathValue(key)
 }
 
+// Header returns the web call headers from the request.
+func Header(r *http.Request, key string) string {
+	return r.Header.Get(key)
+}
+
 type validator interface {
 	Validate() error
 }

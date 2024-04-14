@@ -23,7 +23,7 @@ func Routes(app *web.App, cfg Config) {
 	authen := mid.Authenticate(cfg.Auth)
 	api := newAPI(userapp.NewCoreWithAuth(cfg.UserBus, cfg.Auth), cfg.Auth)
 
-	app.Handle(http.MethodGet, version, "/auth/token/{kid}", api.token, authen)
-	app.Handle(http.MethodGet, version, "/auth/authenticate", api.authenticate, authen)
-	app.Handle(http.MethodPost, version, "/auth/authorize", api.authorize)
+	app.Handle(http.MethodPost, version, "/auth/authenticate", api.authenticate)
+	app.Handle(http.MethodGet, version, "/auth/authorize", api.authorize, authen)
+	//app.Handle(http.MethodGet, version, "/auth/token/{kid}", api.token, authen)
 }

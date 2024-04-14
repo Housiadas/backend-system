@@ -19,17 +19,17 @@ import (
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
-// ErrForbidden is returned when a auth issue is identified.
+// ErrForbidden is returned when an auth issue is identified.
 var ErrForbidden = errors.New("attempted action is not allowed")
 
 // Claims represents the authorization claims transmitted via a JWT.
 type Claims struct {
 	jwt.RegisteredClaims
-	Roles []userbus.Role `json:"roles"`
+	Roles []string `json:"roles"`
 }
 
 // HasRole checks if the specified role exists.
-func (c Claims) HasRole(r userbus.Role) bool {
+func (c Claims) HasRole(r string) bool {
 	for _, role := range c.Roles {
 		if role == r {
 			return true
