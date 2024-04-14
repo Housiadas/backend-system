@@ -53,7 +53,7 @@ var (
 
 	// FailedPrecondition indicates operation was rejected because the
 	// system is not in a state required for the operation's execution.
-	// For example, directory to be deleted may be non-empty, an rmdir
+	// For example, directory to be deleted may be non-empty, a rmdir
 	// operation is applied to a non-directory, etc.
 	FailedPrecondition = ErrCode{value: 9}
 

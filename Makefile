@@ -41,7 +41,7 @@ docker/build:
 ## docker/up: Start all the containers for the application
 .PHONY: docker/up
 docker/up:
-	$(DOCKER_COMPOSE_LOCAL) up -d db redis
+	$(DOCKER_COMPOSE_LOCAL) up -d
 
 ## docker/stop: stop all containers
 .PHONY: docker/stop
@@ -75,11 +75,23 @@ go/api/run:
 go/cmd/build:
 	go build -o app/cmd/cmd app/cmd/main.go
 
-## go/cmd/run: Seed db
+## go/cmd/seed: Seed db
 .PHONY: go/cmd/seed
 go/cmd/seed:
 	make go/cmd/build
 	app/cmd/cmd seed
+
+## go/cmd/useradd: Add user
+.PHONY: go/cmd/useradd
+go/cmd/useradd:
+	make go/cmd/build
+	app/cmd/cmd useradd "chris housi" "example@example.com" "1232455477"
+
+## go/cmd/useradd: Add user
+.PHONY: go/cmd/genkey
+go/cmd/genkey:
+	make go/cmd/build
+	app/cmd/cmd genkey
 
 # ==================================================================================== #
 # DATABASE

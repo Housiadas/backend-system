@@ -12,18 +12,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - db_data_v:/var/lib/postgresql/data
-    networks:
-      - app_local_network
-
-  redis:
-    image: redis:latest
-    container_name: redis-container
-    command: /bin/sh -c 'redis-server --requirepass ${REDIS_PASSWORD:-secret123}'
-    volumes:
-      - redis_data_v:/var/lib/redis/data
-    ports:
-      - "6379:6379"
+      - db_data:/var/lib/postgresql/data
     networks:
       - app_local_network
 
@@ -44,5 +33,4 @@ networks:
   app_local_network:
 
 volumes:
-  db_data_v:
-  redis_data_v:
+  db_data:

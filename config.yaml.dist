@@ -15,3 +15,5 @@ db:
   maxIdleConnections: "25"
   connectionIdleTime: "30s"
   disableTLS: true
+auth:
+  keysFolder: "foundation/keys/"

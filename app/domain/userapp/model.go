@@ -10,6 +10,12 @@ import (
 	"github.com/Housiadas/backend-system/foundation/validate"
 )
 
+// AuthenticateUser defines the data needed to authenticate a user.
+type AuthenticateUser struct {
+	Email    string `json:"email" validate:"email"`
+	Password string `json:"password"`
+}
+
 // QueryParams represents the set of possible query strings.
 type QueryParams struct {
 	Page             int    `query:"page"`

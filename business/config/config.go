@@ -10,6 +10,7 @@ type Config struct {
 	DB      DB
 	Server  Server
 	Version Version
+	Auth    Auth
 }
 
 // LoadConfig reads configuration from file or environment variables.

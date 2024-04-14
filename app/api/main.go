@@ -4,31 +4,24 @@ import (
 	"context"
 	"expvar"
 	"fmt"
-	"github.com/Housiadas/backend-system/app/api/route"
 	"net/http"
 	"os"
 	"os/signal"
 	"runtime"
 	"syscall"
-	"time"
 
 	"github.com/Housiadas/backend-system/app/api/mux"
+	"github.com/Housiadas/backend-system/app/api/route"
+	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	del "github.com/Housiadas/backend-system/business/sys/delegate"
 	"github.com/Housiadas/backend-system/foundation/debug"
+	"github.com/Housiadas/backend-system/foundation/keystore"
 	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/Housiadas/backend-system/foundation/web"
-
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/propagation"
-	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
 /*
@@ -53,6 +46,7 @@ func main() {
 
 	// -------------------------------------------------------------------------
 	// Run the application
+	// -------------------------------------------------------------------------
 	ctx := context.Background()
 	if err := run(ctx, log); err != nil {
 		log.Error(ctx, "startup", "msg", err)
@@ -64,10 +58,12 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	// -------------------------------------------------------------------------
 	// GOMAXPROCS
+	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 
 	// -------------------------------------------------------------------------
 	// Configuration
+	// -------------------------------------------------------------------------
 	cfg, err := config.LoadConfig("../../")
 	if err != nil {
 		return fmt.Errorf("parsing config: %w", err)
@@ -79,12 +75,14 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	// -------------------------------------------------------------------------
 	// App Starting
+	// -------------------------------------------------------------------------
 	log.Info(ctx, "starting service", "version", cfg.Version.Build)
 	defer log.Info(ctx, "shutdown complete")
 	expvar.NewString("build").Set(cfg.Version.Build)
 
 	// -------------------------------------------------------------------------
 	// Database Support
+	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing database support", "hostport", cfg.DB.Host)
 
 	db, err := sqldb.Open(sqldb.Config{
@@ -103,7 +101,31 @@ func run(ctx context.Context, log *logger.Logger) error {
 	defer db.Close()
 
 	// -------------------------------------------------------------------------
+	// Initialize authentication support
+	// -------------------------------------------------------------------------
+	log.Info(ctx, "startup", "status", "initializing authentication support")
+
+	// Load the private keys files from disk. We can assume some system like
+	// Vault has created these files already. How that happens is not our concern.
+	ks := keystore.New()
+	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
+		return fmt.Errorf("reading keys: %w", err)
+	}
+
+	authCfg := auth.Config{
+		Log:       log,
+		DB:        db,
+		KeyLookup: ks,
+	}
+
+	authSrv, err := auth.New(authCfg)
+	if err != nil {
+		return fmt.Errorf("constructing auth: %w", err)
+	}
+
+	// -------------------------------------------------------------------------
 	// Start Tracing Support
+	// -------------------------------------------------------------------------
 
 	//log.Info(ctx, "startup", "status", "initializing tracing support")
 	//
@@ -122,6 +144,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	// -------------------------------------------------------------------------
 	// Build Core APIs
+	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing business core")
 
 	delegate := del.New(log)
@@ -129,6 +152,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	// -------------------------------------------------------------------------
 	// Start Debug Service
+	// -------------------------------------------------------------------------
 	go func() {
 		log.Info(ctx, "startup", "status", "debug v1 router started", "host", cfg.Server.Debug)
 
@@ -139,6 +163,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	// -------------------------------------------------------------------------
 	// Start API Service
+	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing V1 API support")
 
 	shutdown := make(chan os.Signal, 1)
@@ -149,6 +174,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 		Shutdown: shutdown,
 		Log:      log,
 		DB:       db,
+		Auth:     authSrv,
 		BusDomain: mux.BusDomain{
 			Delegate: delegate,
 			User:     userBus,
@@ -174,6 +200,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	// -------------------------------------------------------------------------
 	// Shutdown
+	// -------------------------------------------------------------------------
 	select {
 	case err := <-serverErrors:
 		return fmt.Errorf("server error: %w", err)
@@ -192,52 +219,4 @@ func run(ctx context.Context, log *logger.Logger) error {
 	}
 
 	return nil
-}
-
-// startTracing configure open telemetry to be used with Grafana Tempo.
-func startTracing(serviceName string, reporterURI string, probability float64) (*trace.TracerProvider, error) {
-
-	// WARNING: The current settings are using defaults which may not be
-	// compatible with your project. Please review the documentation for
-	// opentelemetry.
-
-	exporter, err := otlptrace.New(
-		context.Background(),
-		otlptracegrpc.NewClient(
-			otlptracegrpc.WithInsecure(), // This should be configurable
-			otlptracegrpc.WithEndpoint(reporterURI),
-		),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("creating new exporter: %w", err)
-	}
-
-	traceProvider := trace.NewTracerProvider(
-		trace.WithSampler(trace.TraceIDRatioBased(probability)),
-		trace.WithBatcher(exporter,
-			trace.WithMaxExportBatchSize(trace.DefaultMaxExportBatchSize),
-			trace.WithBatchTimeout(trace.DefaultScheduleDelay*time.Millisecond),
-			trace.WithMaxExportBatchSize(trace.DefaultMaxExportBatchSize),
-		),
-		trace.WithResource(
-			resource.NewWithAttributes(
-				semconv.SchemaURL,
-				semconv.ServiceNameKey.String(serviceName),
-			),
-		),
-	)
-
-	// We must set this provider as the global provider for things to work,
-	// but we pass this provider around the program where needed to collect
-	// our traces.
-	otel.SetTracerProvider(traceProvider)
-
-	// Chooses the HTTP header formats we extract incoming trace contexts from,
-	// and the headers we set in outgoing requests.
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{},
-		propagation.Baggage{},
-	))
-
-	return traceProvider, nil
 }

@@ -4,16 +4,20 @@ package userapp
 import (
 	"context"
 	"errors"
+	"net/mail"
 
+	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/business/mid"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/business/sys/page"
+	"github.com/Housiadas/backend-system/foundation/validate"
 )
 
 // Core manages the set of app layer api functions for the user domain.
 type Core struct {
 	userBus *userbus.Core
-	//auth    *auth.Auth
+	auth    *auth.Auth
 }
 
 // NewCore constructs a user core API for use.
@@ -24,28 +28,43 @@ func NewCore(userBus *userbus.Core) *Core {
 }
 
 // NewCoreWithAuth constructs a user core API for use with auth support.
-func NewCoreWithAuth(userBus *userbus.Core) *Core {
+func NewCoreWithAuth(userBus *userbus.Core, auth *auth.Auth) *Core {
 	return &Core{
-		//auth:    auth,
+		auth:    auth,
 		userBus: userBus,
 	}
 }
 
+// Authenticate provides an API to authenticate the user.
+func (c *Core) Authenticate(ctx context.Context, authUser AuthenticateUser) (User, error) {
+	addr, err := mail.ParseAddress(authUser.Email)
+	if err != nil {
+		return User{}, validate.NewFieldsError("email", err)
+	}
+
+	usr, err := c.userBus.Authenticate(ctx, *addr, authUser.Password)
+	if err != nil {
+		return User{}, err
+	}
+
+	return toAppUser(usr), nil
+}
+
 // Token provides an API token for the authenticated user.
-//func (c *Core) Token(ctx context.Context, kid string) (Token, error) {
-//	if c.auth == nil {
-//		return Token{}, errs.Newf(errs.Internal, "auth not configured")
-//	}
-//
-//	claims := mid.GetClaims(ctx)
-//
-//	tkn, err := c.auth.GenerateToken(kid, claims)
-//	if err != nil {
-//		return Token{}, errs.New(errs.Internal, err)
-//	}
-//
-//	return toToken(tkn), nil
-//}
+func (c *Core) Token(ctx context.Context, kid string) (Token, error) {
+	if c.auth == nil {
+		return Token{}, errs.Newf(errs.Internal, "auth not configured")
+	}
+
+	claims := mid.GetClaims(ctx)
+
+	tkn, err := c.auth.GenerateToken(kid, claims)
+	if err != nil {
+		return Token{}, errs.New(errs.Internal, err)
+	}
+
+	return toToken(tkn), nil
+}
 
 // Create adds a new user to the system.
 func (c *Core) Create(ctx context.Context, app NewUser) (User, error) {
@@ -66,58 +85,58 @@ func (c *Core) Create(ctx context.Context, app NewUser) (User, error) {
 }
 
 // Update updates an existing user.
-//func (c *Core) Update(ctx context.Context, app UpdateUser) (User, error) {
-//	uu, err := toBusUpdateUser(app)
-//	if err != nil {
-//		return User{}, errs.New(errs.FailedPrecondition, err)
-//	}
-//
-//	usr, err := mid.GetUser(ctx)
-//	if err != nil {
-//		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
-//	}
-//
-//	updUsr, err := c.userBus.Update(ctx, usr, uu)
-//	if err != nil {
-//		return User{}, errs.Newf(errs.Internal, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
-//	}
-//
-//	return toAppUser(updUsr), nil
-//}
+func (c *Core) Update(ctx context.Context, app UpdateUser) (User, error) {
+	uu, err := toBusUpdateUser(app)
+	if err != nil {
+		return User{}, errs.New(errs.FailedPrecondition, err)
+	}
+
+	usr, err := mid.GetUser(ctx)
+	if err != nil {
+		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
+	}
+
+	updUsr, err := c.userBus.Update(ctx, usr, uu)
+	if err != nil {
+		return User{}, errs.Newf(errs.Internal, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
+	}
+
+	return toAppUser(updUsr), nil
+}
 
 // UpdateRole updates an existing user's role.
-//func (c *Core) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) {
-//	uu, err := toBusUpdateUserRole(app)
-//	if err != nil {
-//		return User{}, errs.New(errs.FailedPrecondition, err)
-//	}
-//
-//	usr, err := mid.GetUser(ctx)
-//	if err != nil {
-//		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
-//	}
-//
-//	updUsr, err := c.userBus.Update(ctx, usr, uu)
-//	if err != nil {
-//		return User{}, errs.Newf(errs.Internal, "updaterole: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
-//	}
-//
-//	return toAppUser(updUsr), nil
-//}
+func (c *Core) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) {
+	uu, err := toBusUpdateUserRole(app)
+	if err != nil {
+		return User{}, errs.New(errs.FailedPrecondition, err)
+	}
+
+	usr, err := mid.GetUser(ctx)
+	if err != nil {
+		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
+	}
+
+	updUsr, err := c.userBus.Update(ctx, usr, uu)
+	if err != nil {
+		return User{}, errs.Newf(errs.Internal, "updaterole: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
+	}
+
+	return toAppUser(updUsr), nil
+}
 
 // Delete removes a user from the system.
-//func (c *Core) Delete(ctx context.Context) error {
-//	usr, err := mid.GetUser(ctx)
-//	if err != nil {
-//		return errs.Newf(errs.Internal, "userID missing in context: %s", err)
-//	}
-//
-//	if err := c.userBus.Delete(ctx, usr); err != nil {
-//		return errs.Newf(errs.Internal, "delete: userID[%s]: %s", usr.ID, err)
-//	}
-//
-//	return nil
-//}
+func (c *Core) Delete(ctx context.Context) error {
+	usr, err := mid.GetUser(ctx)
+	if err != nil {
+		return errs.Newf(errs.Internal, "userID missing in context: %s", err)
+	}
+
+	if err := c.userBus.Delete(ctx, usr); err != nil {
+		return errs.Newf(errs.Internal, "delete: userID[%s]: %s", usr.ID, err)
+	}
+
+	return nil
+}
 
 // Query returns a list of users with paging.
 func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[User], error) {
@@ -149,11 +168,11 @@ func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[User], 
 }
 
 // QueryByID returns a user by its ID.
-//func (c *Core) QueryByID(ctx context.Context) (User, error) {
-//	usr, err := mid.GetUser(ctx)
-//	if err != nil {
-//		return User{}, errs.Newf(errs.Internal, "querybyid: %s", err)
-//	}
-//
-//	return toAppUser(usr), nil
-//}
+func (c *Core) QueryByID(ctx context.Context) (User, error) {
+	usr, err := mid.GetUser(ctx)
+	if err != nil {
+		return User{}, errs.Newf(errs.Internal, "querybyid: %s", err)
+	}
+
+	return toAppUser(usr), nil
+}
