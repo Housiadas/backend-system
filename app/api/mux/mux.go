@@ -1,5 +1,4 @@
-// Package mux provides support to bind domain level routes
-// to the application mux.
+// Package mux provides support to bind domain level routes to the application mux.
 package mux
 
 import (
@@ -9,9 +8,10 @@ import (
 	"github.com/jmoiron/sqlx"
 	"go.opentelemetry.io/otel/trace"
 
+	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
+	midhttp "github.com/Housiadas/backend-system/business/mid/http"
 	"github.com/Housiadas/backend-system/business/sys/delegate"
-	midhttp "github.com/Housiadas/backend-system/business/sys/mid/http"
 	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/Housiadas/backend-system/foundation/web"
 )
@@ -33,8 +33,9 @@ type Config struct {
 	Build     string
 	Shutdown  chan os.Signal
 	Log       *logger.Logger
-	DB        *sqlx.DB
 	Tracer    trace.Tracer
+	DB        *sqlx.DB
+	Auth      *auth.Auth
 	BusDomain BusDomain
 }
 
