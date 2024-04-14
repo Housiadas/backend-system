@@ -7,9 +7,13 @@ import (
 // Config stores all configuration of the application.
 // The values are read by viper from a config file or environment variable.
 type Config struct {
-	DB      DB
-	Server  Server
-	Version Version
+	DB         DB
+	Server     Server
+	Version    Version
+	Otel       Otel
+	Prometheus Prometheus
+	Collect    Collect
+	Publish    Publish
 }
 
 // LoadConfig reads configuration from file or environment variables.

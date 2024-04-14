@@ -12,23 +12,76 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - db_data_v:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     networks:
       - app_local_network
 
-  redis:
-    image: redis:latest
-    container_name: redis-container
-    command: /bin/sh -c 'redis-server --requirepass ${REDIS_PASSWORD:-secret123}'
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    container_name: otel-container
     volumes:
-      - redis_data_v:/var/lib/redis/data
+      - .docker/otel/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    networks:
+      - app_local_network
     ports:
-      - "6379:6379"
+      - "4317:4317" # OTLP gRPC receiver
+#      - "1888:1888" # pprof extension
+#      - "8888:8888" # Prometheus' metrics exposed by the Collector
+#      - "8889:8889" # Prometheus exporter metrics
+#      - "13133:13133" # health_check extension
+#      - "4318:4318" # OTLP http receiver
+#      - "55679:55679" # zpages extension
+
+  # To eventually offload to Tempo...
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo-container
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    user: "1000:1000"
+    volumes:
+      - .docker/tempo/tempo.yaml:/etc/tempo.yaml
+      - ./tempo_data:/tmp/tempo
+    ports:
+      - "14268"  # jaeger ingest
+      - "3200"   # tempo
+      - "4317"  # otlp grpc
+      - "4318"  # otlp http
+      - "9411"   # zipkin
+    networks:
+      - app_local_network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus-container
+    command:
+      - --config.file=/etc/prometheus.yaml
+      - --web.enable-remote-write-receiver
+      - --enable-feature=exemplar-storage
+    volumes:
+      - ./.docker/prometheus/prometheus.yaml:/etc/prometheus.yaml
+    ports:
+      - "9090:9090"
+    networks:
+      - app_local_network
+
+  grafana:
+    image: grafana/grafana:10.1.1
+    container_name: grafana-container
+    volumes:
+      - ./.docker/grafana/datasource.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+    ports:
+      - "3000:3000"
     networks:
       - app_local_network
 
   migrate:
     container_name: migrate-container
+    user: "1000:1000"
     build:
       args:
         UID: "${UID:-1000}"
@@ -44,5 +97,6 @@ networks:
   app_local_network:
 
 volumes:
-  db_data_v:
-  redis_data_v:
+  db_data:
+  redis_data:
+  tempo_data:

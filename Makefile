@@ -41,7 +41,7 @@ docker/build:
 ## docker/up: Start all the containers for the application
 .PHONY: docker/up
 docker/up:
-	$(DOCKER_COMPOSE_LOCAL) up -d db redis
+	$(DOCKER_COMPOSE_LOCAL) up -d
 
 ## docker/stop: stop all containers
 .PHONY: docker/stop
