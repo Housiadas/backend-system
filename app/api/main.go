@@ -4,6 +4,8 @@ import (
 	"context"
 	"expvar"
 	"fmt"
+	"github.com/Housiadas/backend-system/business/domain/productbus"
+	"github.com/Housiadas/backend-system/business/domain/productbus/stores/productdb"
 	"net/http"
 	"os"
 	"os/signal"
@@ -149,6 +151,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	delegate := del.New(log)
 	userBus := userbus.NewCore(log, delegate, userdb.NewStore(log, db))
+	productBus := productbus.NewCore(log, userBus, delegate, productdb.NewStore(log, db))
 
 	// -------------------------------------------------------------------------
 	// Start Debug Service
@@ -178,6 +181,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 		BusDomain: mux.BusDomain{
 			Delegate: delegate,
 			User:     userBus,
+			Product:  productBus,
 		},
 	}
 

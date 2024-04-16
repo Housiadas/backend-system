@@ -20,7 +20,7 @@ import (
 )
 
 // ErrForbidden is returned when an auth issue is identified.
-var ErrForbidden = errors.New("attempted action is not allowed")
+var _ = errors.New("attempted action is not allowed")
 
 // Claims represents the authorization claims transmitted via a JWT.
 type Claims struct {

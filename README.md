@@ -1,5 +1,5 @@
-# Simple Banking System (Tycoon)
-A simple banking API built with Go `v1.22`.
+# Backend System
+A backend system built with Go `v1.22`.
 
 ## Setup
 

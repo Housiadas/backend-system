@@ -44,7 +44,7 @@ func (d *Delegate) Register(domainType string, actionType string, fn Func) {
 }
 
 // Call executes all functions registered for the specified domain and
-// action. These functions are executed synchronously on the G making the call.
+// action. These functions are executed synchronously.
 func (d *Delegate) Call(ctx context.Context, data Data) error {
 	d.log.Info(ctx, "delegate call", "status", "started", "domain", data.Domain, "action", data.Action, "params", data.RawParams)
 	defer d.log.Info(ctx, "delegate call", "status", "completed")

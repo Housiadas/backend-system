@@ -1,69 +1,55 @@
-// Package userapi Package user maintains the web based api for user access.
-package userapi
+// Package productapi maintains the web based api for product access.
+package productapi
 
 import (
 	"context"
 	"net/http"
 
-	"github.com/Housiadas/backend-system/app/domain/userapp"
+	"github.com/Housiadas/backend-system/app/domain/productapp"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/foundation/web"
 )
 
 type api struct {
-	userApp *userapp.Core
+	productApp *productapp.Core
 }
 
-func newAPI(userApp *userapp.Core) *api {
+func newAPI(productApp *productapp.Core) *api {
 	return &api{
-		userApp: userApp,
+		productApp: productApp,
 	}
 }
 
 func (api *api) create(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	var app userapp.NewUser
+	var app productapp.NewProduct
 	if err := web.Decode(r, &app); err != nil {
 		return errs.New(errs.FailedPrecondition, err)
 	}
 
-	usr, err := api.userApp.Create(ctx, app)
+	prd, err := api.productApp.Create(ctx, app)
 	if err != nil {
 		return err
 	}
 
-	return web.Respond(ctx, w, usr, http.StatusCreated)
+	return web.Respond(ctx, w, prd, http.StatusCreated)
 }
 
 func (api *api) update(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	var app userapp.UpdateUser
+	var app productapp.UpdateProduct
 	if err := web.Decode(r, &app); err != nil {
 		return errs.New(errs.FailedPrecondition, err)
 	}
 
-	usr, err := api.userApp.Update(ctx, app)
+	prd, err := api.productApp.Update(ctx, app)
 	if err != nil {
 		return err
 	}
 
-	return web.Respond(ctx, w, usr, http.StatusOK)
-}
-
-func (api *api) updateRole(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	var app userapp.UpdateUserRole
-	if err := web.Decode(r, &app); err != nil {
-		return errs.New(errs.FailedPrecondition, err)
-	}
-
-	usr, err := api.userApp.UpdateRole(ctx, app)
-	if err != nil {
-		return err
-	}
-
-	return web.Respond(ctx, w, usr, http.StatusOK)
+	return web.Respond(ctx, w, prd, http.StatusOK)
 }
 
 func (api *api) delete(ctx context.Context, w http.ResponseWriter, _ *http.Request) error {
-	if err := api.userApp.Delete(ctx); err != nil {
+	if err := api.productApp.Delete(ctx); err != nil {
 		return err
 	}
 
@@ -76,19 +62,19 @@ func (api *api) query(ctx context.Context, w http.ResponseWriter, r *http.Reques
 		return err
 	}
 
-	usr, err := api.userApp.Query(ctx, qp)
+	hme, err := api.productApp.Query(ctx, qp)
 	if err != nil {
 		return err
 	}
 
-	return web.Respond(ctx, w, usr, http.StatusOK)
+	return web.Respond(ctx, w, hme, http.StatusOK)
 }
 
 func (api *api) queryByID(ctx context.Context, w http.ResponseWriter, _ *http.Request) error {
-	usr, err := api.userApp.QueryByID(ctx)
+	hme, err := api.productApp.QueryByID(ctx)
 	if err != nil {
 		return err
 	}
 
-	return web.Respond(ctx, w, usr, http.StatusOK)
+	return web.Respond(ctx, w, hme, http.StatusOK)
 }

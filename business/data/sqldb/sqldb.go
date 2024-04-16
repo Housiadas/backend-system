@@ -170,7 +170,15 @@ func NamedQuerySliceUsingIn[T any](ctx context.Context, log *logger.Logger, db s
 	return namedQuerySlice(ctx, log, db, query, data, dest, true)
 }
 
-func namedQuerySlice[T any](ctx context.Context, log *logger.Logger, db sqlx.ExtContext, query string, data any, dest *[]T, withIn bool) (err error) {
+func namedQuerySlice[T any](
+	ctx context.Context,
+	log *logger.Logger,
+	db sqlx.ExtContext,
+	query string,
+	data any,
+	dest *[]T,
+	withIn bool,
+) (err error) {
 	q := queryString(query, data)
 
 	defer func() {

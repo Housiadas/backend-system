@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/Housiadas/backend-system/business/auth"
+	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 )
 
@@ -17,6 +18,7 @@ const (
 	claimKey ctxKey = iota + 1
 	userIDKey
 	userKey
+	productKey
 )
 
 func SetClaims(ctx context.Context, claims auth.Claims) context.Context {
@@ -57,4 +59,18 @@ func SetUserID(ctx context.Context, userID uuid.UUID) context.Context {
 
 func SetUser(ctx context.Context, usr userbus.User) context.Context {
 	return context.WithValue(ctx, userKey, usr)
+}
+
+// GetProduct returns the product from the context.
+func GetProduct(ctx context.Context) (productbus.Product, error) {
+	v, ok := ctx.Value(productKey).(productbus.Product)
+	if !ok {
+		return productbus.Product{}, errors.New("product not found in context")
+	}
+
+	return v, nil
+}
+
+func SetProduct(ctx context.Context, prd productbus.Product) context.Context {
+	return context.WithValue(ctx, productKey, prd)
 }

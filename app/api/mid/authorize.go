@@ -3,11 +3,11 @@ package mid
 import (
 	"context"
 	"errors"
+	"github.com/google/uuid"
 	"net/http"
 
-	"github.com/google/uuid"
-
 	"github.com/Housiadas/backend-system/business/auth"
+	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/mid"
 	"github.com/Housiadas/backend-system/business/sys/errs"
@@ -78,6 +78,55 @@ func AuthorizeUser(a *auth.Auth, userBus *userbus.Core, rule string) web.MidHand
 				Claims: mid.GetClaims(ctx),
 				UserID: userID,
 				Rule:   rule,
+			}
+
+			if err := a.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
+				return errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", authData.Claims.Roles, authData.Rule, err)
+			}
+
+			return handler(ctx, w, r)
+		}
+
+		return h
+	}
+
+	return m
+}
+
+// AuthorizeProduct executes the specified role and extracts the specified
+// product from the DB if a product id is specified in the call. Depending on
+// the rule specified, the userid from the claims may be compared with the
+// specified user id from the product.
+func AuthorizeProduct(a *auth.Auth, productBus *productbus.Core) web.MidHandler {
+	m := func(handler web.Handler) web.Handler {
+		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+			var userID uuid.UUID
+
+			if id := web.Param(r, "product_id"); id != "" {
+				var err error
+				productID, err := uuid.Parse(id)
+				if err != nil {
+					return errs.New(errs.Unauthenticated, ErrInvalidID)
+				}
+
+				prd, err := productBus.QueryByID(ctx, productID)
+				if err != nil {
+					switch {
+					case errors.Is(err, productbus.ErrNotFound):
+						return errs.New(errs.Unauthenticated, err)
+					default:
+						return errs.Newf(errs.Internal, "querybyid: productID[%s]: %s", productID, err)
+					}
+				}
+
+				userID = prd.UserID
+				ctx = mid.SetProduct(ctx, prd)
+			}
+
+			authData := auth.Authorize{
+				Claims: mid.GetClaims(ctx),
+				UserID: userID,
+				Rule:   auth.RuleAdminOrSubject,
 			}
 
 			if err := a.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {

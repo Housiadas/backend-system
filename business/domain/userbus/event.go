@@ -11,7 +11,7 @@ import (
 // Domain represents the name of this domain.
 const Domain = "user"
 
-// Set of delegate actions.
+// ActionUpdated Set of delegate actions.
 const (
 	ActionUpdated = "updated"
 )

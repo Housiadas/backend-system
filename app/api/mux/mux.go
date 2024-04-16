@@ -9,6 +9,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/Housiadas/backend-system/business/auth"
+	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	midhttp "github.com/Housiadas/backend-system/business/mid/http"
 	"github.com/Housiadas/backend-system/business/sys/delegate"
@@ -43,6 +44,7 @@ type Config struct {
 type BusDomain struct {
 	Delegate *delegate.Delegate
 	User     *userbus.Core
+	Product  *productbus.Core
 }
 
 // RouteAdder defines behavior that sets the routes to bind for an instance
