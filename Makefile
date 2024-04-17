@@ -65,10 +65,24 @@ docker/clean:
 go/mock/store:
 	mockgen -package mockdb -destination business/db/mock/store.go $(APP_MODULE)/business/db Store
 
+# ==================================================================================== #
+# API Application
+# ==================================================================================== #
+
 ## go/api/run: Run main.go locally
 .PHONY: go/api/run
 go/api/run:
 	go run app/api/main.go
+
+## go/api/build: build the api application
+.PHONY: go/api/build
+go/api/build:
+	cd app & \
+	go build -ldflags=${LINKER_FLAGS} -o=./banking-api
+
+# ==================================================================================== #
+# CMD Application
+# ==================================================================================== #
 
 ## go/cmd/build: Build cmd application
 .PHONY: go/cmd/build
@@ -116,12 +130,6 @@ db/migrate/down:
 # QUALITY CONTROL
 # ==================================================================================== #
 
-# update: update dependencies
-.PHONY: update
-update:
-	go get -u ./...
-	go mod verify
-
 # vendor: tidy and vendor dependencies
 .PHONY: vendor
 vendor:
@@ -129,15 +137,20 @@ vendor:
 	go mod vendor
 	go mod verify
 
-## audit: tidy dependencies and format, vet and test all code
-.PHONY: audit
-audit:
+# update: update dependencies
+.PHONY: update
+update:
+	go get -u ./...
+	go mod verify
+
+## lint: Go linter
+.PHONY: lint
+lint:
 	go mod tidy
 	go mod verify
 	go fmt ./...
 	go vet ./...
 	staticcheck ./...
-	go test ./... --vet --cover --short --race
 
 # tests: run tests
 .PHONY: tests
@@ -150,13 +163,3 @@ coverage:
 	go test -v -coverprofile cover.out ./...
 	go tool cover -html cover.out -o cover.html
 	open cover.html
-
-# ==================================================================================== #
-# BUILD
-# ==================================================================================== #
-
-## build/api: build the cmd/api application
-.PHONY: build/api
-build/api:
-	cd app & \
-	go build -ldflags=${LINKER_FLAGS} -o=./banking-api

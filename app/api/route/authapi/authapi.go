@@ -8,12 +8,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
+
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/foundation/validate"
 	"github.com/Housiadas/backend-system/foundation/web"
-	"github.com/golang-jwt/jwt/v4"
 )
 
 type api struct {

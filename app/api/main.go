@@ -15,6 +15,8 @@ import (
 	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/data/sqldb"
+	"github.com/Housiadas/backend-system/business/domain/productbus"
+	"github.com/Housiadas/backend-system/business/domain/productbus/stores/productdb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	del "github.com/Housiadas/backend-system/business/sys/delegate"
@@ -149,6 +151,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	delegate := del.New(log)
 	userBus := userbus.NewCore(log, delegate, userdb.NewStore(log, db))
+	productBus := productbus.NewCore(log, userBus, delegate, productdb.NewStore(log, db))
 
 	// -------------------------------------------------------------------------
 	// Start Debug Service
@@ -178,6 +181,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 		BusDomain: mux.BusDomain{
 			Delegate: delegate,
 			User:     userBus,
+			Product:  productBus,
 		},
 	}
 

@@ -1,11 +1,13 @@
-# Simple Banking System (Tycoon)
-A simple banking API built with Go `v1.22`.
+# Backend System
+A backend system built with Go `v1.22`.
 
 ## Setup
 
 ```
 make docker/build
 make docker/up
+make db/migrate/up
+make go/cmd/seed
 ```
 
 ## Migration
@@ -22,6 +24,11 @@ make db/migrate/down
 make tests
 ```
 
+## Help
+
+```
+make help
+```
 
 ## Database Schema
 We used https://dbdiagram.io to define our database structure.

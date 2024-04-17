@@ -3,6 +3,7 @@ package route
 import (
 	"github.com/Housiadas/backend-system/app/api/mux"
 	"github.com/Housiadas/backend-system/app/api/route/authapi"
+	"github.com/Housiadas/backend-system/app/api/route/productapi"
 	"github.com/Housiadas/backend-system/app/api/route/sys"
 	"github.com/Housiadas/backend-system/app/api/route/userapi"
 	"github.com/Housiadas/backend-system/foundation/web"
@@ -30,6 +31,14 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		Log:     cfg.Log,
 		Auth:    cfg.Auth,
 		UserBus: cfg.BusDomain.User,
+	})
+
+	// Product Domain Routes
+	productapi.Routes(app, productapi.Config{
+		Log:        cfg.Log,
+		Auth:       cfg.Auth,
+		UserBus:    cfg.BusDomain.User,
+		ProductBus: cfg.BusDomain.Product,
 	})
 
 	// System Routes
