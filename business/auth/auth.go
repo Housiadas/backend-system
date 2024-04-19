@@ -12,15 +12,11 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/open-policy-agent/opa/rego"
 
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
-
-// ErrForbidden is returned when an auth issue is identified.
-var _ = errors.New("attempted action is not allowed")
 
 // Claims represents the authorization claims transmitted via a JWT.
 type Claims struct {
@@ -66,7 +62,6 @@ type Auth struct {
 
 // New creates an Auth to support authentication/authorization.
 func New(cfg Config) (*Auth, error) {
-
 	// If a database connection is not provided, we won't perform the
 	// user enabled check.
 	var userBus *userbus.Core
@@ -83,29 +78,6 @@ func New(cfg Config) (*Auth, error) {
 	}
 
 	return &a, nil
-}
-
-// GenerateToken generates a signed JWT token string representing the user Claims.
-func (a *Auth) GenerateToken(kid string, claims Claims) (string, error) {
-	token := jwt.NewWithClaims(a.method, claims)
-	token.Header["kid"] = kid
-
-	privateKeyPEM, err := a.keyLookup.PrivateKey(kid)
-	if err != nil {
-		return "", fmt.Errorf("private key: %w", err)
-	}
-
-	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(privateKeyPEM))
-	if err != nil {
-		return "", fmt.Errorf("parsing private pem: %w", err)
-	}
-
-	str, err := token.SignedString(privateKey)
-	if err != nil {
-		return "", fmt.Errorf("signing token: %w", err)
-	}
-
-	return str, nil
 }
 
 // Authenticate processes the token to validate the sender's token is valid.
@@ -147,59 +119,11 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, er
 	}
 
 	// Check the database for this user to verify they are still enabled.
-
 	if err := a.isUserEnabled(ctx, claims); err != nil {
 		return Claims{}, fmt.Errorf("user not enabled : %w", err)
 	}
 
 	return claims, nil
-}
-
-// Authorize attempts to authorize the user with the provided input roles, if
-// none of the input roles are within the user's claims, we return an error
-// otherwise the user is authorized.
-func (a *Auth) Authorize(ctx context.Context, claims Claims, userID uuid.UUID, rule string) error {
-	input := map[string]any{
-		"Roles":   claims.Roles,
-		"Subject": claims.Subject,
-		"UserID":  userID,
-	}
-
-	if err := a.opaPolicyEvaluation(ctx, opaAuthorization, rule, input); err != nil {
-		return fmt.Errorf("rego evaluation failed : %w", err)
-	}
-
-	return nil
-}
-
-// opaPolicyEvaluation asks opa to evaluate the token against the specified token
-// policy and public key.
-func (a *Auth) opaPolicyEvaluation(ctx context.Context, opaPolicy string, rule string, input any) error {
-	query := fmt.Sprintf("x = data.%s.%s", opaPackage, rule)
-
-	q, err := rego.New(
-		rego.Query(query),
-		rego.Module("policy.rego", opaPolicy),
-	).PrepareForEval(ctx)
-	if err != nil {
-		return err
-	}
-
-	results, err := q.Eval(ctx, rego.EvalInput(input))
-	if err != nil {
-		return fmt.Errorf("query: %w", err)
-	}
-
-	if len(results) == 0 {
-		return errors.New("no results")
-	}
-
-	result, ok := results[0].Bindings["x"].(bool)
-	if !ok || !result {
-		return fmt.Errorf("bindings results[%v] ok[%v]", results, ok)
-	}
-
-	return nil
 }
 
 // isUserEnabled hits the database and checks the user is not disabled. If the
