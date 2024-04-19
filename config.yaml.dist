@@ -16,4 +16,4 @@ db:
   connectionIdleTime: "30s"
   disableTLS: true
 auth:
-  keysFolder: "foundation/keys/"
+  keysFolder: "keys/"
