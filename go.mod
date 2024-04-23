@@ -4,6 +4,7 @@ go 1.22
 
 require (
 	github.com/arl/statsviz v0.6.0
+	github.com/confluentinc/confluent-kafka-go/v2 v2.3.0
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.19.0
@@ -49,6 +50,7 @@ require (
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/moby/sys/sequential v0.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.1 // indirect
 	github.com/prometheus/client_golang v1.19.0 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
