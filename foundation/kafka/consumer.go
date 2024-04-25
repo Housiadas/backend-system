@@ -69,7 +69,8 @@ func (c *ConsumerClient) Consume(ctx context.Context, fn func() error) error {
 			msgCount += 1
 			if msgCount%MinCommitCount == 0 {
 				go func() {
-					_, _ = c.consumer.Commit()
+					_, err := c.consumer.Commit()
+					c.log.Error(ctx, fmt.Sprintf("consumer: Commiting%v\n", err))
 				}()
 			}
 			// Callback, application specific
