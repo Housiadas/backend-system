@@ -4,7 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
+)
+
+const (
+	MinCommitCount = 4
 )
 
 type Consumer interface {
@@ -23,16 +28,17 @@ type ConsumerConfig struct {
 
 type ConsumerClient struct {
 	consumer *kafka.Consumer
+	log      *logger.Logger
 }
 
-func NewConsumer(cfg ConsumerConfig) (*ConsumerClient, error) {
+func NewConsumer(cfg ConsumerConfig, log *logger.Logger) (*ConsumerClient, error) {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers":        cfg.Broker,
 		"group.id":                 cfg.GroupId,
 		"broker.address.family":    cfg.AddressFamily,
 		"session.timeout.ms":       cfg.SessionTimeout,
 		"auto.offset.reset":        "earliest",
-		"enable.auto.offset.store": true,
+		"enable.auto.offset.store": false,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create consumer: %w", err)
@@ -40,6 +46,7 @@ func NewConsumer(cfg ConsumerConfig) (*ConsumerClient, error) {
 
 	return &ConsumerClient{
 		consumer: consumer,
+		log:      log,
 	}, nil
 }
 
@@ -52,22 +59,32 @@ func (c *ConsumerClient) Subscribe(topic string) error {
 	return err
 }
 
-func (c *ConsumerClient) Consume(fn func() error) error {
+func (c *ConsumerClient) Consume(ctx context.Context, fn func() error) error {
+	msgCount := 0
 	run := true
-	for run {
+	for run == true {
 		ev := c.consumer.Poll(100)
 		switch e := ev.(type) {
 		case *kafka.Message:
+			msgCount += 1
+			if msgCount%MinCommitCount == 0 {
+				go func() {
+					_, _ = c.consumer.Commit()
+				}()
+			}
 			// Callback, application specific
 			err := fn()
 			if err != nil {
-				return err
+				c.log.Error(ctx, fmt.Sprintf("consumer: %v\n", e))
 			}
-			run = false
+			fmt.Printf("%% Message on %s:\n%s\n", e.TopicPartition, string(e.Value))
+		case kafka.PartitionEOF:
+			c.log.Info(ctx, fmt.Sprintf("consumer: EOF Reached %v\n", e))
 		case kafka.Error:
-			return fmt.Errorf("kakfa consumer error: %v\n", e)
+			c.log.Error(ctx, fmt.Sprintf("consumer: %v\n", e))
+			run = false
 		default:
-			return fmt.Errorf("kafka consumer uknown: %v\n", e)
+			c.log.Info(ctx, fmt.Sprintf("consumer: Ignored %v\n", e))
 		}
 	}
 	return nil
