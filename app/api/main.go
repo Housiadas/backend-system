@@ -4,6 +4,7 @@ import (
 	"context"
 	"expvar"
 	"fmt"
+	"github.com/Housiadas/backend-system/foundation/kafka"
 	"net/http"
 	"os"
 	"os/signal"
@@ -126,6 +127,21 @@ func run(ctx context.Context, log *logger.Logger) error {
 	}
 
 	// -------------------------------------------------------------------------
+	// Initialize Kafka Producer
+	// -------------------------------------------------------------------------
+	producer, err := kafka.NewProducer(kafka.ProducerConfig{
+		Broker:           cfg.Kafka.Broker,
+		LogLevel:         cfg.Kafka.LogLevel,
+		AddressFamily:    cfg.Kafka.AddressFamily,
+		MaxMessageBytes:  cfg.Kafka.MaxMessageBytes,
+		SecurityProtocol: cfg.Kafka.SecurityProtocol,
+	})
+	if err != nil {
+		return fmt.Errorf("creating kafka producer: %w", err)
+	}
+	defer producer.Close()
+
+	// -------------------------------------------------------------------------
 	// Start Tracing Support
 	// -------------------------------------------------------------------------
 
@@ -150,8 +166,8 @@ func run(ctx context.Context, log *logger.Logger) error {
 	log.Info(ctx, "startup", "status", "initializing business core")
 
 	delegate := del.New(log)
-	userBus := userbus.NewCore(log, delegate, userdb.NewStore(log, db))
-	productBus := productbus.NewCore(log, userBus, delegate, productdb.NewStore(log, db))
+	userBus := userbus.NewCore(log, userdb.NewStore(log, db), producer)
+	productBus := productbus.NewCore(log, productdb.NewStore(log, db), userBus, producer)
 
 	// -------------------------------------------------------------------------
 	// Start Debug Service

@@ -17,3 +17,10 @@ db:
   disableTLS: true
 auth:
   keysFolder: "keys/"
+kafka:
+  brokers: "localhost:19092,localhost:29092,localhost:39092"
+  addressFamily: "v4"
+  securityProtocol: "PLAINTEXT"
+  logLevel: "7"
+  maxMessageBytes: "5000000"
+

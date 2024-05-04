@@ -34,7 +34,7 @@ func Users(log *logger.Logger, cfg sqldb.Config, pageNumber string, rowsPerPage 
 		return fmt.Errorf("converting rows per page: %w", err)
 	}
 
-	userBus := userbus.NewCore(log, nil, userdb.NewStore(log, db))
+	userBus := userbus.NewCore(log, userdb.NewStore(log, db), nil)
 
 	users, err := userBus.Query(ctx, userbus.QueryFilter{}, userbus.DefaultOrderBy, page, rows)
 	if err != nil {

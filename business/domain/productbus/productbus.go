@@ -11,8 +11,8 @@ import (
 
 	"github.com/Housiadas/backend-system/business/data/transaction"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/sys/delegate"
 	"github.com/Housiadas/backend-system/business/sys/order"
+	"github.com/Housiadas/backend-system/foundation/kafka"
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
@@ -38,23 +38,19 @@ type Storer interface {
 // Core manages the set of APIs for product access.
 type Core struct {
 	log      *logger.Logger
-	userBus  *userbus.Core
-	delegate *delegate.Delegate
 	storer   Storer
+	userBus  *userbus.Core
+	producer *kafka.ProducerClient
 }
 
 // NewCore constructs a product core API for use.
-func NewCore(log *logger.Logger, userBus *userbus.Core, delegate *delegate.Delegate, storer Storer) *Core {
-	c := Core{
+func NewCore(log *logger.Logger, storer Storer, userBus *userbus.Core, producer *kafka.ProducerClient) *Core {
+	return &Core{
 		log:      log,
-		userBus:  userBus,
-		delegate: delegate,
 		storer:   storer,
+		userBus:  userBus,
+		producer: producer,
 	}
-
-	c.registerDelegateFunctions()
-
-	return &c
 }
 
 // ExecuteUnderTransaction constructs a new Core value that will use the
@@ -72,9 +68,9 @@ func (c *Core) ExecuteUnderTransaction(tx transaction.Transaction) (*Core, error
 
 	core := Core{
 		log:      c.log,
-		userBus:  userBus,
-		delegate: c.delegate,
 		storer:   storer,
+		userBus:  userBus,
+		producer: c.producer,
 	}
 
 	return &core, nil

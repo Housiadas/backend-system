@@ -1,4 +1,8 @@
-version: '3.8'
+networks:
+  app_local_network:
+
+volumes:
+  db_data:
 
 services:
   db:
@@ -15,6 +19,16 @@ services:
       - db_data:/var/lib/postgresql/data
     networks:
       - app_local_network
+
+  kpow:
+    image: factorhouse/kpow-ce:latest
+    depends_on:
+      - zookeeper
+      - schema-registry
+    ports:
+      - "3000:3000"
+    env_file:
+      - kpow.env
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -95,9 +109,3 @@ services:
       - .:/app
     networks:
       - app_local_network
-
-networks:
-  app_local_network:
-
-volumes:
-  db_data:

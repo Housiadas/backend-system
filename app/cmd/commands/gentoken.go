@@ -33,7 +33,7 @@ func GenToken(log *logger.Logger, dbConfig sqldb.Config, keyPath string, userID 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	userBus := userbus.NewCore(log, nil, userdb.NewStore(log, db))
+	userBus := userbus.NewCore(log, userdb.NewStore(log, db), nil)
 
 	usr, err := userBus.QueryByID(ctx, userID)
 	if err != nil {

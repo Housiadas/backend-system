@@ -6,6 +6,7 @@ tmp/
 
 .env
 app.env
+kpow.env
 config.yaml
 
 cover.out
