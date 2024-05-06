@@ -24,3 +24,7 @@ kafka:
   logLevel: "7"
   maxMessageBytes: "5000000"
   SessionTimeout: "45000"
+tempo:
+  host: "localhost:4317"
+  serviceName: "backend-system"
+  probability: "0.05"

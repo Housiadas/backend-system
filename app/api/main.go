@@ -160,7 +160,6 @@ func run(ctx context.Context, log *logger.Logger) error {
 	if err != nil {
 		return fmt.Errorf("starting tracing: %w", err)
 	}
-
 	defer traceProvider.Shutdown(context.Background())
 
 	tr := traceProvider.Tracer(cfg.Tempo.ServiceName)
@@ -185,7 +184,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	}()
 
 	// -------------------------------------------------------------------------
-	// Start API Service
+	// Start Http Server
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing V1 API support")
 

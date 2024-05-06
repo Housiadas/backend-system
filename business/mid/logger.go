@@ -34,9 +34,9 @@ func Logger(ctx context.Context, log *logger.Logger, path string, rawQuery strin
 	log.Info(ctx, "request completed",
 		"method", method,
 		"path", path,
-		"remoteaddr", remoteAddr,
-		"statuscode", statusCode,
-		"since", time.Since(now).String(),
+		"remote_addr", remoteAddr,
+		"status_code", statusCode,
+		"execution_time", time.Since(now).String(),
 	)
 
 	return resp, err
