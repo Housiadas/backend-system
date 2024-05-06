@@ -1,11 +1,11 @@
 apiVersion: 1
 
 datasources:
-  - name: mytempo
+  - name: Tempo
     type: tempo
     access: proxy
     orgId: 1
-    url: tempo:3200
+    url: http://tempo:3200
     basicAuth: false
     isDefault: false
     version: 1

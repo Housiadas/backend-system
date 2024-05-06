@@ -24,7 +24,7 @@
   "liveNow": false,
   "panels": [
     {
-      "datasource": "mytempo",
+      "datasource": "Tempo",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -73,7 +73,7 @@
       "pluginVersion": "10.1.0",
       "targets": [
         {
-          "datasource": "mytempo",
+          "datasource": "Tempo",
           "key": "Q-9fc3b403-aa1a-4311-978b-cda05474ac3e-0",
           "limit": 20,
           "queryType": "nativeSearch",
