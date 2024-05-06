@@ -10,7 +10,6 @@ import (
 )
 
 const (
-	Domain           = "users"
 	UserUpdatedEvent = "user-updated"
 )
 

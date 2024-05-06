@@ -129,8 +129,9 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	// Initialize Kafka Producer
 	// -------------------------------------------------------------------------
+	log.Info(ctx, "startup", "status", "initializing kafka support")
 	producer, err := kafka.NewProducer(kafka.ProducerConfig{
-		Broker:           cfg.Kafka.Broker,
+		Brokers:          cfg.Kafka.Brokers,
 		LogLevel:         cfg.Kafka.LogLevel,
 		AddressFamily:    cfg.Kafka.AddressFamily,
 		MaxMessageBytes:  cfg.Kafka.MaxMessageBytes,

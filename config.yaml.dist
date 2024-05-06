@@ -23,4 +23,3 @@ kafka:
   securityProtocol: "PLAINTEXT"
   logLevel: "7"
   maxMessageBytes: "5000000"
-

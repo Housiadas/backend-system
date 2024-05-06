@@ -156,9 +156,7 @@ func (c *Core) Update(ctx context.Context, usr User, uu UpdateUser) (User, error
 			Topic:     &event.Topic,
 			Partition: conflkafka.PartitionAny,
 		},
-		Value:         event.Data,
-		Timestamp:     time.Time{},
-		TimestampType: 0,
+		Value: event.Data,
 	})
 	if err != nil {
 		return User{}, fmt.Errorf("failed to produce `%s` error: %w", UserUpdatedEvent, err)

@@ -13,7 +13,7 @@ type Producer interface {
 }
 
 type ProducerConfig struct {
-	Broker           string
+	Brokers          string
 	SecurityProtocol string
 	AddressFamily    string
 	LogLevel         int
@@ -27,8 +27,8 @@ type ProducerClient struct {
 func NewProducer(cfg ProducerConfig) (*ProducerClient, error) {
 	producer, err := kafka.NewProducer(&kafka.ConfigMap{
 		"go.logs.channel.enable":   true,
-		"allow.auto.create.topics": false,
-		"bootstrap.servers":        cfg.Broker,
+		"allow.auto.create.topics": true,
+		"bootstrap.servers":        cfg.Brokers,
 		"log_level":                cfg.LogLevel,
 		"broker.address.family":    cfg.AddressFamily,
 		"message.max.bytes":        cfg.MaxMessageBytes,

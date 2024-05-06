@@ -1,7 +1,7 @@
 package config
 
 type Kafka struct {
-	Broker           string
+	Brokers          string
 	AddressFamily    string
 	SecurityProtocol string
 	LogLevel         int
