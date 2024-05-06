@@ -8,12 +8,13 @@ import (
 	"net/mail"
 	"time"
 
+	conflkafka "github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/Housiadas/backend-system/business/data/transaction"
-	"github.com/Housiadas/backend-system/business/sys/delegate"
 	"github.com/Housiadas/backend-system/business/sys/order"
+	"github.com/Housiadas/backend-system/foundation/kafka"
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
@@ -41,15 +42,15 @@ type Storer interface {
 type Core struct {
 	log      *logger.Logger
 	storer   Storer
-	delegate *delegate.Delegate
+	producer *kafka.ProducerClient
 }
 
 // NewCore constructs a user core API for use.
-func NewCore(log *logger.Logger, delegate *delegate.Delegate, storer Storer) *Core {
+func NewCore(log *logger.Logger, storer Storer, p *kafka.ProducerClient) *Core {
 	return &Core{
 		log:      log,
-		delegate: delegate,
 		storer:   storer,
+		producer: p,
 	}
 }
 
@@ -63,8 +64,8 @@ func (c *Core) ExecuteUnderTransaction(tx transaction.Transaction) (*Core, error
 
 	core := Core{
 		log:      c.log,
-		delegate: c.delegate,
 		storer:   trS,
+		producer: c.producer,
 	}
 
 	return &core, nil
@@ -149,10 +150,16 @@ func (c *Core) Update(ctx context.Context, usr User, uu UpdateUser) (User, error
 		return User{}, fmt.Errorf("update: %w", err)
 	}
 
-	// Other domains may need to know when a user is updated so business
-	// logic can be applied. This represents a delegate call to other domains.
-	if err := c.delegate.Call(ctx, ActionUpdatedData(uu, usr.ID)); err != nil {
-		return User{}, fmt.Errorf("failed to execute `%s` action: %w", ActionUpdated, err)
+	event := ActionUpdatedData(uu, usr.ID)
+	err := c.producer.Produce(ctx, &conflkafka.Message{
+		TopicPartition: conflkafka.TopicPartition{
+			Topic:     &event.Topic,
+			Partition: conflkafka.PartitionAny,
+		},
+		Value: event.Data,
+	})
+	if err != nil {
+		return User{}, fmt.Errorf("failed to produce `%s` error: %w", UserUpdatedEvent, err)
 	}
 
 	return usr, nil

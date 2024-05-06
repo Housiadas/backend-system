@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/google/uuid"
 	"github.com/spf13/viper"
 
 	"github.com/Housiadas/backend-system/app/cmd/commands"
@@ -26,6 +25,7 @@ type Config struct {
 		KeysFolder string
 		DefaultKID string
 	}
+	Kafka cfg.Kafka
 }
 
 func main() {
@@ -51,7 +51,7 @@ func run(log *logger.Logger) error {
 		KeysFolder string
 		DefaultKID string
 	}{
-		KeysFolder: "foundation/keys",
+		KeysFolder: "/keys",
 		DefaultKID: "54bb2165-71e1-41a6-af3e-7da4a0e1e2c1",
 	}
 
@@ -86,7 +86,6 @@ func processCommands(args []string, log *logger.Logger, c Config) error {
 		DisableTLS:   c.DB.DisableTLS,
 	}
 
-	fmt.Println(args)
 	switch args[1] {
 	case "seed":
 		if err := commands.Seed(dbConfig); err != nil {
@@ -101,37 +100,22 @@ func processCommands(args []string, log *logger.Logger, c Config) error {
 			return fmt.Errorf("adding user: %w", err)
 		}
 
-	case "users":
-		pageNumber := args[2]
-		rowsPerPage := args[3]
-		if err := commands.Users(log, dbConfig, pageNumber, rowsPerPage); err != nil {
-			return fmt.Errorf("getting users: %w", err)
-		}
-
 	case "genkey":
 		if err := commands.GenKey(); err != nil {
 			return fmt.Errorf("key generation: %w", err)
 		}
 
-	case "gentoken":
-		userID, err := uuid.Parse(args[2])
-		if err != nil {
-			return fmt.Errorf("generating token: %w", err)
-		}
-		kid := args[3]
-		if kid == "" {
-			kid = c.Auth.DefaultKID
-		}
-		if err := commands.GenToken(log, dbConfig, c.Auth.KeysFolder, userID, kid); err != nil {
-			return fmt.Errorf("generating token: %w", err)
+	case "userevents":
+		if err := commands.UserEvents(log, dbConfig, c.Kafka); err != nil {
+			return fmt.Errorf("kafka consumer for user events: %w", err)
 		}
 
 	default:
 		fmt.Println("seed:       add data to the database")
 		fmt.Println("useradd:    add a new user to the database")
-		fmt.Println("users:      get a list of users from the database")
 		fmt.Println("genkey:     generate a set of private/public key files")
-		fmt.Println("gentoken:   generate a JWT for a user with claims")
+		fmt.Println("gentoken:	 generate a JWT for a user with claims")
+		fmt.Println("userevents: kafka consumer to listen to user events")
 		fmt.Println("provide a command to get more help.")
 		return commands.ErrHelp
 	}

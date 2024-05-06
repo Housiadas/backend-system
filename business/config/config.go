@@ -11,6 +11,7 @@ type Config struct {
 	Server  Server
 	Version Version
 	Auth    Auth
+	Kafka   Kafka
 }
 
 // LoadConfig reads configuration from file or environment variables.

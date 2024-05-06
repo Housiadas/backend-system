@@ -3,17 +3,14 @@ package userbus
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Housiadas/backend-system/business/sys/delegate"
 
 	"github.com/google/uuid"
+
+	"github.com/Housiadas/backend-system/foundation/kafka"
 )
 
-// Domain represents the name of this domain.
-const Domain = "user"
-
-// ActionUpdated Set of delegate actions.
 const (
-	ActionUpdated = "updated"
+	UserUpdatedEvent = "user-updated"
 )
 
 // ActionUpdatedParms represents the parameters for the updated action.
@@ -27,28 +24,20 @@ func (au *ActionUpdatedParms) String() string {
 	return fmt.Sprintf("&EventParamsUpdated{UserID:%v, Enabled:%v}", au.UserID, au.Enabled)
 }
 
-// Marshal returns the event parameters encoded as JSON.
-func (au *ActionUpdatedParms) Marshal() ([]byte, error) {
-	return json.Marshal(au)
-}
-
 // ActionUpdatedData constructs the data for the updated action.
-func ActionUpdatedData(uu UpdateUser, userID uuid.UUID) delegate.Data {
+func ActionUpdatedData(uu UpdateUser, userID uuid.UUID) kafka.Event {
 	params := ActionUpdatedParms{
-		UserID: userID,
-		UpdateUser: UpdateUser{
-			Enabled: uu.Enabled,
-		},
+		UserID:     userID,
+		UpdateUser: uu,
 	}
 
-	rawParams, err := params.Marshal()
+	rawData, err := json.Marshal(params)
 	if err != nil {
 		panic(err)
 	}
 
-	return delegate.Data{
-		Domain:    Domain,
-		Action:    ActionUpdated,
-		RawParams: rawParams,
+	return kafka.Event{
+		Topic: UserUpdatedEvent,
+		Data:  rawData,
 	}
 }
