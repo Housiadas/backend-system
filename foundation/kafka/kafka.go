@@ -5,8 +5,3 @@ type Event struct {
 	Topic string
 	Data  []byte
 }
-
-type EventData struct {
-	Action string
-	Params any
-}
