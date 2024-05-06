@@ -101,11 +101,17 @@ go/cmd/useradd:
 	make go/cmd/build
 	app/cmd/cmd useradd "chris housi" "example@example.com" "1232455477"
 
-## go/cmd/useradd: Add user
+## go/cmd/genkey: Generate key
 .PHONY: go/cmd/genkey
 go/cmd/genkey:
 	make go/cmd/build
 	app/cmd/cmd genkey
+
+## go/cmd/userevents: User events
+.PHONY: go/cmd/userevents
+go/cmd/userevents:
+	make go/cmd/build
+	app/cmd/cmd userevents
 
 # ==================================================================================== #
 # DATABASE

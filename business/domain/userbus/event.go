@@ -27,10 +27,8 @@ func (au *ActionUpdatedParms) String() string {
 // ActionUpdatedData constructs the data for the updated action.
 func ActionUpdatedData(uu UpdateUser, userID uuid.UUID) kafka.Event {
 	params := ActionUpdatedParms{
-		UserID: userID,
-		UpdateUser: UpdateUser{
-			Enabled: uu.Enabled,
-		},
+		UserID:     userID,
+		UpdateUser: uu,
 	}
 
 	rawData, err := json.Marshal(params)

@@ -19,7 +19,7 @@ func GenKey() error {
 	}
 
 	// Create a file for the private key information in PEM form.
-	privateFile, err := os.Create("private.pem")
+	privateFile, err := os.Create("keys/private.pem")
 	if err != nil {
 		return fmt.Errorf("creating private file: %w", err)
 	}
@@ -37,7 +37,7 @@ func GenKey() error {
 	}
 
 	// Create a file for the public key information in PEM form.
-	publicFile, err := os.Create("public.pem")
+	publicFile, err := os.Create("keys/public.pem")
 	if err != nil {
 		return fmt.Errorf("creating public file: %w", err)
 	}

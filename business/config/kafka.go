@@ -6,4 +6,5 @@ type Kafka struct {
 	SecurityProtocol string
 	LogLevel         int
 	MaxMessageBytes  int
+	SessionTimeout   int
 }

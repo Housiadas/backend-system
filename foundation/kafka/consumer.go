@@ -19,7 +19,7 @@ type Consumer interface {
 }
 
 type ConsumerConfig struct {
-	Broker           string
+	Brokers          string
 	GroupId          string
 	AddressFamily    string
 	SecurityProtocol string
@@ -31,9 +31,9 @@ type ConsumerClient struct {
 	log      *logger.Logger
 }
 
-func NewConsumer(cfg ConsumerConfig, log *logger.Logger) (*ConsumerClient, error) {
+func NewConsumer(log *logger.Logger, cfg ConsumerConfig) (*ConsumerClient, error) {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers":        cfg.Broker,
+		"bootstrap.servers":        cfg.Brokers,
 		"group.id":                 cfg.GroupId,
 		"broker.address.family":    cfg.AddressFamily,
 		"session.timeout.ms":       cfg.SessionTimeout,
@@ -59,7 +59,7 @@ func (c *ConsumerClient) Subscribe(topic string) error {
 	return err
 }
 
-func (c *ConsumerClient) Consume(ctx context.Context, fn func() error) error {
+func (c *ConsumerClient) Consume(ctx context.Context, fn func(msg *kafka.Message) error) error {
 	msgCount := 0
 	run := true
 	for run == true {
@@ -74,7 +74,7 @@ func (c *ConsumerClient) Consume(ctx context.Context, fn func() error) error {
 				}()
 			}
 			// Callback, application specific
-			err := fn()
+			err := fn(e)
 			if err != nil {
 				c.log.Error(ctx, fmt.Sprintf("consumer: %v\n", e))
 			}
