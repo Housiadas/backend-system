@@ -12,6 +12,7 @@ type Config struct {
 	Version Version
 	Auth    Auth
 	Kafka   Kafka
+	Tempo   Tempo
 }
 
 // LoadConfig reads configuration from file or environment variables.

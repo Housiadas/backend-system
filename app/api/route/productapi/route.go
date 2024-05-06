@@ -16,23 +16,23 @@ import (
 type Config struct {
 	Log        *logger.Logger
 	Auth       *auth.Auth
-	UserBus    *userbus.Core
-	ProductBus *productbus.Core
+	UserBus    *userbus.Business
+	ProductBus *productbus.Business
 }
 
 // Routes adds specific routes for this group.
 func Routes(app *web.App, cfg Config) {
 	const version = "v1"
 
-	authen := mid.Authenticate(cfg.Auth)
+	authenticate := mid.Authenticate(cfg.Auth)
 	ruleAny := mid.Authorize(cfg.Auth, auth.RuleAny)
 	ruleUserOnly := mid.Authorize(cfg.Auth, auth.RuleUserOnly)
 	ruleAuthorizeProduct := mid.AuthorizeProduct(cfg.Auth, cfg.ProductBus)
 
-	api := newAPI(productapp.NewCore(cfg.ProductBus))
-	app.Handle(http.MethodGet, version, "/products", api.query, authen, ruleAny)
-	app.Handle(http.MethodGet, version, "/products/{product_id}", api.queryByID, authen, ruleAuthorizeProduct)
-	app.Handle(http.MethodPost, version, "/products", api.create, authen, ruleUserOnly)
-	app.Handle(http.MethodPut, version, "/products/{product_id}", api.update, authen, ruleAuthorizeProduct)
-	app.Handle(http.MethodDelete, version, "/products/{product_id}", api.delete, authen, ruleAuthorizeProduct)
+	api := newAPI(productapp.NewApp(cfg.ProductBus))
+	app.Handle(http.MethodGet, version, "/products", api.query, authenticate, ruleAny)
+	app.Handle(http.MethodGet, version, "/products/{product_id}", api.queryByID, authenticate, ruleAuthorizeProduct)
+	app.Handle(http.MethodPost, version, "/products", api.create, authenticate, ruleUserOnly)
+	app.Handle(http.MethodPut, version, "/products/{product_id}", api.update, authenticate, ruleAuthorizeProduct)
+	app.Handle(http.MethodDelete, version, "/products/{product_id}", api.delete, authenticate, ruleAuthorizeProduct)
 }

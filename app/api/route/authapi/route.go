@@ -12,7 +12,7 @@ import (
 
 // Config contains all the mandatory systems required by handlers.
 type Config struct {
-	UserBus *userbus.Core
+	UserBus *userbus.Business
 	Auth    *auth.Auth
 }
 
@@ -20,10 +20,10 @@ type Config struct {
 func Routes(app *web.App, cfg Config) {
 	const version = "v1"
 
-	authen := mid.Authenticate(cfg.Auth)
+	authenticate := mid.Authenticate(cfg.Auth)
 	api := newAPI(userapp.NewCoreWithAuth(cfg.UserBus, cfg.Auth), cfg.Auth)
 
 	app.Handle(http.MethodPost, version, "/auth/authenticate", api.authenticate)
-	app.Handle(http.MethodGet, version, "/auth/authorize", api.authorize, authen)
+	app.Handle(http.MethodGet, version, "/auth/authorize", api.authorize, authenticate)
 	//app.Handle(http.MethodGet, version, "/auth/token/{kid}", api.token, authen)
 }

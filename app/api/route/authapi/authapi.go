@@ -18,31 +18,31 @@ import (
 )
 
 type api struct {
-	userApp *userapp.Core
 	auth    *auth.Auth
+	userApp *userapp.App
 }
 
-func newAPI(userApp *userapp.Core, auth *auth.Auth) *api {
+func newAPI(userApp *userapp.App, auth *auth.Auth) *api {
 	return &api{
 		userApp: userApp,
 		auth:    auth,
 	}
 }
 
-func (api *api) authenticate(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+func (api *api) authenticate(ctx context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
 	kid := web.Header(r, "kid")
 	if kid == "" {
-		return validate.NewFieldsError("kid", errors.New("missing kid"))
+		return nil, errs.New(errs.FailedPrecondition, validate.NewFieldsError("kid", errors.New("missing kid")))
 	}
 
 	var requestData userapp.AuthenticateUser
 	if err := web.Decode(r, &requestData); err != nil {
-		return errs.New(errs.FailedPrecondition, err)
+		return nil, errs.New(errs.FailedPrecondition, err)
 	}
 
 	usr, err := api.userApp.Authenticate(ctx, requestData)
 	if err != nil {
-		return errs.New(errs.InvalidArgument, invalidCredentials)
+		return nil, errs.New(errs.InvalidArgument, invalidCredentials)
 	}
 
 	// Generating a token requires defining a set of claims. In this applications
@@ -71,7 +71,7 @@ func (api *api) authenticate(ctx context.Context, w http.ResponseWriter, r *http
 	// file to validate these claims. Dgraph does not support key rotate at this time.
 	token, err := api.auth.GenerateToken(kid, claims)
 	if err != nil {
-		return fmt.Errorf("generating token: %w", err)
+		return nil, fmt.Errorf("generating token: %w", err)
 	}
 
 	data := struct {
@@ -80,49 +80,36 @@ func (api *api) authenticate(ctx context.Context, w http.ResponseWriter, r *http
 		Token: token,
 	}
 
-	return web.Respond(ctx, w, data, http.StatusOK)
+	return data, nil
 }
 
-func (api *api) authorize(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	var auth auth.Authorize
-	if err := web.Decode(r, &auth); err != nil {
-		return errs.New(errs.FailedPrecondition, err)
+func (api *api) authorize(ctx context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
+	var authData auth.Authorize
+	if err := web.Decode(r, &authData); err != nil {
+		return nil, errs.New(errs.FailedPrecondition, err)
 	}
 
-	if err := api.auth.Authorize(ctx, auth.Claims, auth.UserID, auth.Rule); err != nil {
-		return errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", auth.Claims.Roles, auth.Rule, err)
+	if err := api.auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
+		return nil, errs.Newf(errs.Unauthenticated,
+			"authorize: you are not authorized for that action, claims[%v] rule[%v]: %s",
+			authData.Claims.Roles,
+			authData.Rule, err,
+		)
 	}
 
-	return web.Respond(ctx, w, nil, http.StatusNoContent)
+	return nil, nil
 }
 
-func (api *api) token(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+func (api *api) token(ctx context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
 	kid := web.Param(r, "kid")
 	if kid == "" {
-		return validate.NewFieldsError("kid", errors.New("missing kid"))
+		return nil, errs.New(errs.FailedPrecondition, validate.NewFieldsError("kid", errors.New("missing kid")))
 	}
 
 	token, err := api.userApp.Token(ctx, kid)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return web.Respond(ctx, w, token, http.StatusOK)
+	return token, nil
 }
-
-//// The middleware is actually handling the authentication. So if the code
-//// gets to this handler, authentication passed.
-//func (api *api) authenticate(ctx context.Context, w http.ResponseWriter, _ *http.Request) error {
-//
-//	userID, err := mid.GetUserID(ctx)
-//	if err != nil {
-//		return errs.New(errs.Unauthenticated, err)
-//	}
-//
-//	resp := auth.AuthenticateResp{
-//		UserID: userID,
-//		Claims: mid.GetClaims(ctx),
-//	}
-//
-//	return web.Respond(ctx, w, resp, http.StatusOK)
-//}

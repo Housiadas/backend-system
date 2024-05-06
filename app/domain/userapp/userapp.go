@@ -14,29 +14,29 @@ import (
 	"github.com/Housiadas/backend-system/foundation/validate"
 )
 
-// Core manages the set of app layer api functions for the user domain.
-type Core struct {
-	userBus *userbus.Core
+// App manages the set of app layer api functions for the user domain.
+type App struct {
+	userBus *userbus.Business
 	auth    *auth.Auth
 }
 
-// NewCore constructs a user core API for use.
-func NewCore(userBus *userbus.Core) *Core {
-	return &Core{
+// NewApp constructs a user core API for use.
+func NewApp(userBus *userbus.Business) *App {
+	return &App{
 		userBus: userBus,
 	}
 }
 
 // NewCoreWithAuth constructs a user core API for use with auth support.
-func NewCoreWithAuth(userBus *userbus.Core, auth *auth.Auth) *Core {
-	return &Core{
+func NewCoreWithAuth(userBus *userbus.Business, auth *auth.Auth) *App {
+	return &App{
 		auth:    auth,
 		userBus: userBus,
 	}
 }
 
 // Authenticate provides an API to authenticate the user.
-func (c *Core) Authenticate(ctx context.Context, authUser AuthenticateUser) (User, error) {
+func (c *App) Authenticate(ctx context.Context, authUser AuthenticateUser) (User, error) {
 	addr, err := mail.ParseAddress(authUser.Email)
 	if err != nil {
 		return User{}, validate.NewFieldsError("email", err)
@@ -51,7 +51,7 @@ func (c *Core) Authenticate(ctx context.Context, authUser AuthenticateUser) (Use
 }
 
 // Token provides an API token for the authenticated user.
-func (c *Core) Token(ctx context.Context, kid string) (Token, error) {
+func (c *App) Token(ctx context.Context, kid string) (Token, error) {
 	if c.auth == nil {
 		return Token{}, errs.Newf(errs.Internal, "auth not configured")
 	}
@@ -67,7 +67,7 @@ func (c *Core) Token(ctx context.Context, kid string) (Token, error) {
 }
 
 // Create adds a new user to the system.
-func (c *Core) Create(ctx context.Context, app NewUser) (User, error) {
+func (c *App) Create(ctx context.Context, app NewUser) (User, error) {
 	nc, err := toBusNewUser(app)
 	if err != nil {
 		return User{}, errs.New(errs.FailedPrecondition, err)
@@ -85,7 +85,7 @@ func (c *Core) Create(ctx context.Context, app NewUser) (User, error) {
 }
 
 // Update updates an existing user.
-func (c *Core) Update(ctx context.Context, app UpdateUser) (User, error) {
+func (c *App) Update(ctx context.Context, app UpdateUser) (User, error) {
 	uu, err := toBusUpdateUser(app)
 	if err != nil {
 		return User{}, errs.New(errs.FailedPrecondition, err)
@@ -105,7 +105,7 @@ func (c *Core) Update(ctx context.Context, app UpdateUser) (User, error) {
 }
 
 // UpdateRole updates an existing user's role.
-func (c *Core) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) {
+func (c *App) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) {
 	uu, err := toBusUpdateUserRole(app)
 	if err != nil {
 		return User{}, errs.New(errs.FailedPrecondition, err)
@@ -125,7 +125,7 @@ func (c *Core) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error)
 }
 
 // Delete removes a user from the system.
-func (c *Core) Delete(ctx context.Context) error {
+func (c *App) Delete(ctx context.Context) error {
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
 		return errs.Newf(errs.Internal, "userID missing in context: %s", err)
@@ -139,7 +139,7 @@ func (c *Core) Delete(ctx context.Context) error {
 }
 
 // Query returns a list of users with paging.
-func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[User], error) {
+func (c *App) Query(ctx context.Context, qp QueryParams) (page.Document[User], error) {
 	if err := validatePaging(qp); err != nil {
 		return page.Document[User]{}, err
 	}
@@ -168,7 +168,7 @@ func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[User], 
 }
 
 // QueryByID returns a user by its ID.
-func (c *Core) QueryByID(ctx context.Context) (User, error) {
+func (c *App) QueryByID(ctx context.Context) (User, error) {
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
 		return User{}, errs.Newf(errs.Internal, "querybyid: %s", err)

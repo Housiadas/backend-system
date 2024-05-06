@@ -1,10 +1,11 @@
-package sys
+package systemapi
 
 import (
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
 
+	"github.com/Housiadas/backend-system/app/domain/systemapp"
 	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/Housiadas/backend-system/foundation/web"
 )
@@ -20,7 +21,7 @@ type Config struct {
 func Routes(app *web.App, cfg Config) {
 	const version = "v1"
 
-	api := newApi(cfg.Build, cfg.Log, cfg.DB)
+	api := newAPI(systemapp.NewApp(cfg.Build, cfg.Log, cfg.DB))
 	app.HandleNoMiddleware(http.MethodGet, version, "/readiness", api.readiness)
 	app.HandleNoMiddleware(http.MethodGet, version, "/liveness", api.liveness)
 }

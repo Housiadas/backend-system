@@ -3,7 +3,6 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -26,11 +25,10 @@ type validator interface {
 // If the provided value is a struct then it is checked for validation tags.
 // If the value implements a validate function, it is executed.
 func Decode(r *http.Request, val any) error {
-	data, err := io.ReadAll(r.Body)
-	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal(data, val); err != nil {
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+
+	if err := d.Decode(val); err != nil {
 		return fmt.Errorf("unable to decode payload: %w", err)
 	}
 

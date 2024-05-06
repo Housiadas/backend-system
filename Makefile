@@ -56,9 +56,9 @@ docker/down:
 ## docker/clean: docker clean all
 .PHONY: docker/clean
 docker/clean:
-	docker system prune && \
-    docker image prune && \
-    docker volume prune
+	docker system prune -f  && \
+    docker image prune -f && \
+    docker volume prune -f
 
 ## go/mock/store: Go mock Store interface
 .PHONY: go/mock/store
