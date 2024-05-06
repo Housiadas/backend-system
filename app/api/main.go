@@ -4,7 +4,6 @@ import (
 	"context"
 	"expvar"
 	"fmt"
-	"github.com/Housiadas/backend-system/foundation/kafka"
 	"net/http"
 	"os"
 	"os/signal"
@@ -20,10 +19,11 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/productbus/stores/productdb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
-	del "github.com/Housiadas/backend-system/business/sys/delegate"
 	"github.com/Housiadas/backend-system/foundation/debug"
+	"github.com/Housiadas/backend-system/foundation/kafka"
 	"github.com/Housiadas/backend-system/foundation/keystore"
 	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/foundation/tracer"
 	"github.com/Housiadas/backend-system/foundation/web"
 )
 
@@ -145,30 +145,33 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	// Start Tracing Support
 	// -------------------------------------------------------------------------
+	log.Info(ctx, "startup", "status", "initializing tracing support")
 
-	//log.Info(ctx, "startup", "status", "initializing tracing support")
-	//
-	//traceProvider, err := startTracing(
-	//	cfg.Tempo.ServiceName,
-	//	cfg.Tempo.ReporterURI,
-	//	cfg.Tempo.Probability,
-	//)
-	//if err != nil {
-	//	return fmt.Errorf("starting tracing: %w", err)
-	//}
-	//
-	//defer traceProvider.Shutdown(context.Background())
-	//
-	//tracer := traceProvider.Tracer("service")
+	traceProvider, err := tracer.InitTracing(tracer.Config{
+		Log:         log,
+		ServiceName: cfg.Tempo.ServiceName,
+		Host:        cfg.Tempo.Host,
+		ExcludedRoutes: map[string]struct{}{
+			"/v1/liveness":  {},
+			"/v1/readiness": {},
+		},
+		Probability: cfg.Tempo.Probability,
+	})
+	if err != nil {
+		return fmt.Errorf("starting tracing: %w", err)
+	}
+
+	defer traceProvider.Shutdown(context.Background())
+
+	tr := traceProvider.Tracer(cfg.Tempo.ServiceName)
 
 	// -------------------------------------------------------------------------
-	// Build Core APIs
+	// Build Business APIs
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing business core")
 
-	delegate := del.New(log)
-	userBus := userbus.NewCore(log, userdb.NewStore(log, db), producer)
-	productBus := productbus.NewCore(log, productdb.NewStore(log, db), userBus, producer)
+	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db), producer)
+	productBus := productbus.NewBusiness(log, productdb.NewStore(log, db), userBus, producer)
 
 	// -------------------------------------------------------------------------
 	// Start Debug Service
@@ -190,15 +193,14 @@ func run(ctx context.Context, log *logger.Logger) error {
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
 	cfgMux := mux.Config{
-		Build:    build,
-		Shutdown: shutdown,
-		Log:      log,
-		DB:       db,
-		Auth:     authSrv,
-		BusDomain: mux.BusDomain{
-			Delegate: delegate,
-			User:     userBus,
-			Product:  productBus,
+		Build:  build,
+		Log:    log,
+		DB:     db,
+		Tracer: tr,
+		Business: mux.Business{
+			Auth:    authSrv,
+			User:    userBus,
+			Product: productBus,
 		},
 	}
 
@@ -219,9 +221,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 		serverErrors <- api.ListenAndServe()
 	}()
 
-	// -------------------------------------------------------------------------
 	// Shutdown
-	// -------------------------------------------------------------------------
 	select {
 	case err := <-serverErrors:
 		return fmt.Errorf("server error: %w", err)

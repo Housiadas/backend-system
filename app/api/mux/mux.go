@@ -2,17 +2,16 @@
 package mux
 
 import (
+	"context"
 	"net/http"
-	"os"
 
 	"github.com/jmoiron/sqlx"
 	"go.opentelemetry.io/otel/trace"
 
+	"github.com/Housiadas/backend-system/app/api/mid"
 	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	midhttp "github.com/Housiadas/backend-system/business/mid/http"
-	"github.com/Housiadas/backend-system/business/sys/delegate"
 	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/Housiadas/backend-system/foundation/web"
 )
@@ -31,20 +30,18 @@ func WithCORS(origins []string) func(opts *Options) {
 
 // Config contains all the mandatory systems required by handlers.
 type Config struct {
-	Build     string
-	Shutdown  chan os.Signal
-	Log       *logger.Logger
-	Tracer    trace.Tracer
-	DB        *sqlx.DB
-	Auth      *auth.Auth
-	BusDomain BusDomain
+	Build    string
+	Log      *logger.Logger
+	DB       *sqlx.DB
+	Tracer   trace.Tracer
+	Business Business
 }
 
-// BusDomain represents the set of core business packages.
-type BusDomain struct {
-	Delegate *delegate.Delegate
-	User     *userbus.Core
-	Product  *productbus.Core
+// Business represents the set of core business packages.
+type Business struct {
+	Auth    *auth.Auth
+	User    *userbus.Business
+	Product *productbus.Business
 }
 
 // RouteAdder defines behavior that sets the routes to bind for an instance
@@ -55,22 +52,26 @@ type RouteAdder interface {
 
 // WebAPI constructs a http.Handler with all application routes bound.
 func WebAPI(cfg Config, routeAdder RouteAdder, options ...func(opts *Options)) http.Handler {
+	log := func(ctx context.Context, msg string, v ...any) {
+		cfg.Log.Info(ctx, msg, v...)
+	}
+
+	app := web.NewApp(
+		log,
+		cfg.Tracer,
+		mid.Logger(cfg.Log),
+		mid.Errors(cfg.Log),
+		mid.Metrics(),
+		mid.Panics(),
+	)
+
 	var opts Options
 	for _, option := range options {
 		option(&opts)
 	}
 
-	app := web.NewApp(
-		cfg.Shutdown,
-		cfg.Tracer,
-		midhttp.Logger(cfg.Log),
-		midhttp.Errors(cfg.Log),
-		midhttp.Metrics(),
-		midhttp.Panics(),
-	)
-
 	if len(opts.corsOrigin) > 0 {
-		app.EnableCORS(midhttp.Cors(opts.corsOrigin))
+		app.EnableCORS(mid.Cors(opts.corsOrigin))
 	}
 
 	routeAdder.Add(app, cfg)

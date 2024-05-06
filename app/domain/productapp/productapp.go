@@ -10,20 +10,20 @@ import (
 	"github.com/Housiadas/backend-system/business/sys/page"
 )
 
-// Core manages the set of app layer api functions for the product domain.
-type Core struct {
-	productBus *productbus.Core
+// App manages the set of app layer api functions for the product domain.
+type App struct {
+	productBus *productbus.Business
 }
 
-// NewCore constructs a product core API for use.
-func NewCore(productBus *productbus.Core) *Core {
-	return &Core{
+// NewApp constructs a product core API for use.
+func NewApp(productBus *productbus.Business) *App {
+	return &App{
 		productBus: productBus,
 	}
 }
 
 // Create adds a new product to the system.
-func (c *Core) Create(ctx context.Context, app NewProduct) (Product, error) {
+func (c *App) Create(ctx context.Context, app NewProduct) (Product, error) {
 	np, err := toBusNewProduct(ctx, app)
 	if err != nil {
 		return Product{}, errs.New(errs.FailedPrecondition, err)
@@ -38,7 +38,7 @@ func (c *Core) Create(ctx context.Context, app NewProduct) (Product, error) {
 }
 
 // Update updates an existing product.
-func (c *Core) Update(ctx context.Context, app UpdateProduct) (Product, error) {
+func (c *App) Update(ctx context.Context, app UpdateProduct) (Product, error) {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
 		return Product{}, errs.Newf(errs.Internal, "product missing in context: %s", err)
@@ -53,7 +53,7 @@ func (c *Core) Update(ctx context.Context, app UpdateProduct) (Product, error) {
 }
 
 // Delete removes a product from the system.
-func (c *Core) Delete(ctx context.Context) error {
+func (c *App) Delete(ctx context.Context) error {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
 		return errs.Newf(errs.Internal, "productID missing in context: %s", err)
@@ -67,7 +67,7 @@ func (c *Core) Delete(ctx context.Context) error {
 }
 
 // Query returns a list of products with paging.
-func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[Product], error) {
+func (c *App) Query(ctx context.Context, qp QueryParams) (page.Document[Product], error) {
 	if err := validatePaging(qp); err != nil {
 		return page.Document[Product]{}, err
 	}
@@ -96,7 +96,7 @@ func (c *Core) Query(ctx context.Context, qp QueryParams) (page.Document[Product
 }
 
 // QueryByID returns a product by its ID.
-func (c *Core) QueryByID(ctx context.Context) (Product, error) {
+func (c *App) QueryByID(ctx context.Context) (Product, error) {
 	prd, err := mid.GetProduct(ctx)
 	if err != nil {
 		return Product{}, errs.Newf(errs.Internal, "querybyid: %s", err)

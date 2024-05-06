@@ -15,7 +15,7 @@ const (
 )
 
 // actionUserUpdated is executed by the user domain indirectly when a user is updated.
-func (c *Core) actionUserUpdated(ctx context.Context, event kafka.Event) error {
+func (c *Business) actionUserUpdated(ctx context.Context, event kafka.Event) error {
 	var params userbus.ActionUpdatedParms
 	err := json.Unmarshal(event.Data, &params)
 	if err != nil {

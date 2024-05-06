@@ -28,7 +28,7 @@ func UserAdd(log *logger.Logger, cfg sqldb.Config, name, email, password string)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	userBus := userbus.NewCore(log, userdb.NewStore(log, db), nil)
+	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db), nil)
 
 	addr, err := mail.ParseAddress(email)
 	if err != nil {

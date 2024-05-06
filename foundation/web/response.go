@@ -3,17 +3,32 @@ package web
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
+	"github.com/Housiadas/backend-system/foundation/tracer"
 	"go.opentelemetry.io/otel/attribute"
 )
 
-// Respond converts a Go value to JSON and sends it to the client.
-func Respond(ctx context.Context, w http.ResponseWriter, data any, statusCode int) error {
-	ctx, span := AddSpan(ctx, "foundation.web.response", attribute.Int("status", statusCode))
+type httpStatus interface {
+	HTTPStatus() int
+}
+
+func respond(ctx context.Context, w http.ResponseWriter, data any) error {
+	var statusCode = http.StatusOK
+	switch v := data.(type) {
+	case httpStatus:
+		statusCode = v.HTTPStatus()
+	case error:
+		statusCode = http.StatusInternalServerError
+	}
+
+	_, span := tracer.AddSpan(ctx, "foundation.web.response", attribute.Int("status", statusCode))
 	defer span.End()
 
-	setStatusCode(ctx, statusCode)
+	if data == nil {
+		statusCode = http.StatusNoContent
+	}
 
 	if statusCode == http.StatusNoContent {
 		w.WriteHeader(statusCode)
@@ -22,14 +37,14 @@ func Respond(ctx context.Context, w http.ResponseWriter, data any, statusCode in
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return err
+		return fmt.Errorf("web.respond: marshal: %w", err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 
 	if _, err := w.Write(jsonData); err != nil {
-		return err
+		return fmt.Errorf("web.respond: write: %w", err)
 	}
 
 	return nil

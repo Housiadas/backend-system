@@ -1,4 +1,4 @@
-// Package mid contains the set of values the middleware is responsible to extract and set.
+// Package mid provides app level middleware support.
 package mid
 
 import (
@@ -12,6 +12,11 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 )
 
+// Handler represents a handler function that needs to be called.
+type Handler func(context.Context) (any, error)
+
+// =============================================================================
+
 type ctxKey int
 
 const (
@@ -21,10 +26,11 @@ const (
 	productKey
 )
 
-func SetClaims(ctx context.Context, claims auth.Claims) context.Context {
+func setClaims(ctx context.Context, claims auth.Claims) context.Context {
 	return context.WithValue(ctx, claimKey, claims)
 }
 
+// GetClaims returns the claims from the context.
 func GetClaims(ctx context.Context) auth.Claims {
 	v, ok := ctx.Value(claimKey).(auth.Claims)
 	if !ok {
@@ -33,7 +39,11 @@ func GetClaims(ctx context.Context) auth.Claims {
 	return v
 }
 
-// GetUserID returns the claims from the context.
+func setUserID(ctx context.Context, userID uuid.UUID) context.Context {
+	return context.WithValue(ctx, userIDKey, userID)
+}
+
+// GetUserID returns the user id from the context.
 func GetUserID(ctx context.Context) (uuid.UUID, error) {
 	v, ok := ctx.Value(userIDKey).(uuid.UUID)
 	if !ok {
@@ -41,6 +51,10 @@ func GetUserID(ctx context.Context) (uuid.UUID, error) {
 	}
 
 	return v, nil
+}
+
+func setUser(ctx context.Context, usr userbus.User) context.Context {
+	return context.WithValue(ctx, userKey, usr)
 }
 
 // GetUser returns the user from the context.
@@ -53,12 +67,8 @@ func GetUser(ctx context.Context) (userbus.User, error) {
 	return v, nil
 }
 
-func SetUserID(ctx context.Context, userID uuid.UUID) context.Context {
-	return context.WithValue(ctx, userIDKey, userID)
-}
-
-func SetUser(ctx context.Context, usr userbus.User) context.Context {
-	return context.WithValue(ctx, userKey, usr)
+func setProduct(ctx context.Context, prd productbus.Product) context.Context {
+	return context.WithValue(ctx, productKey, prd)
 }
 
 // GetProduct returns the product from the context.
@@ -69,8 +79,4 @@ func GetProduct(ctx context.Context) (productbus.Product, error) {
 	}
 
 	return v, nil
-}
-
-func SetProduct(ctx context.Context, prd productbus.Product) context.Context {
-	return context.WithValue(ctx, productKey, prd)
 }
