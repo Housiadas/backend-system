@@ -33,6 +33,17 @@ import (
 
 var build = "develop"
 
+// @title           Backend System
+// @description     This is a backend system with various technologies.
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:4000
 func main() {
 	var log *logger.Logger
 

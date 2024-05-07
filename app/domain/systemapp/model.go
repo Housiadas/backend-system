@@ -11,3 +11,7 @@ type Info struct {
 	Namespace  string `json:"namespace,omitempty"`
 	GOMAXPROCS int    `json:"GOMAXPROCS,omitempty"`
 }
+
+type Status struct {
+	Status string `json:"status"`
+}

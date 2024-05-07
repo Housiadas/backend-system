@@ -5,6 +5,7 @@
 GO_VERSION := 1.22
 UID := $(shell id -u)
 GID := $(shell id -g)
+PWD := $(shell pwd)
 
 APP_MODULE := github.com/Housiadas/backend-system
 INPUT ?= $(shell bash -c 'read -p "Insert name: " name; echo $$name')
@@ -117,17 +118,17 @@ go/cmd/userevents:
 # DATABASE
 # ==================================================================================== #
 
-## db/migrations/create name=$1: create new migration files
+## db/migrations/create name=$1: Create new migration files
 .PHONY: db/migrate/create
 db/migrate/create:
 	$(MIGRATE) create -seq -ext=.sql -dir=./business/data/migrations $(INPUT)
 
-## db/migrations/up: apply all up database migrations
+## db/migrations/up: Apply all up database migrations
 .PHONY: db/migrate/up
 db/migrate/up:
 	$(MIGRATE) -path=./business/data/migrations -database=${MIGRATION_DB_DSN} up
 
-## db/migrations/down: apply all down database migrations (DROP Database)
+## db/migrations/down: Apply all down database migrations (DROP Database)
 .PHONY: db/migrate/down
 db/migrate/down:
 	$(MIGRATE) -path=./business/data/migrations -database=${MIGRATION_DB_DSN} down
@@ -136,14 +137,14 @@ db/migrate/down:
 # QUALITY CONTROL
 # ==================================================================================== #
 
-# vendor: tidy and vendor dependencies
+# vendor: Tidy and vendor dependencies
 .PHONY: vendor
 vendor:
 	go mod tidy
 	go mod vendor
 	go mod verify
 
-# update: update dependencies
+# update: Update dependencies
 .PHONY: update
 update:
 	go get -u ./...
@@ -158,7 +159,7 @@ lint:
 	go vet ./...
 	staticcheck ./...
 
-# tests: run tests
+# tests: Run tests
 .PHONY: tests
 tests:
 	go test ./... -v --cover --short --race
@@ -169,3 +170,12 @@ coverage:
 	go test -v -coverprofile cover.out ./...
 	go tool cover -html cover.out -o cover.html
 	open cover.html
+
+# ==================================================================================== #
+# SWAGGER
+# ==================================================================================== #
+
+# swagger: Generate swagger docs
+.PHONY: swagger
+swagger:
+	docker run --rm -v $(PWD):/code --user $(UID) ghcr.io/swaggo/swag:v1.16.3 init --g app/api/main.go
