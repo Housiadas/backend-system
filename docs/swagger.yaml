@@ -32,6 +32,9 @@ definitions:
       status:
         type: string
     type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
 host: localhost:4000
 info:
   contact:
@@ -74,4 +77,7 @@ paths:
           schema:
             $ref: '#/definitions/errs.Error'
       summary: App Readiness
+securityDefinitions:
+  BasicAuth:
+    type: basic
 swagger: "2.0"

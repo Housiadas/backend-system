@@ -3,8 +3,12 @@ package systemapp
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/swaggo/swag"
+	"net/http"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -68,4 +72,20 @@ func (a *App) Liveness() Info {
 	// This handler provides a free timer loop.
 
 	return info
+}
+
+func (a *App) Swagger(ctx context.Context, w http.ResponseWriter, r *http.Request) (any, error) {
+	doc, err := swag.ReadDoc()
+	if err != nil {
+		a.log.Error(ctx, "swagger error: read doc", err)
+		return nil, err
+	}
+
+	data := make(map[string]interface{})
+	data["host"] = r.Host
+	if err := json.NewDecoder(strings.NewReader(doc)).Decode(&data); err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }

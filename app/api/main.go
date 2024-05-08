@@ -19,6 +19,7 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/productbus/stores/productdb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
+	_ "github.com/Housiadas/backend-system/docs"
 	"github.com/Housiadas/backend-system/foundation/debug"
 	"github.com/Housiadas/backend-system/foundation/kafka"
 	"github.com/Housiadas/backend-system/foundation/keystore"
@@ -39,10 +40,14 @@ var build = "develop"
 // @contact.name   API Support
 // @contact.url    http://www.swagger.io/support
 // @contact.email  support@swagger.io
-
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
-
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+//
+//	@query.collection.format multi
+//
+// @securityDefinitions.basic  BasicAuth
+// @externalDocs.description  OpenAPI
+// @externalDocs.url          https://swagger.io/resources/open-api/
 // @host      localhost:4000
 func main() {
 	var log *logger.Logger

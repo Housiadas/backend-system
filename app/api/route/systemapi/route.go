@@ -1,6 +1,7 @@
 package systemapi
 
 import (
+	httpSwagger "github.com/swaggo/http-swagger"
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
@@ -19,9 +20,16 @@ type Config struct {
 
 // Routes adds specific routes for this group.
 func Routes(app *web.App, cfg Config) {
-	const version = "v1"
 
 	api := newAPI(systemapp.NewApp(cfg.Build, cfg.Log, cfg.DB))
-	app.HandleNoMiddleware(http.MethodGet, version, "/readiness", api.readiness)
-	app.HandleNoMiddleware(http.MethodGet, version, "/liveness", api.liveness)
+	app.HandleNoMiddleware(http.MethodGet, "", "/readiness", api.readiness)
+	app.HandleNoMiddleware(http.MethodGet, "", "/liveness", api.liveness)
+	//app.HandleNoMiddleware(http.MethodGet, "", "/swagger/", api.swagger)
+
+	mux := http.NewServeMux()
+	mux.Handle("/swagger/", httpSwagger.Handler(
+		httpSwagger.URL("./swagger.json"),
+	))
+	app.HandleNoMiddleware(http.MethodGet, "", "/swagger/swagger.json", api.swagger)
+
 }

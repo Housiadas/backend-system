@@ -3,13 +3,9 @@ package systemapi
 
 import (
 	"context"
-	"encoding/json"
-	"github.com/swaggo/swag"
-	"net/http"
-	"strings"
-
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
 	"github.com/Housiadas/backend-system/business/sys/errs"
+	"net/http"
 )
 
 type api struct {
@@ -64,21 +60,7 @@ func (api *api) liveness(_ context.Context, _ http.ResponseWriter, _ *http.Reque
 	return info, nil
 }
 
-func (api *api) swagger(_ context.Context, w http.ResponseWriter, r *http.Request) (any, error) {
-	doc, err := swag.ReadDoc()
-	if err != nil {
-		return nil, err
-	}
-
-	data := make(map[string]interface{})
-	if err := json.NewDecoder(strings.NewReader(doc)).Decode(&data); err != nil {
-		return nil, err
-	}
-
-	data["host"] = r.Host
-	if err = json.NewEncoder(w).Encode(&data); err != nil {
-		return nil, err
-	}
-
-	return data, nil
+// Swagger http handler
+func (api *api) swagger(ctx context.Context, w http.ResponseWriter, r *http.Request) (any, error) {
+	return api.systemApp.Swagger(ctx, w, r)
 }
