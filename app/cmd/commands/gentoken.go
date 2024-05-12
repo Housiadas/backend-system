@@ -53,7 +53,7 @@ func GenToken(log *logger.Logger, dbConfig sqldb.Config, keyPath string, userID 
 
 	a, err := auth.New(authCfg)
 	if err != nil {
-		return fmt.Errorf("constructing auth: %w", err)
+		return fmt.Errorf("constructing authapi: %w", err)
 	}
 
 	// Generating a token requires defining a set of claims. In this applications

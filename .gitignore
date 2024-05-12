@@ -3,6 +3,7 @@ tls/
 keys/
 bin/
 tmp/
+app/cmd/cmd
 
 .env
 app.env

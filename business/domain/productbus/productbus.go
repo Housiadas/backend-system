@@ -1,4 +1,4 @@
-// Package productbus provides business access to product domain.
+// Package productbus provides business access to productapi domain.
 package productbus
 
 import (
@@ -18,7 +18,7 @@ import (
 
 // Set of error variables for CRUD operations.
 var (
-	ErrNotFound     = errors.New("product not found")
+	ErrNotFound     = errors.New("productapi not found")
 	ErrUserDisabled = errors.New("user disabled")
 	ErrInvalidCost  = errors.New("cost not valid")
 )
@@ -35,7 +35,7 @@ type Storer interface {
 	QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Product, error)
 }
 
-// Business manages the set of APIs for product access.
+// Business manages the set of APIs for productapi access.
 type Business struct {
 	log      *logger.Logger
 	storer   Storer
@@ -43,7 +43,7 @@ type Business struct {
 	producer *kafka.ProducerClient
 }
 
-// NewBusiness constructs a product core API for use.
+// NewBusiness constructs a productapi core API for use.
 func NewBusiness(log *logger.Logger, storer Storer, userBus *userbus.Business, producer *kafka.ProducerClient) *Business {
 	return &Business{
 		log:      log,
@@ -76,7 +76,7 @@ func (c *Business) ExecuteUnderTransaction(tx transaction.Transaction) (*Busines
 	return &core, nil
 }
 
-// Create adds a new product to the system.
+// Create adds a new productapi to the systemapi.
 func (c *Business) Create(ctx context.Context, np NewProduct) (Product, error) {
 	usr, err := c.userBus.QueryByID(ctx, np.UserID)
 	if err != nil {
@@ -110,7 +110,7 @@ func (c *Business) Create(ctx context.Context, np NewProduct) (Product, error) {
 	return prd, nil
 }
 
-// Update modifies information about a product.
+// Update modifies information about a productapi.
 func (c *Business) Update(ctx context.Context, prd Product, up UpdateProduct) (Product, error) {
 	if up.Name != nil {
 		prd.Name = *up.Name
@@ -133,7 +133,7 @@ func (c *Business) Update(ctx context.Context, prd Product, up UpdateProduct) (P
 	return prd, nil
 }
 
-// Delete removes the specified product.
+// Delete removes the specified productapi.
 func (c *Business) Delete(ctx context.Context, prd Product) error {
 	if err := c.storer.Delete(ctx, prd); err != nil {
 		return fmt.Errorf("delete: %w", err)
@@ -165,7 +165,7 @@ func (c *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
 	return c.storer.Count(ctx, filter)
 }
 
-// QueryByID finds the product by the specified ID.
+// QueryByID finds the productapi by the specified ID.
 func (c *Business) QueryByID(ctx context.Context, productID uuid.UUID) (Product, error) {
 	prd, err := c.storer.QueryByID(ctx, productID)
 	if err != nil {

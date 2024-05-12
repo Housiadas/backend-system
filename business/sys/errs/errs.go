@@ -6,7 +6,7 @@ import (
 	"runtime"
 )
 
-// ErrCode represents an error code in the system.
+// ErrCode represents an error code in the systemapi.
 type ErrCode struct {
 	value int
 }
@@ -47,7 +47,7 @@ func (ec ErrCode) Equal(ec2 ErrCode) bool {
 
 // =============================================================================
 
-// Error represents an error in the system.
+// Error represents an error in the systemapi.
 type Error struct {
 	Code     ErrCode `json:"code"`
 	Message  string  `json:"message"`

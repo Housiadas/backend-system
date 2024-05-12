@@ -87,7 +87,7 @@ func (c *Business) Authenticate(ctx context.Context, email mail.Address, passwor
 	return usr, nil
 }
 
-// Create adds a new user to the system.
+// Create adds a new user to the systemapi.
 func (c *Business) Create(ctx context.Context, nu NewUser) (User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(nu.Password), bcrypt.DefaultCost)
 	if err != nil {

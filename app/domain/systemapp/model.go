@@ -11,3 +11,14 @@ type Info struct {
 	Namespace  string `json:"namespace,omitempty"`
 	GOMAXPROCS int    `json:"GOMAXPROCS,omitempty"`
 }
+
+type Status struct {
+	Status string `json:"status"`
+}
+
+type ApiError struct {
+	StatusCode int                    `json:"status"`
+	Message    string                 `json:"message"`
+	Details    string                 `json:"details"`
+	Context    map[string]interface{} `json:"context"`
+}

@@ -4,9 +4,9 @@ import (
 	_ "embed"
 )
 
-// These the current set of rules we have for auth.
+// These the current set of rules we have for authapi.
 const (
-	RuleAuthenticate   = "auth"
+	RuleAuthenticate   = "authapi"
 	RuleAny            = "rule_any"
 	RuleAdminOnly      = "rule_admin_only"
 	RuleUserOnly       = "rule_user_only"

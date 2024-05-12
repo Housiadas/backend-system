@@ -14,7 +14,7 @@ var roles = map[string]Role{
 	RoleUser.name:  RoleUser,
 }
 
-// Role represents a role in the system.
+// Role represents a role in the systemapi.
 type Role struct {
 	name string
 }

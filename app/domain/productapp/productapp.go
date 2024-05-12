@@ -1,28 +1,28 @@
-// Package productapp maintains the app layer api for the product domain.
+// Package productapp maintains the app layer api for the productapi domain.
 package productapp
 
 import (
 	"context"
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
-	"github.com/Housiadas/backend-system/business/mid"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/business/sys/page"
+	"github.com/Housiadas/backend-system/business/web"
 )
 
-// App manages the set of app layer api functions for the product domain.
+// App manages the set of app layer api functions for the productapi domain.
 type App struct {
 	productBus *productbus.Business
 }
 
-// NewApp constructs a product core API for use.
+// NewApp constructs a productapi core API for use.
 func NewApp(productBus *productbus.Business) *App {
 	return &App{
 		productBus: productBus,
 	}
 }
 
-// Create adds a new product to the system.
+// Create adds a new productapi to the systemapi.
 func (c *App) Create(ctx context.Context, app NewProduct) (Product, error) {
 	np, err := toBusNewProduct(ctx, app)
 	if err != nil {
@@ -37,11 +37,11 @@ func (c *App) Create(ctx context.Context, app NewProduct) (Product, error) {
 	return toAppProduct(prd), nil
 }
 
-// Update updates an existing product.
+// Update updates an existing productapi.
 func (c *App) Update(ctx context.Context, app UpdateProduct) (Product, error) {
-	prd, err := mid.GetProduct(ctx)
+	prd, err := web.GetProduct(ctx)
 	if err != nil {
-		return Product{}, errs.Newf(errs.Internal, "product missing in context: %s", err)
+		return Product{}, errs.Newf(errs.Internal, "productapi missing in context: %s", err)
 	}
 
 	updPrd, err := c.productBus.Update(ctx, prd, toBusUpdateProduct(app))
@@ -52,9 +52,9 @@ func (c *App) Update(ctx context.Context, app UpdateProduct) (Product, error) {
 	return toAppProduct(updPrd), nil
 }
 
-// Delete removes a product from the system.
+// Delete removes a productapi from the systemapi.
 func (c *App) Delete(ctx context.Context) error {
-	prd, err := mid.GetProduct(ctx)
+	prd, err := web.GetProduct(ctx)
 	if err != nil {
 		return errs.Newf(errs.Internal, "productID missing in context: %s", err)
 	}
@@ -95,9 +95,9 @@ func (c *App) Query(ctx context.Context, qp QueryParams) (page.Document[Product]
 	return page.NewDocument(toAppProducts(prds), total, qp.Page, qp.Rows), nil
 }
 
-// QueryByID returns a product by its ID.
+// QueryByID returns a productapi by its ID.
 func (c *App) QueryByID(ctx context.Context) (Product, error) {
-	prd, err := mid.GetProduct(ctx)
+	prd, err := web.GetProduct(ctx)
 	if err != nil {
 		return Product{}, errs.Newf(errs.Internal, "querybyid: %s", err)
 	}

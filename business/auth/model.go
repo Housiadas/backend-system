@@ -4,7 +4,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Error represents an error in the system.
+// Error represents an error in the systemapi.
 type Error struct {
 	Message string `json:"message"`
 }

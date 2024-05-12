@@ -37,7 +37,7 @@ func TestGenerateSeedProducts(ctx context.Context, n int, api *Business, userID 
 	for i, np := range newPrds {
 		prd, err := api.Create(ctx, np)
 		if err != nil {
-			return nil, fmt.Errorf("seeding product: idx: %d : %w", i, err)
+			return nil, fmt.Errorf("seeding productapi: idx: %d : %w", i, err)
 		}
 
 		prds[i] = prd

@@ -4,11 +4,11 @@ package userapp
 import (
 	"context"
 	"errors"
+	"github.com/Housiadas/backend-system/business/web"
 	"net/mail"
 
 	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/mid"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/business/sys/page"
 	"github.com/Housiadas/backend-system/foundation/validate"
@@ -21,14 +21,7 @@ type App struct {
 }
 
 // NewApp constructs a user core API for use.
-func NewApp(userBus *userbus.Business) *App {
-	return &App{
-		userBus: userBus,
-	}
-}
-
-// NewCoreWithAuth constructs a user core API for use with auth support.
-func NewCoreWithAuth(userBus *userbus.Business, auth *auth.Auth) *App {
+func NewApp(userBus *userbus.Business, auth *auth.Auth) *App {
 	return &App{
 		auth:    auth,
 		userBus: userBus,
@@ -53,10 +46,10 @@ func (c *App) Authenticate(ctx context.Context, authUser AuthenticateUser) (User
 // Token provides an API token for the authenticated user.
 func (c *App) Token(ctx context.Context, kid string) (Token, error) {
 	if c.auth == nil {
-		return Token{}, errs.Newf(errs.Internal, "auth not configured")
+		return Token{}, errs.Newf(errs.Internal, "authapi not configured")
 	}
 
-	claims := mid.GetClaims(ctx)
+	claims := web.GetClaims(ctx)
 
 	tkn, err := c.auth.GenerateToken(kid, claims)
 	if err != nil {
@@ -66,7 +59,7 @@ func (c *App) Token(ctx context.Context, kid string) (Token, error) {
 	return toToken(tkn), nil
 }
 
-// Create adds a new user to the system.
+// Create adds a new user to the systemapi.
 func (c *App) Create(ctx context.Context, app NewUser) (User, error) {
 	nc, err := toBusNewUser(app)
 	if err != nil {
@@ -91,7 +84,7 @@ func (c *App) Update(ctx context.Context, app UpdateUser) (User, error) {
 		return User{}, errs.New(errs.FailedPrecondition, err)
 	}
 
-	usr, err := mid.GetUser(ctx)
+	usr, err := web.GetUser(ctx)
 	if err != nil {
 		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
 	}
@@ -111,7 +104,7 @@ func (c *App) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) 
 		return User{}, errs.New(errs.FailedPrecondition, err)
 	}
 
-	usr, err := mid.GetUser(ctx)
+	usr, err := web.GetUser(ctx)
 	if err != nil {
 		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
 	}
@@ -124,9 +117,9 @@ func (c *App) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) 
 	return toAppUser(updUsr), nil
 }
 
-// Delete removes a user from the system.
+// Delete removes a user from the systemapi.
 func (c *App) Delete(ctx context.Context) error {
-	usr, err := mid.GetUser(ctx)
+	usr, err := web.GetUser(ctx)
 	if err != nil {
 		return errs.Newf(errs.Internal, "userID missing in context: %s", err)
 	}
@@ -169,7 +162,7 @@ func (c *App) Query(ctx context.Context, qp QueryParams) (page.Document[User], e
 
 // QueryByID returns a user by its ID.
 func (c *App) QueryByID(ctx context.Context) (User, error) {
-	usr, err := mid.GetUser(ctx)
+	usr, err := web.GetUser(ctx)
 	if err != nil {
 		return User{}, errs.Newf(errs.Internal, "querybyid: %s", err)
 	}

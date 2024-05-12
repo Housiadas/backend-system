@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	ProductUpdatedEvent = "product-updated"
-	ProductDeletedEvent = "product-deleted"
+	ProductUpdatedEvent = "productapi-updated"
+	ProductDeletedEvent = "productapi-deleted"
 )
 
 // actionUserUpdated is executed by the user domain indirectly when a user is updated.

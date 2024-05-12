@@ -1,4 +1,4 @@
-// Package auth provides authentication and authorization support.
+// Package authapi provides authentication and authorization support.
 // Authentication: You are who you say you are.
 // Authorization:  You have permission to do what you are requesting to do.
 package auth
@@ -42,7 +42,7 @@ type KeyLookup interface {
 	PublicKey(kid string) (key string, err error)
 }
 
-// Config represents information required to initialize auth.
+// Config represents information required to initialize authapi.
 type Config struct {
 	Log       *logger.Logger
 	DB        *sqlx.DB

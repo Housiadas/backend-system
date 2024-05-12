@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Product represents an individual product.
+// Product represents an individual productapi.
 type Product struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID

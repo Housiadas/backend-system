@@ -22,7 +22,7 @@ type key struct {
 }
 
 // KeyStore represents an in memory store implementation of the
-// KeyLookup interface for use with the auth package.
+// KeyLookup interface for use with the authapi package.
 type KeyStore struct {
 	store map[string]key
 }
@@ -63,7 +63,7 @@ func (ks *KeyStore) LoadRSAKeys(fsys fs.FS) error {
 		// to /dev/random or something like that.
 		pem, err := io.ReadAll(io.LimitReader(file, 1024*1024))
 		if err != nil {
-			return fmt.Errorf("reading auth private key: %w", err)
+			return fmt.Errorf("reading authapi private key: %w", err)
 		}
 
 		privatePEM := string(pem)

@@ -10,8 +10,10 @@ import (
 	"runtime"
 	"syscall"
 
-	"github.com/Housiadas/backend-system/app/api/mux"
-	"github.com/Housiadas/backend-system/app/api/route"
+	"github.com/Housiadas/backend-system/app/api/handler"
+	"github.com/Housiadas/backend-system/app/domain/productapp"
+	"github.com/Housiadas/backend-system/app/domain/systemapp"
+	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/data/sqldb"
@@ -19,12 +21,14 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/productbus/stores/productdb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
+	"github.com/Housiadas/backend-system/business/web"
+	"github.com/Housiadas/backend-system/business/web/mid"
+	_ "github.com/Housiadas/backend-system/docs"
 	"github.com/Housiadas/backend-system/foundation/debug"
 	"github.com/Housiadas/backend-system/foundation/kafka"
 	"github.com/Housiadas/backend-system/foundation/keystore"
 	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/Housiadas/backend-system/foundation/tracer"
-	"github.com/Housiadas/backend-system/foundation/web"
 )
 
 /*
@@ -33,6 +37,22 @@ import (
 
 var build = "develop"
 
+// @title           Backend System
+// @description     This is a backend system with various technologies.
+//
+// @contact.name	API Support
+// @contact.url		http://www.swagger.io/support
+// @contact.email	support@swagger.io
+//
+// @license.name	Apache 2.0
+// @license.url		http://www.apache.org/licenses/LICENSE-2.0.html
+//
+//	@query.collection.format multi
+//
+// @externalDocs.description  OpenAPI
+//
+// @externalDocs.url	https://swagger.io/resources/open-api/
+// @host				localhost:4000
 func main() {
 	var log *logger.Logger
 
@@ -108,7 +128,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing authentication support")
 
-	// Load the private keys files from disk. We can assume some system like
+	// Load the private keys files from disk. We can assume some systemapi like
 	// Vault has created these files already. How that happens is not our concern.
 	ks := keystore.New()
 	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
@@ -123,7 +143,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	authSrv, err := auth.New(authCfg)
 	if err != nil {
-		return fmt.Errorf("constructing auth: %w", err)
+		return fmt.Errorf("constructing authapi: %w", err)
 	}
 
 	// -------------------------------------------------------------------------
@@ -186,17 +206,30 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	// Start Http Server
 	// -------------------------------------------------------------------------
-	log.Info(ctx, "startup", "status", "initializing V1 API support")
+	log.Info(ctx, "startup", "status", "initializing Http Server")
 
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
-
-	cfgMux := mux.Config{
-		Build:  build,
+	// Initialize handler
+	respond := web.NewRespond(log)
+	midBusiness := mid.Business{
+		Auth:    authSrv,
+		User:    userBus,
+		Product: productBus,
+	}
+	h := handler.Handler{
 		Log:    log,
 		DB:     db,
 		Tracer: tr,
-		Business: mux.Business{
+		Build:  build,
+		Web: handler.Web{
+			Mid:     mid.New(authSrv, midBusiness, log, respond),
+			Respond: respond,
+		},
+		App: handler.App{
+			User:    userapp.NewApp(userBus, authSrv),
+			Product: productapp.NewApp(productBus),
+			System:  systemapp.NewApp(cfg.Version.Build, log, db),
+		},
+		Business: handler.Business{
 			Auth:    authSrv,
 			User:    userBus,
 			Product: productBus,
@@ -205,7 +238,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	api := http.Server{
 		Addr:         cfg.Server.Api,
-		Handler:      mux.WebAPI(cfgMux, route.Routes(), mux.WithCORS(cfg.Server.CorsAllowedOrigins)),
+		Handler:      h.Routes(),
 		ReadTimeout:  cfg.Server.ReadTimeout,
 		WriteTimeout: cfg.Server.WriteTimeout,
 		IdleTimeout:  cfg.Server.IdleTimeout,
@@ -213,6 +246,8 @@ func run(ctx context.Context, log *logger.Logger) error {
 	}
 
 	serverErrors := make(chan error, 1)
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
 		log.Info(ctx, "startup", "status", "api router started", "host", api.Addr)

@@ -1,4 +1,4 @@
-// Package productdb contains product related CRUD functionality.
+// Package productdb contains productapi related CRUD functionality.
 package productdb
 
 import (
@@ -17,7 +17,7 @@ import (
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
-// Store manages the set of APIs for product database access.
+// Store manages the set of APIs for productapi database access.
 type Store struct {
 	log *logger.Logger
 	db  sqlx.ExtContext
@@ -84,7 +84,7 @@ func (s *Store) Update(ctx context.Context, prd productbus.Product) error {
 	return nil
 }
 
-// Delete removes the product identified by a given ID.
+// Delete removes the productapi identified by a given ID.
 func (s *Store) Delete(ctx context.Context, prd productbus.Product) error {
 	data := struct {
 		ID string `db:"product_id"`
@@ -162,7 +162,7 @@ func (s *Store) Count(ctx context.Context, filter productbus.QueryFilter) (int, 
 	return count.Count, nil
 }
 
-// QueryByID finds the product identified by a given ID.
+// QueryByID finds the productapi identified by a given ID.
 func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (productbus.Product, error) {
 	data := struct {
 		ID string `db:"product_id"`
@@ -189,7 +189,7 @@ func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (productbus.
 	return toCoreProduct(dbPrd), nil
 }
 
-// QueryByUserID finds the product identified by a given User ID.
+// QueryByUserID finds the productapi identified by a given User ID.
 func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]productbus.Product, error) {
 	data := struct {
 		ID string `db:"user_id"`

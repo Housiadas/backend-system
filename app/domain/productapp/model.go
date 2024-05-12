@@ -3,10 +3,10 @@ package productapp
 import (
 	"context"
 	"fmt"
+	"github.com/Housiadas/backend-system/business/web"
 	"time"
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
-	"github.com/Housiadas/backend-system/business/mid"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/foundation/validate"
 )
@@ -22,7 +22,7 @@ type QueryParams struct {
 	Quantity string `query:"quantity"`
 }
 
-// Product represents information about an individual product.
+// Product represents information about an individual productapi.
 type Product struct {
 	ID          string  `json:"id"`
 	UserID      string  `json:"userID"`
@@ -54,7 +54,7 @@ func toAppProducts(prds []productbus.Product) []Product {
 	return items
 }
 
-// NewProduct defines the data needed to add a new product.
+// NewProduct defines the data needed to add a new productapi.
 type NewProduct struct {
 	Name     string  `json:"name" validate:"required"`
 	Cost     float64 `json:"cost" validate:"required,gte=0"`
@@ -62,7 +62,7 @@ type NewProduct struct {
 }
 
 func toBusNewProduct(ctx context.Context, app NewProduct) (productbus.NewProduct, error) {
-	userID, err := mid.GetUserID(ctx)
+	userID, err := web.GetUserID(ctx)
 	if err != nil {
 		return productbus.NewProduct{}, fmt.Errorf("getuserid: %w", err)
 	}
@@ -86,7 +86,7 @@ func (app NewProduct) Validate() error {
 	return nil
 }
 
-// UpdateProduct defines the data needed to update a product.
+// UpdateProduct defines the data needed to update a productapi.
 type UpdateProduct struct {
 	Name     *string  `json:"name"`
 	Cost     *float64 `json:"cost" validate:"omitempty,gte=0"`
