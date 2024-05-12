@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/Housiadas/backend-system/business/config"
 	"github.com/jmoiron/sqlx"
 	"go.opentelemetry.io/otel/trace"
 
@@ -17,10 +18,12 @@ import (
 
 // Handler contains all the mandatory systems required by handlers.
 type Handler struct {
+	AppName  string
 	Build    string
 	Log      *logger.Logger
 	DB       *sqlx.DB
 	Tracer   trace.Tracer
+	Cors     config.CorsSettings
 	Web      Web
 	App      App
 	Business Business

@@ -169,7 +169,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	traceProvider, err := tracer.InitTracing(tracer.Config{
 		Log:         log,
-		ServiceName: cfg.Tempo.ServiceName,
+		ServiceName: cfg.App.Name,
 		Host:        cfg.Tempo.Host,
 		ExcludedRoutes: map[string]struct{}{
 			"/v1/liveness":  {},
@@ -182,7 +182,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	}
 	defer traceProvider.Shutdown(context.Background())
 
-	tr := traceProvider.Tracer(cfg.Tempo.ServiceName)
+	tr := traceProvider.Tracer(cfg.App.Name)
 
 	// -------------------------------------------------------------------------
 	// Build Business APIs
@@ -216,10 +216,12 @@ func run(ctx context.Context, log *logger.Logger) error {
 		Product: productBus,
 	}
 	h := handler.Handler{
-		Log:    log,
-		DB:     db,
-		Tracer: tr,
-		Build:  build,
+		AppName: cfg.App.Name,
+		Log:     log,
+		DB:      db,
+		Tracer:  tr,
+		Build:   build,
+		Cors:    cfg.Cors,
 		Web: handler.Web{
 			Mid:     mid.New(authSrv, midBusiness, log, respond),
 			Respond: respond,

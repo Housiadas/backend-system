@@ -5,6 +5,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+	"github.com/riandyrn/otelchi"
 	httpSwagger "github.com/swaggo/http-swagger"
 
 	"github.com/Housiadas/backend-system/business/auth"
@@ -32,8 +34,19 @@ func (h *Handler) Routes() *chi.Mux {
 	)
 
 	apiRouter.Route("/v1", func(r chi.Router) {
-		r.Post("/authapi/authenticate", h.Web.Respond.Respond(h.authenticate))
-		r.With(authenticate).Get("/authapi/authorize", h.Web.Respond.Respond(h.authorize))
+		r.Use(otelchi.Middleware(h.AppName, otelchi.WithChiRoutes(r)))
+		r.Use(mid.ApiVersion("v1"))
+		r.Use(cors.Handler(cors.Options{
+			AllowedOrigins: h.Cors.AllowedOrigins,
+			AllowedMethods: h.Cors.AllowedMethods,
+			AllowedHeaders: h.Cors.AllowedHeaders,
+			ExposedHeaders: h.Cors.ExposedHeaders,
+			MaxAge:         h.Cors.MaxAge,
+		}))
+
+		// Auth
+		r.Post("/auth/authenticate", h.Web.Respond.Respond(h.authenticate))
+		r.With(authenticate).Get("/auth/authorize", h.Web.Respond.Respond(h.authorize))
 
 		// Users
 		r.With(authenticate).Route("/users", func(u chi.Router) {
