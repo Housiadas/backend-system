@@ -1,6 +1,7 @@
 package mid
 
 import (
+	"encoding/json"
 	"net/http"
 	"runtime/debug"
 
@@ -20,7 +21,12 @@ func (m *Mid) Recoverer() func(next http.Handler) http.Handler {
 					trace := debug.Stack()
 					err := errs.Newf(errs.Internal, "PANIC [%v] TRACE[%s]", rec, string(trace))
 					m.Log.Error(ctx, "panic mid", err)
-					http.Error(w, err.Error(), errs.Internal.Value())
+
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusInternalServerError)
+					if err := json.NewEncoder(w).Encode(err); err != nil {
+						return
+					}
 				}
 			}()
 

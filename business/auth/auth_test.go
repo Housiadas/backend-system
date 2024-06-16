@@ -27,208 +27,245 @@ func Test_Auth(t *testing.T) {
 		teardown()
 	}()
 
-	cfg := auth.Config{
+	ath, err := auth.New(auth.Config{
 		Log:       log,
 		DB:        db,
 		KeyLookup: &keyStore{},
 		Issuer:    "service project",
-	}
-	a, err := auth.New(cfg)
+	})
 	if err != nil {
 		t.Fatalf("Should be able to create an authenticator: %s", err)
 	}
 
-	claims := auth.Claims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "service project",
-			Subject:   "5cf37266-3473-4006-984f-9325122678b7",
-			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-		},
-		Roles: parseRoles([]userbus.Role{userbus.RoleAdmin}),
-	}
-	userID := uuid.MustParse(claims.Subject)
-
-	token, err := a.GenerateToken(kid, claims)
-	if err != nil {
-		t.Fatalf("Should be able to generate a JWT : %s", err)
-	}
-
-	parsedClaims, err := a.Authenticate(context.Background(), "Bearer "+token)
-	if err != nil {
-		t.Fatalf("Should be able to authenticate the claims : %s", err)
-	}
-
-	err = a.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOnly)
-	if err != nil {
-		t.Errorf("Should be able to authorize the RoleAdmin claims : %s", err)
-	}
-
-	err = a.Authorize(context.Background(), parsedClaims, userID, auth.RuleUserOnly)
-	if err == nil {
-		t.Error("Should NOT be able to authorize the RoleUser claim")
-	}
-
-	err = a.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOrSubject)
-	if err != nil {
-		t.Errorf("Should be able to authorize the RuleAdminOrSubject claim with RoleAdmin only : %s", err)
-	}
-
-	// -------------------------------------------------------------------------
-
-	claims = auth.Claims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "service project",
-			Subject:   "5cf37266-3473-4006-984f-9325122678b7",
-			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-		},
-		Roles: parseRoles([]userbus.Role{userbus.RoleUser}),
-	}
-	userID = uuid.MustParse(claims.Subject)
-
-	token, err = a.GenerateToken(kid, claims)
-	if err != nil {
-		t.Fatalf("Should be able to generate a JWT : %v", err)
-	}
-
-	parsedClaims, err = a.Authenticate(context.Background(), "Bearer "+token)
-	if err != nil {
-		t.Fatalf("Should be able to authenticate the claims : %s", err)
-	}
-
-	err = a.Authorize(context.Background(), parsedClaims, userID, auth.RuleUserOnly)
-	if err != nil {
-		t.Errorf("Should be able to authorize the RuleUserOnly claim with RoleUser only : %s", err)
-	}
-
-	err = a.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOnly)
-	if err == nil {
-		t.Error("Should NOT be able to authorize the RuleAdminOnly claim with RoleUser only")
-	}
-
-	err = a.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOrSubject)
-	if err != nil {
-		t.Errorf("Should be able to authorize the RuleAdminOrSubject claim with RoleUser only : %s", err)
-	}
-
-	err = a.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
-	if err != nil {
-		t.Errorf("Should be able to authorize the RuleAny any claim with RoleUser only : %s", err)
-	}
-
-	// -------------------------------------------------------------------------
-
-	claims = auth.Claims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "service project",
-			Subject:   "5cf37266-3473-4006-984f-9325122678b7",
-			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-		},
-		Roles: parseRoles([]userbus.Role{userbus.RoleUser}),
-	}
-	userID = uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
-
-	token, err = a.GenerateToken(kid, claims)
-	if err != nil {
-		t.Fatalf("Should be able to generate a JWT : %s", err)
-	}
-
-	parsedClaims, err = a.Authenticate(context.Background(), "Bearer "+token)
-	if err != nil {
-		t.Fatalf("Should be able to authenticate the claims : %s", err)
-	}
-
-	err = a.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOrSubject)
-	if err == nil {
-		t.Error("Should NOT be able to authorize the RuleAdminOrSubject claim with RoleUser only and different userID")
-	}
-
-	// -------------------------------------------------------------------------
-
-	claims = auth.Claims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "service project",
-			Subject:   "5cf37266-3473-4006-984f-9325122678b7",
-			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-		},
-		Roles: parseRoles([]userbus.Role{userbus.RoleUser, userbus.RoleAdmin}),
-	}
-	userID = uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
-
-	token, err = a.GenerateToken(kid, claims)
-	if err != nil {
-		t.Fatalf("Should be able to generate a JWT : %s", err)
-	}
-
-	parsedClaims, err = a.Authenticate(context.Background(), "Bearer "+token)
-	if err != nil {
-		t.Fatalf("Should be able to authenticate the claims : %s", err)
-	}
-
-	err = a.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
-	if err != nil {
-		t.Errorf("Should be able to authorize the RuleAny any claim with RoleUser and RoleAdmin : %s", err)
-	}
-
-	// -------------------------------------------------------------------------
-
-	claims = auth.Claims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "service project",
-			Subject:   "5cf37266-3473-4006-984f-9325122678b7",
-			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-		},
-		Roles: parseRoles([]userbus.Role{userbus.RoleUser}),
-	}
-	userID = uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
-
-	token, err = a.GenerateToken(kid, claims)
-	if err != nil {
-		t.Fatalf("Should be able to generate a JWT : %s", err)
-	}
-
-	parsedClaims, err = a.Authenticate(context.Background(), "Bearer "+token)
-	if err != nil {
-		t.Fatalf("Should be able to authenticate the claims : %s", err)
-	}
-
-	err = a.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
-	if err != nil {
-		t.Errorf("Should be able to authorize the RuleAny any claim with RoleUser only : %s", err)
-	}
-
-	// -------------------------------------------------------------------------
-
-	claims = auth.Claims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "service project",
-			Subject:   "5cf37266-3473-4006-984f-9325122678b7",
-			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-		},
-		Roles: parseRoles([]userbus.Role{userbus.RoleAdmin}),
-	}
-	userID = uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
-
-	token, err = a.GenerateToken(kid, claims)
-	if err != nil {
-		t.Fatalf("Should be able to generate a JWT : %s", err)
-	}
-
-	parsedClaims, err = a.Authenticate(context.Background(), "Bearer "+token)
-	if err != nil {
-		t.Fatalf("Should be able to authenticate the claims : %s", err)
-	}
-
-	err = a.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
-	if err != nil {
-		t.Errorf("Should be able to authorize the RuleAny any claim with RoleAdmin only : %s", err)
-	}
+	t.Run("test1", test1(ath))
+	t.Run("test2", test2(ath))
+	t.Run("test3", test3(ath))
+	t.Run("test4", test4(ath))
+	t.Run("test5", test5(ath))
+	t.Run("test6", test6(ath))
 }
+
+func test1(ath *auth.Auth) func(t *testing.T) {
+	f := func(t *testing.T) {
+		claims := auth.Claims{
+			RegisteredClaims: jwt.RegisteredClaims{
+				Issuer:    ath.Issuer(),
+				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
+				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
+			},
+			Roles: parseRoles([]userbus.Role{userbus.Roles.Admin}),
+		}
+
+		token, err := ath.GenerateToken(kid, claims)
+		if err != nil {
+			t.Fatalf("Should be able to generate a JWT : %s", err)
+		}
+
+		parsedClaims, err := ath.Authenticate(context.Background(), "Bearer "+token)
+		if err != nil {
+			t.Fatalf("Should be able to authenticate the claims : %s", err)
+		}
+
+		userID := uuid.MustParse(claims.Subject)
+
+		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOnly)
+		if err != nil {
+			t.Errorf("Should be able to authorize the Roles.Admin claims : %s", err)
+		}
+
+		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleUserOnly)
+		if err == nil {
+			t.Error("Should NOT be able to authorize the Roles.User claim")
+		}
+
+		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOrSubject)
+		if err != nil {
+			t.Errorf("Should be able to authorize the RuleAdminOrSubject claim with Roles.Admin only : %s", err)
+		}
+	}
+
+	return f
+}
+
+func test2(ath *auth.Auth) func(t *testing.T) {
+	f := func(t *testing.T) {
+		claims := auth.Claims{
+			RegisteredClaims: jwt.RegisteredClaims{
+				Issuer:    ath.Issuer(),
+				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
+				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
+			},
+			Roles: parseRoles([]userbus.Role{userbus.Roles.User}),
+		}
+
+		token, err := ath.GenerateToken(kid, claims)
+		if err != nil {
+			t.Fatalf("Should be able to generate a JWT : %v", err)
+		}
+
+		parsedClaims, err := ath.Authenticate(context.Background(), "Bearer "+token)
+		if err != nil {
+			t.Fatalf("Should be able to authenticate the claims : %s", err)
+		}
+
+		userID := uuid.MustParse(claims.Subject)
+
+		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleUserOnly)
+		if err != nil {
+			t.Errorf("Should be able to authorize the RuleUserOnly claim with Roles.User only : %s", err)
+		}
+
+		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOnly)
+		if err == nil {
+			t.Error("Should NOT be able to authorize the RuleAdminOnly claim with Roles.User only")
+		}
+
+		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOrSubject)
+		if err != nil {
+			t.Errorf("Should be able to authorize the RuleAdminOrSubject claim with Roles.User only : %s", err)
+		}
+
+		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
+		if err != nil {
+			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.User only : %s", err)
+		}
+	}
+
+	return f
+}
+
+func test3(ath *auth.Auth) func(t *testing.T) {
+	f := func(t *testing.T) {
+		claims := auth.Claims{
+			RegisteredClaims: jwt.RegisteredClaims{
+				Issuer:    ath.Issuer(),
+				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
+				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
+			},
+			Roles: parseRoles([]userbus.Role{userbus.Roles.User}),
+		}
+
+		token, err := ath.GenerateToken(kid, claims)
+		if err != nil {
+			t.Fatalf("Should be able to generate a JWT : %s", err)
+		}
+
+		parsedClaims, err := ath.Authenticate(context.Background(), "Bearer "+token)
+		if err != nil {
+			t.Fatalf("Should be able to authenticate the claims : %s", err)
+		}
+
+		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
+
+		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOrSubject)
+		if err == nil {
+			t.Error("Should NOT be able to authorize the RuleAdminOrSubject claim with Roles.User only and different userID")
+		}
+	}
+
+	return f
+}
+
+func test4(ath *auth.Auth) func(t *testing.T) {
+	f := func(t *testing.T) {
+		claims := auth.Claims{
+			RegisteredClaims: jwt.RegisteredClaims{
+				Issuer:    ath.Issuer(),
+				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
+				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
+			},
+			Roles: parseRoles([]userbus.Role{userbus.Roles.User, userbus.Roles.Admin}),
+		}
+		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
+
+		token, err := ath.GenerateToken(kid, claims)
+		if err != nil {
+			t.Fatalf("Should be able to generate a JWT : %s", err)
+		}
+
+		parsedClaims, err := ath.Authenticate(context.Background(), "Bearer "+token)
+		if err != nil {
+			t.Fatalf("Should be able to authenticate the claims : %s", err)
+		}
+
+		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
+		if err != nil {
+			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.User and Roles.Admin : %s", err)
+		}
+	}
+
+	return f
+}
+
+func test5(ath *auth.Auth) func(t *testing.T) {
+	f := func(t *testing.T) {
+		claims := auth.Claims{
+			RegisteredClaims: jwt.RegisteredClaims{
+				Issuer:    ath.Issuer(),
+				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
+				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
+			},
+			Roles: parseRoles([]userbus.Role{userbus.Roles.User}),
+		}
+		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
+
+		token, err := ath.GenerateToken(kid, claims)
+		if err != nil {
+			t.Fatalf("Should be able to generate a JWT : %s", err)
+		}
+
+		parsedClaims, err := ath.Authenticate(context.Background(), "Bearer "+token)
+		if err != nil {
+			t.Fatalf("Should be able to authenticate the claims : %s", err)
+		}
+
+		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
+		if err != nil {
+			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.User only : %s", err)
+		}
+	}
+
+	return f
+}
+
+func test6(ath *auth.Auth) func(t *testing.T) {
+	f := func(t *testing.T) {
+		claims := auth.Claims{
+			RegisteredClaims: jwt.RegisteredClaims{
+				Issuer:    ath.Issuer(),
+				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
+				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
+			},
+			Roles: parseRoles([]userbus.Role{userbus.Roles.Admin}),
+		}
+		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
+
+		token, err := ath.GenerateToken(kid, claims)
+		if err != nil {
+			t.Fatalf("Should be able to generate a JWT : %s", err)
+		}
+
+		parsedClaims, err := ath.Authenticate(context.Background(), "Bearer "+token)
+		if err != nil {
+			t.Fatalf("Should be able to authenticate the claims : %s", err)
+		}
+
+		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
+		if err != nil {
+			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.Admin only : %s", err)
+		}
+	}
+
+	return f
+}
+
+// =============================================================================
 
 func newUnit(t *testing.T) (*logger.Logger, *sqlx.DB, func()) {
 	var buf bytes.Buffer
@@ -247,6 +284,8 @@ func newUnit(t *testing.T) (*logger.Logger, *sqlx.DB, func()) {
 	return log, nil, teardown
 }
 
+// =============================================================================
+
 type keyStore struct{}
 
 func (ks *keyStore) PrivateKey(kid string) (string, error) {
@@ -260,7 +299,7 @@ func (ks *keyStore) PublicKey(kid string) (string, error) {
 func parseRoles(roles []userbus.Role) []string {
 	appRoles := make([]string, len(roles))
 	for i, role := range roles {
-		appRoles[i] = role.Name()
+		appRoles[i] = role.String()
 	}
 	return appRoles
 }
@@ -268,7 +307,7 @@ func parseRoles(roles []userbus.Role) []string {
 const (
 	kid = "s4sKIjD9kIRjxs2tulPqGLdxSfgPErRN1Mu3Hd9k9NQ"
 
-	privateKeyPEM = `-----BEGIN RSA PRIVATE KEY-----
+	privateKeyPEM = `-----BEGIN PRIVATE KEY-----
 MIIEpQIBAAKCAQEAvMAHb0IoLvoYuW2kA+LTmnk+hfnBq1eYIh4CT/rMPCxgtzjq
 U0guQOMnLg69ydyA5uu37v6rbS1+stuBTEiMQl/bxAhgLkGrUhgpZ10Bt6GzSEgw
 QNloZoGaxe4p20wMPpT4kcMKNHkQds3uONNcLxPUmfjbbH64g+seg28pbgQPwKFK
@@ -294,7 +333,7 @@ U3DxWDrL5L9NqKEwcNt7ZIDsdnfsJp5F7F6o/UiyOFd9YQb7YkxN0r5rUTg7Lpdx
 eMyv0/UCgYEAhX9MPzmTO4+N8naGFof1o8YP97pZj0HkEvM0hTaeAQFKJiwX5ijQ
 xumKGh//G0AYsjqP02ItzOm2mWnbI3FrNlKmGFvR6VxIZMOyXvpLofHucjJ5SWli
 eYjPklKcXaMftt1FVO4n+EKj1k1+Tv14nytq/J5WN+r4FBlNEYj/6vg=
------END RSA PRIVATE KEY-----
+-----END PRIVATE KEY-----
 `
 	publicKeyPEM = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvMAHb0IoLvoYuW2kA+LT

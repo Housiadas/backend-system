@@ -1,6 +1,8 @@
 package mid
 
 import (
+	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -16,13 +18,26 @@ func (m *Mid) Bearer() func(next http.Handler) http.Handler {
 			ctx := r.Context()
 			claims, err := m.Auth.Authenticate(ctx, r.Header.Get("authorization"))
 			if err != nil {
+				err = errs.New(errs.Unauthenticated, err)
 				m.Log.Error(ctx, "bearer mid: unauthenticated", errs.Unauthenticated)
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				if err := json.NewEncoder(w).Encode(err); err != nil {
+					return
+				}
 				return
 			}
 
 			if claims.Subject == "" {
 				m.Log.Info(ctx, "request unauthenticated", errs.Unauthenticated)
-				http.Error(w, errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, no claims").Error(), errs.Unauthenticated.Value())
+				err = errs.New(errs.Unauthenticated, errors.New("authorize: you are not authorized for that action, no claims"))
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				if err := json.NewEncoder(w).Encode(err); err != nil {
+					return
+				}
 				return
 			}
 

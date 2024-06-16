@@ -24,16 +24,6 @@ type Claims struct {
 	Roles []string `json:"roles"`
 }
 
-// HasRole checks if the specified role exists.
-func (c Claims) HasRole(r string) bool {
-	for _, role := range c.Roles {
-		if role == r {
-			return true
-		}
-	}
-	return false
-}
-
 // KeyLookup declares a method set of behavior for looking up
 // private and public keys for JWT use. The return could be a
 // PEM encoded string or a JWS based key.
@@ -78,6 +68,11 @@ func New(cfg Config) (*Auth, error) {
 	}
 
 	return &a, nil
+}
+
+// Issuer provides the configured issuer used to authenticate tokens.
+func (a *Auth) Issuer() string {
+	return a.issuer
 }
 
 // Authenticate processes the token to validate the sender's token is valid.

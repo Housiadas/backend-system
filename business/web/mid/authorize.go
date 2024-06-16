@@ -1,6 +1,7 @@
 package mid
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -38,7 +39,12 @@ func (m *Mid) Authorize(rule string) func(next http.Handler) http.Handler {
 			if err := m.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
 				err = errs.New(errs.Unauthenticated, err)
 				m.Log.Error(ctx, "authorize mid: authorize", err)
-				http.Error(w, err.Error(), errs.Unauthenticated.Value())
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				if err := json.NewEncoder(w).Encode(err); err != nil {
+					return
+				}
 				return
 			}
 
@@ -63,7 +69,12 @@ func (m *Mid) AuthorizeUser(rule string) func(next http.Handler) http.Handler {
 				if err != nil {
 					err = errs.New(errs.Unauthenticated, ErrInvalidID)
 					m.Log.Error(ctx, "authorize user mid: authorize", err)
-					http.Error(w, err.Error(), errs.Unauthenticated.Value())
+
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusUnauthorized)
+					if err := json.NewEncoder(w).Encode(err); err != nil {
+						return
+					}
 					return
 				}
 
@@ -76,7 +87,12 @@ func (m *Mid) AuthorizeUser(rule string) func(next http.Handler) http.Handler {
 						err = errs.Newf(errs.Unauthenticated, "querybyid: userID[%s]: %s", userID, err)
 					}
 					m.Log.Error(ctx, "authorize user mid: authorize", err)
-					http.Error(w, err.Error(), errs.Unauthenticated.Value())
+
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusUnauthorized)
+					if err := json.NewEncoder(w).Encode(err); err != nil {
+						return
+					}
 					return
 				}
 
@@ -92,7 +108,12 @@ func (m *Mid) AuthorizeUser(rule string) func(next http.Handler) http.Handler {
 			if err := m.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
 				err = errs.New(errs.Unauthenticated, err)
 				m.Log.Error(ctx, "authorize user mid: authorize", err)
-				http.Error(w, err.Error(), errs.Unauthenticated.Value())
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				if err := json.NewEncoder(w).Encode(err); err != nil {
+					return
+				}
 				return
 			}
 
@@ -118,7 +139,12 @@ func (m *Mid) AuthorizeProduct(rule string) func(next http.Handler) http.Handler
 				if err != nil {
 					err = errs.New(errs.Unauthenticated, ErrInvalidID)
 					m.Log.Error(ctx, "authorize product mid: authorize", err)
-					http.Error(w, err.Error(), errs.Unauthenticated.Value())
+
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusUnauthorized)
+					if err := json.NewEncoder(w).Encode(err); err != nil {
+						return
+					}
 					return
 				}
 
@@ -131,7 +157,12 @@ func (m *Mid) AuthorizeProduct(rule string) func(next http.Handler) http.Handler
 						err = errs.Newf(errs.Internal, "querybyid: productID[%s]: %s", productID, err)
 					}
 					m.Log.Error(ctx, "authorize product mid: authorize", err)
-					http.Error(w, err.Error(), errs.Unauthenticated.Value())
+
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusUnauthorized)
+					if err := json.NewEncoder(w).Encode(err); err != nil {
+						return
+					}
 					return
 				}
 
@@ -148,7 +179,12 @@ func (m *Mid) AuthorizeProduct(rule string) func(next http.Handler) http.Handler
 			if err := m.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
 				err = errs.New(errs.Unauthenticated, err)
 				m.Log.Error(ctx, "authorize product mid: authorize", err)
-				http.Error(w, err.Error(), errs.Unauthenticated.Value())
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				if err := json.NewEncoder(w).Encode(err); err != nil {
+					return
+				}
 				return
 			}
 

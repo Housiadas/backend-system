@@ -17,7 +17,7 @@ func (m *Mid) RequestID(next http.Handler) http.Handler {
 		ctx := r.Context()
 		h := r.Header.Get(middleware.RequestIDHeader)
 
-		if h != "" {
+		if h == "" {
 			u = uuid.New()
 		} else {
 			u, err = uuid.Parse(h)

@@ -31,9 +31,18 @@ type AuthenticateUser struct {
 }
 
 // Encode implements the encoder interface.
-func (app AuthenticateUser) Encode() ([]byte, string, error) {
+func (app *AuthenticateUser) Encode() ([]byte, string, error) {
 	data, err := json.Marshal(app)
 	return data, "application/json", err
+}
+
+// Validate checks the data in the model is considered clean.
+func (app *AuthenticateUser) Validate() error {
+	if err := errs.Check(app); err != nil {
+		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+	}
+
+	return nil
 }
 
 // =============================================================================
