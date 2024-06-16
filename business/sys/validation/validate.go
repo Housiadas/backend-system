@@ -1,4 +1,5 @@
-package errs
+// Package validation contains the support for validating models.
+package validation
 
 import (
 	"reflect"

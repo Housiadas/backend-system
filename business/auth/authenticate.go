@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Authenticate processes the token to validate the sender's token is valid.
+// Authenticate processes the token to validation the sender's token is valid.
 func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, error) {
 	parts := strings.Split(bearerToken, " ")
 	if len(parts) != 2 || parts[0] != "Bearer" {

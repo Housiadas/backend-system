@@ -8,6 +8,7 @@ import (
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/business/sys/validation"
 	"github.com/Housiadas/backend-system/business/web"
 )
 
@@ -78,8 +79,8 @@ func (app *NewProduct) Decode(data []byte) error {
 
 // Validate checks the data in the model is considered clean.
 func (app *NewProduct) Validate() error {
-	if err := errs.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+	if err := validation.Check(app); err != nil {
+		return errs.Newf(errs.InvalidArgument, "validation: %s", err)
 	}
 
 	return nil
@@ -111,8 +112,8 @@ func toBusNewProduct(ctx context.Context, app NewProduct) (productbus.NewProduct
 // UpdateProduct defines the data needed to update a product.
 type UpdateProduct struct {
 	Name     *string  `json:"name"`
-	Cost     *float64 `json:"cost" validate:"omitempty,gte=0"`
-	Quantity *int     `json:"quantity" validate:"omitempty,gte=1"`
+	Cost     *float64 `json:"cost" validation:"omitempty,gte=0"`
+	Quantity *int     `json:"quantity" validation:"omitempty,gte=1"`
 }
 
 // Decode implements the decoder interface.
@@ -122,8 +123,8 @@ func (app *UpdateProduct) Decode(data []byte) error {
 
 // Validate checks the data in the model is considered clean.
 func (app *UpdateProduct) Validate() error {
-	if err := errs.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+	if err := validation.Check(app); err != nil {
+		return errs.Newf(errs.InvalidArgument, "validation: %s", err)
 	}
 
 	return nil
