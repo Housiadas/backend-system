@@ -4,9 +4,9 @@ import (
 	_ "embed"
 )
 
-// These the current set of rules we have for authapi.
+// These the current set of rules we have for auth.
 const (
-	RuleAuthenticate   = "authapi"
+	RuleAuthenticate   = "auth"
 	RuleAny            = "rule_any"
 	RuleAdminOnly      = "rule_admin_only"
 	RuleUserOnly       = "rule_user_only"
@@ -21,8 +21,8 @@ const (
 // Core OPA policies.
 var (
 	//go:embed rego/authentication.rego
-	opaAuthentication string
+	regoAuthentication string
 
 	//go:embed rego/authorization.rego
-	opaAuthorization string
+	regoAuthorization string
 )

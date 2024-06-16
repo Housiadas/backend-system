@@ -50,7 +50,7 @@ func (m *Mid) Bearer() func(next http.Handler) http.Handler {
 			ctx = web.SetUserID(ctx, subjectID)
 			ctx = web.SetClaims(ctx, claims)
 
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }

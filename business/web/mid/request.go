@@ -31,6 +31,6 @@ func (m *Mid) RequestID(next http.Handler) http.Handler {
 		ctx = web.SetRequestID(ctx, us)
 		w.Header().Set(middleware.RequestIDHeader, us)
 
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
