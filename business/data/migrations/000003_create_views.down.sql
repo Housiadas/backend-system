@@ -1,1 +1,1 @@
-DROP VIEW IF EXISTS view_products;
+DROP VIEW IF EXISTS view_user_products;

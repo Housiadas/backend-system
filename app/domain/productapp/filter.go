@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
-	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/business/sys/validation"
 )
 
 func parseFilter(qp QueryParams) (productbus.QueryFilter, error) {
@@ -15,7 +15,7 @@ func parseFilter(qp QueryParams) (productbus.QueryFilter, error) {
 	if qp.ID != "" {
 		id, err := uuid.Parse(qp.ID)
 		if err != nil {
-			return productbus.QueryFilter{}, errs.NewFieldsError("product_id", err)
+			return productbus.QueryFilter{}, validation.NewFieldsError("product_id", err)
 		}
 		filter.ID = &id
 	}
@@ -23,7 +23,7 @@ func parseFilter(qp QueryParams) (productbus.QueryFilter, error) {
 	if qp.Name != "" {
 		name, err := productbus.Names.Parse(qp.Name)
 		if err != nil {
-			return productbus.QueryFilter{}, errs.NewFieldsError("name", err)
+			return productbus.QueryFilter{}, validation.NewFieldsError("name", err)
 		}
 		filter.Name = &name
 	}
@@ -31,7 +31,7 @@ func parseFilter(qp QueryParams) (productbus.QueryFilter, error) {
 	if qp.Cost != "" {
 		cst, err := strconv.ParseFloat(qp.Cost, 64)
 		if err != nil {
-			return productbus.QueryFilter{}, errs.NewFieldsError("cost", err)
+			return productbus.QueryFilter{}, validation.NewFieldsError("cost", err)
 		}
 		filter.Cost = &cst
 	}
@@ -39,7 +39,7 @@ func parseFilter(qp QueryParams) (productbus.QueryFilter, error) {
 	if qp.Quantity != "" {
 		qua, err := strconv.ParseInt(qp.Quantity, 10, 64)
 		if err != nil {
-			return productbus.QueryFilter{}, errs.NewFieldsError("quantity", err)
+			return productbus.QueryFilter{}, validation.NewFieldsError("quantity", err)
 		}
 		i := int(qua)
 		filter.Quantity = &i

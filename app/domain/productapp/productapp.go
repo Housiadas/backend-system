@@ -8,6 +8,7 @@ import (
 	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/business/sys/order"
 	"github.com/Housiadas/backend-system/business/sys/page"
+	"github.com/Housiadas/backend-system/business/sys/validation"
 	"github.com/Housiadas/backend-system/business/web"
 )
 
@@ -76,7 +77,7 @@ func (a *App) Delete(ctx context.Context) error {
 func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[Product], error) {
 	p, err := page.Parse(qp.Page, qp.Rows)
 	if err != nil {
-		return page.Result[Product]{}, errs.NewFieldsError("page", err)
+		return page.Result[Product]{}, validation.NewFieldsError("page", err)
 	}
 
 	filter, err := parseFilter(qp)
@@ -86,7 +87,7 @@ func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[Product], 
 
 	orderBy, err := order.Parse(orderByFields, qp.OrderBy, defaultOrderBy)
 	if err != nil {
-		return page.Result[Product]{}, errs.NewFieldsError("order", err)
+		return page.Result[Product]{}, validation.NewFieldsError("order", err)
 	}
 
 	prds, err := a.productBus.Query(ctx, filter, orderBy, p)

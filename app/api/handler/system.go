@@ -50,3 +50,17 @@ func (h *Handler) liveness(_ context.Context, _ http.ResponseWriter, _ *http.Req
 
 	return info, nil
 }
+
+func (h *Handler) notFound(_ context.Context, _ http.ResponseWriter, _ *http.Request) (web.Encoder, error) {
+	return &errs.Error{
+		Code:    errs.NotFound,
+		Message: "Route not found",
+	}, nil
+}
+
+func (h *Handler) notAllowed(_ context.Context, _ http.ResponseWriter, _ *http.Request) (web.Encoder, error) {
+	return &errs.Error{
+		Code:    errs.NotFound,
+		Message: "Method not allowed",
+	}, nil
+}

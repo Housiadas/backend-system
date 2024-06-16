@@ -1,5 +1,5 @@
 -- Description: Add products view.
-CREATE OR REPLACE VIEW view_products AS
+CREATE OR REPLACE VIEW view_user_products AS
 SELECT p.product_id,
        p.user_id,
        p.name,
