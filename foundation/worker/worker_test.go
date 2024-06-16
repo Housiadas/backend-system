@@ -47,7 +47,7 @@ func Test_Worker(t *testing.T) {
 		t.Error("Should be no more work running")
 	}
 
-	// Shutdown the system with no work.
+	// Shutdown the systemapi with no work.
 	if err := w.Shutdown(context.Background()); err != nil {
 		t.Fatalf("Should be able to shutdown work cleanly : %s", err)
 	}
@@ -145,7 +145,7 @@ func Test_StopWorker(t *testing.T) {
 		t.Error("Should be no more work running")
 	}
 
-	// Shutdown the system with no work.
+	// Shutdown the systemapi with no work.
 	if err := w.Shutdown(context.Background()); err != nil {
 		t.Fatalf("Should be able to shutdown work cleanly : %s", err)
 	}

@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-// GenKey creates a x509 private/public key for auth tokens.
+// GenKey creates a x509 private/public key for authapi tokens.
 func GenKey() error {
 
 	// Generate a new private key.

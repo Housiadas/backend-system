@@ -3,9 +3,10 @@ package productapp
 import (
 	"strconv"
 
-	"github.com/Housiadas/backend-system/business/domain/productbus"
-	"github.com/Housiadas/backend-system/foundation/validate"
 	"github.com/google/uuid"
+
+	"github.com/Housiadas/backend-system/business/domain/productbus"
+	"github.com/Housiadas/backend-system/business/sys/errs"
 )
 
 func parseFilter(qp QueryParams) (productbus.QueryFilter, error) {
@@ -14,29 +15,34 @@ func parseFilter(qp QueryParams) (productbus.QueryFilter, error) {
 	if qp.ID != "" {
 		id, err := uuid.Parse(qp.ID)
 		if err != nil {
-			return productbus.QueryFilter{}, validate.NewFieldsError("product_id", err)
+			return productbus.QueryFilter{}, errs.NewFieldsError("product_id", err)
 		}
-		filter.WithProductID(id)
+		filter.ID = &id
 	}
 
 	if qp.Name != "" {
-		filter.WithName(qp.Name)
+		name, err := productbus.Names.Parse(qp.Name)
+		if err != nil {
+			return productbus.QueryFilter{}, errs.NewFieldsError("name", err)
+		}
+		filter.Name = &name
 	}
 
 	if qp.Cost != "" {
 		cst, err := strconv.ParseFloat(qp.Cost, 64)
 		if err != nil {
-			return productbus.QueryFilter{}, validate.NewFieldsError("cost", err)
+			return productbus.QueryFilter{}, errs.NewFieldsError("cost", err)
 		}
-		filter.WithCost(cst)
+		filter.Cost = &cst
 	}
 
 	if qp.Quantity != "" {
 		qua, err := strconv.ParseInt(qp.Quantity, 10, 64)
 		if err != nil {
-			return productbus.QueryFilter{}, validate.NewFieldsError("quantity", err)
+			return productbus.QueryFilter{}, errs.NewFieldsError("quantity", err)
 		}
-		filter.WithQuantity(int(qua))
+		i := int(qua)
+		filter.Quantity = &i
 	}
 
 	return filter, nil

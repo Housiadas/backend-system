@@ -1,13 +1,15 @@
 package productdb
 
 import (
+	"fmt"
 	"time"
 
-	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/google/uuid"
+
+	"github.com/Housiadas/backend-system/business/domain/productbus"
 )
 
-type dbProduct struct {
+type product struct {
 	ID          uuid.UUID `db:"product_id"`
 	UserID      uuid.UUID `db:"user_id"`
 	Name        string    `db:"name"`
@@ -17,40 +19,49 @@ type dbProduct struct {
 	DateUpdated time.Time `db:"date_updated"`
 }
 
-func toDBProduct(prd productbus.Product) dbProduct {
-	prdDB := dbProduct{
-		ID:          prd.ID,
-		UserID:      prd.UserID,
-		Name:        prd.Name,
-		Cost:        prd.Cost,
-		Quantity:    prd.Quantity,
-		DateCreated: prd.DateCreated.UTC(),
-		DateUpdated: prd.DateUpdated.UTC(),
+func toDBProduct(bus productbus.Product) product {
+	db := product{
+		ID:          bus.ID,
+		UserID:      bus.UserID,
+		Name:        bus.Name.String(),
+		Cost:        bus.Cost,
+		Quantity:    bus.Quantity,
+		DateCreated: bus.DateCreated.UTC(),
+		DateUpdated: bus.DateUpdated.UTC(),
 	}
 
-	return prdDB
+	return db
 }
 
-func toCoreProduct(dbPrd dbProduct) productbus.Product {
-	prd := productbus.Product{
-		ID:          dbPrd.ID,
-		UserID:      dbPrd.UserID,
-		Name:        dbPrd.Name,
-		Cost:        dbPrd.Cost,
-		Quantity:    dbPrd.Quantity,
-		DateCreated: dbPrd.DateCreated.In(time.Local),
-		DateUpdated: dbPrd.DateUpdated.In(time.Local),
+func toBusProduct(db product) (productbus.Product, error) {
+	name, err := productbus.Names.Parse(db.Name)
+	if err != nil {
+		return productbus.Product{}, fmt.Errorf("parse name: %w", err)
 	}
 
-	return prd
+	bus := productbus.Product{
+		ID:          db.ID,
+		UserID:      db.UserID,
+		Name:        name,
+		Cost:        db.Cost,
+		Quantity:    db.Quantity,
+		DateCreated: db.DateCreated.In(time.Local),
+		DateUpdated: db.DateUpdated.In(time.Local),
+	}
+
+	return bus, nil
 }
 
-func toCoreProducts(dbPrds []dbProduct) []productbus.Product {
-	prds := make([]productbus.Product, len(dbPrds))
+func toBusProducts(dbs []product) ([]productbus.Product, error) {
+	bus := make([]productbus.Product, len(dbs))
 
-	for i, dbPrd := range dbPrds {
-		prds[i] = toCoreProduct(dbPrd)
+	for i, db := range dbs {
+		var err error
+		bus[i], err = toBusProduct(db)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return prds
+	return bus, nil
 }

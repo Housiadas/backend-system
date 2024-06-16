@@ -7,12 +7,14 @@ import (
 // Config stores all configuration of the application.
 // The values are read by viper from a config file or environment variable.
 type Config struct {
+	App     App
 	DB      DB
 	Server  Server
 	Version Version
 	Auth    Auth
 	Kafka   Kafka
 	Tempo   Tempo
+	Cors    CorsSettings
 }
 
 // LoadConfig reads configuration from file or environment variables.

@@ -79,7 +79,7 @@ func processCommands(args []string, log *logger.Logger, c Config) error {
 	dbConfig := sqldb.Config{
 		User:         c.DB.User,
 		Password:     c.DB.Password,
-		HostPort:     c.DB.Host,
+		Host:         c.DB.Host,
 		Name:         c.DB.Name,
 		MaxIdleConns: c.DB.MaxIdleConns,
 		MaxOpenConns: c.DB.MaxOpenConns,

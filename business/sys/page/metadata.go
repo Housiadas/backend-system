@@ -11,15 +11,16 @@ type Metadata struct {
 	Total       int `json:"total,omitempty"`
 }
 
-// CalculateMetadata function calculates the appropriate pagination metadata
+// calculateMetadata function calculates the appropriate pagination metadata
 // values given the total number of records, current page, and page size values. Note
 // that the last page value is calculated using the math.Ceil() function, which rounds
 // up a float to the nearest integer. So, for example, if there were 12 records in total
 // and a page size of 5, the last page value would be math.Ceil(12/5) = 3.
-func CalculateMetadata(total, page, rows int) Metadata {
+func calculateMetadata(total, page, rows int) Metadata {
 	if total == 0 {
 		return Metadata{}
 	}
+
 	return Metadata{
 		CurrentPage: page,
 		RowsPerPage: rows,

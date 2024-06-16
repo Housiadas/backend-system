@@ -106,6 +106,11 @@ var (
 	// Unauthenticated indicates the request does not have valid
 	// authentication credentials for the operation.
 	Unauthenticated = ErrCode{value: 17}
+
+	// TooManyRequests TooManyRequest indicates that the client has made too many requests and
+	// exceeded their rate limit and/or quota and must wait before making
+	// further requests.
+	TooManyRequests = ErrCode{value: 18}
 )
 
 var codeNumbers = map[string]ErrCode{
@@ -127,6 +132,7 @@ var codeNumbers = map[string]ErrCode{
 	"unavailable":         Unavailable,
 	"data_loss":           DataLoss,
 	"unauthenticated":     Unauthenticated,
+	"too_many_requests":   TooManyRequests,
 }
 
 var codeNames = map[ErrCode]string{
@@ -148,6 +154,7 @@ var codeNames = map[ErrCode]string{
 	Unavailable:        "unavailable",
 	DataLoss:           "data_loss",
 	Unauthenticated:    "unauthenticated",
+	TooManyRequests:    "too_many_requests",
 }
 
 var httpStatus = map[ErrCode]int{
@@ -169,4 +176,5 @@ var httpStatus = map[ErrCode]int{
 	Unavailable:        http.StatusServiceUnavailable,
 	DataLoss:           http.StatusInternalServerError,
 	Unauthenticated:    http.StatusUnauthorized,
+	TooManyRequests:    http.StatusTooManyRequests,
 }

@@ -1,3 +1,5 @@
+app:
+  name: "backend-system"
 server:
   api: "localhost:4000"
   debug: "localhost:4010"
@@ -5,7 +7,6 @@ server:
   writeTimeout: "10s"
   idleTimeout: "120s"
   shutdownTimeout: "20s"
-  corsAllowedOrigins: "*"
 db:
   name: "housi_db"
   user: "housi"
@@ -26,5 +27,10 @@ kafka:
   SessionTimeout: "45000"
 tempo:
   host: "localhost:4317"
-  serviceName: "backend-system"
   probability: "0.05"
+cors:
+  allowedOrigins: "*"
+  allowedMethods: "GET;POST;PUT;DELETE;OPTIONS;PATCH"
+  allowedHeaders: "*"
+  exposedHeaders: "*"
+  maxAge: "86400"

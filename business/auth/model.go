@@ -1,17 +1,18 @@
 package auth
 
 import (
+	"encoding/json"
 	"github.com/google/uuid"
 )
 
-// Error represents an error in the system.
-type Error struct {
-	Message string `json:"message"`
+type AuthenticateResp struct {
+	Token string `json:"token"`
 }
 
-// Error implements the error interface.
-func (err Error) Error() string {
-	return err.Message
+// Encode implements the encoder interface.
+func (a AuthenticateResp) Encode() ([]byte, string, error) {
+	data, err := json.Marshal(a)
+	return data, "application/json", err
 }
 
 // Authorize defines the information required to perform an authorization.
@@ -21,8 +22,12 @@ type Authorize struct {
 	Rule   string
 }
 
-// AuthenticateResp defines the information that will be received on authenticate.
-type AuthenticateResp struct {
-	UserID uuid.UUID
-	Claims Claims
+// Error represents an error in the systemapi.
+type Error struct {
+	Message string `json:"message"`
+}
+
+// Error implements the error interface.
+func (err Error) Error() string {
+	return err.Message
 }

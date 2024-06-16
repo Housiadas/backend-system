@@ -10,6 +10,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/Housiadas/backend-system/business/data/sqldb"
+	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
@@ -38,7 +39,7 @@ func (a *App) Readiness(ctx context.Context) error {
 
 	if err := sqldb.StatusCheck(ctx, a.db); err != nil {
 		a.log.Info(ctx, "readiness failure", "ERROR", err)
-		return err
+		return errs.New(errs.Internal, err)
 	}
 
 	return nil

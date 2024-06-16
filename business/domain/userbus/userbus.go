@@ -1,4 +1,4 @@
-// Package userbus Package users provides business access to user domain.
+// Package userbus provides business access to user domain.
 package userbus
 
 import (
@@ -8,13 +8,12 @@ import (
 	"net/mail"
 	"time"
 
-	conflkafka "github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/Housiadas/backend-system/business/data/transaction"
+	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/sys/order"
-	"github.com/Housiadas/backend-system/foundation/kafka"
+	"github.com/Housiadas/backend-system/business/sys/page"
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
@@ -27,68 +26,48 @@ var (
 
 // Storer interface declares the behavior this package needs to persists and retrieve data.
 type Storer interface {
-	ExecuteUnderTransaction(tx transaction.Transaction) (Storer, error)
+	NewWithTx(tx sqldb.CommitRollbacker) (Storer, error)
 	Create(ctx context.Context, usr User) error
 	Update(ctx context.Context, usr User) error
 	Delete(ctx context.Context, usr User) error
-	Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]User, error)
+	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]User, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByID(ctx context.Context, userID uuid.UUID) (User, error)
-	QueryByIDs(ctx context.Context, userID []uuid.UUID) ([]User, error)
 	QueryByEmail(ctx context.Context, email mail.Address) (User, error)
 }
 
 // Business manages the set of APIs for user access.
 type Business struct {
-	log      *logger.Logger
-	storer   Storer
-	producer *kafka.ProducerClient
+	log    *logger.Logger
+	storer Storer
 }
 
-// NewBusiness constructs a user core API for use.
-func NewBusiness(log *logger.Logger, storer Storer, p *kafka.ProducerClient) *Business {
+// NewBusiness constructs a user business API for use.
+func NewBusiness(log *logger.Logger, storer Storer) *Business {
 	return &Business{
-		log:      log,
-		storer:   storer,
-		producer: p,
+		log:    log,
+		storer: storer,
 	}
 }
 
-// ExecuteUnderTransaction constructs a new Business value that will use the
+// NewWithTx constructs a new business value that will use the
 // specified transaction in any store related calls.
-func (c *Business) ExecuteUnderTransaction(tx transaction.Transaction) (*Business, error) {
-	trS, err := c.storer.ExecuteUnderTransaction(tx)
+func (b *Business) NewWithTx(tx sqldb.CommitRollbacker) (*Business, error) {
+	storer, err := b.storer.NewWithTx(tx)
 	if err != nil {
 		return nil, err
 	}
 
-	core := Business{
-		log:      c.log,
-		storer:   trS,
-		producer: c.producer,
+	bus := Business{
+		log:    b.log,
+		storer: storer,
 	}
 
-	return &core, nil
-}
-
-// Authenticate finds a user by their email and verifies their password. On
-// success, it returns a Claims User representing this user. The claims can be
-// used to generate a token for future authentication.
-func (c *Business) Authenticate(ctx context.Context, email mail.Address, password string) (User, error) {
-	usr, err := c.QueryByEmail(ctx, email)
-	if err != nil {
-		return User{}, fmt.Errorf("query: email[%s]: %w", email, err)
-	}
-
-	if err := bcrypt.CompareHashAndPassword(usr.PasswordHash, []byte(password)); err != nil {
-		return User{}, fmt.Errorf("comparehashandpassword: %w", ErrAuthenticationFailure)
-	}
-
-	return usr, nil
+	return &bus, nil
 }
 
 // Create adds a new user to the system.
-func (c *Business) Create(ctx context.Context, nu NewUser) (User, error) {
+func (b *Business) Create(ctx context.Context, nu NewUser) (User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(nu.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return User{}, fmt.Errorf("generatefrompassword: %w", err)
@@ -108,7 +87,7 @@ func (c *Business) Create(ctx context.Context, nu NewUser) (User, error) {
 		DateUpdated:  now,
 	}
 
-	if err := c.storer.Create(ctx, usr); err != nil {
+	if err := b.storer.Create(ctx, usr); err != nil {
 		return User{}, fmt.Errorf("create: %w", err)
 	}
 
@@ -116,7 +95,7 @@ func (c *Business) Create(ctx context.Context, nu NewUser) (User, error) {
 }
 
 // Update modifies information about a user.
-func (c *Business) Update(ctx context.Context, usr User, uu UpdateUser) (User, error) {
+func (b *Business) Update(ctx context.Context, usr User, uu UpdateUser) (User, error) {
 	if uu.Name != nil {
 		usr.Name = *uu.Name
 	}
@@ -146,28 +125,28 @@ func (c *Business) Update(ctx context.Context, usr User, uu UpdateUser) (User, e
 	}
 	usr.DateUpdated = time.Now()
 
-	if err := c.storer.Update(ctx, usr); err != nil {
+	if err := b.storer.Update(ctx, usr); err != nil {
 		return User{}, fmt.Errorf("update: %w", err)
 	}
 
-	event := ActionUpdatedData(uu, usr.ID)
-	err := c.producer.Produce(ctx, &conflkafka.Message{
-		TopicPartition: conflkafka.TopicPartition{
-			Topic:     &event.Topic,
-			Partition: conflkafka.PartitionAny,
-		},
-		Value: event.Data,
-	})
-	if err != nil {
-		return User{}, fmt.Errorf("failed to produce `%s` error: %w", UserUpdatedEvent, err)
-	}
+	//event := ActionUpdatedData(uu, usr.ID)
+	//err := c.producer.Produce(ctx, &conflkafka.Message{
+	//	TopicPartition: conflkafka.TopicPartition{
+	//		Topic:     &event.Topic,
+	//		Partition: conflkafka.PartitionAny,
+	//	},
+	//	Value: event.Data,
+	//})
+	//if err != nil {
+	//	return User{}, fmt.Errorf("failed to produce `%s` error: %w", UserUpdatedEvent, err)
+	//}
 
 	return usr, nil
 }
 
 // Delete removes the specified user.
-func (c *Business) Delete(ctx context.Context, usr User) error {
-	if err := c.storer.Delete(ctx, usr); err != nil {
+func (b *Business) Delete(ctx context.Context, usr User) error {
+	if err := b.storer.Delete(ctx, usr); err != nil {
 		return fmt.Errorf("delete: %w", err)
 	}
 
@@ -175,12 +154,8 @@ func (c *Business) Delete(ctx context.Context, usr User) error {
 }
 
 // Query retrieves a list of existing users.
-func (c *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]User, error) {
-	if err := filter.Validate(); err != nil {
-		return nil, err
-	}
-
-	users, err := c.storer.Query(ctx, filter, orderBy, pageNumber, rowsPerPage)
+func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]User, error) {
+	users, err := b.storer.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
@@ -189,17 +164,13 @@ func (c *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.
 }
 
 // Count returns the total number of users.
-func (c *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
-	if err := filter.Validate(); err != nil {
-		return 0, err
-	}
-
-	return c.storer.Count(ctx, filter)
+func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
+	return b.storer.Count(ctx, filter)
 }
 
-// QueryByID finds the user by the specified ID.
-func (c *Business) QueryByID(ctx context.Context, userID uuid.UUID) (User, error) {
-	user, err := c.storer.QueryByID(ctx, userID)
+// QueryByID finds the user by the specified Ib.
+func (b *Business) QueryByID(ctx context.Context, userID uuid.UUID) (User, error) {
+	user, err := b.storer.QueryByID(ctx, userID)
 	if err != nil {
 		return User{}, fmt.Errorf("query: userID[%s]: %w", userID, err)
 	}
@@ -207,22 +178,28 @@ func (c *Business) QueryByID(ctx context.Context, userID uuid.UUID) (User, error
 	return user, nil
 }
 
-// QueryByIDs finds the users by a specified User IDs.
-func (c *Business) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]User, error) {
-	user, err := c.storer.QueryByIDs(ctx, userIDs)
-	if err != nil {
-		return nil, fmt.Errorf("query: userIDs[%s]: %w", userIDs, err)
-	}
-
-	return user, nil
-}
-
 // QueryByEmail finds the user by a specified user email.
-func (c *Business) QueryByEmail(ctx context.Context, email mail.Address) (User, error) {
-	user, err := c.storer.QueryByEmail(ctx, email)
+func (b *Business) QueryByEmail(ctx context.Context, email mail.Address) (User, error) {
+	user, err := b.storer.QueryByEmail(ctx, email)
 	if err != nil {
 		return User{}, fmt.Errorf("query: email[%s]: %w", email, err)
 	}
 
 	return user, nil
+}
+
+// Authenticate finds a user by their email and verifies their password. On
+// success, it returns a Claims User representing this user. The claims can be
+// used to generate a token for future authentication.
+func (b *Business) Authenticate(ctx context.Context, email mail.Address, password string) (User, error) {
+	usr, err := b.QueryByEmail(ctx, email)
+	if err != nil {
+		return User{}, fmt.Errorf("query: email[%s]: %w", email, err)
+	}
+
+	if err := bcrypt.CompareHashAndPassword(usr.PasswordHash, []byte(password)); err != nil {
+		return User{}, fmt.Errorf("comparehashandpassword: %w", ErrAuthenticationFailure)
+	}
+
+	return usr, nil
 }

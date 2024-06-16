@@ -6,12 +6,13 @@ import (
 	"net/mail"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/Housiadas/backend-system/business/data/sqldb/dbarray"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/google/uuid"
 )
 
-type dbUser struct {
+type user struct {
 	ID           uuid.UUID      `db:"user_id"`
 	Name         string         `db:"name"`
 	Email        string         `db:"email"`
@@ -23,67 +24,72 @@ type dbUser struct {
 	DateUpdated  time.Time      `db:"date_updated"`
 }
 
-func toDBUser(usr userbus.User) dbUser {
-	roles := make([]string, len(usr.Roles))
-	for i, role := range usr.Roles {
-		roles[i] = role.Name()
+func toDBUser(bus userbus.User) user {
+	roles := make([]string, len(bus.Roles))
+	for i, role := range bus.Roles {
+		roles[i] = role.String()
 	}
 
-	return dbUser{
-		ID:           usr.ID,
-		Name:         usr.Name,
-		Email:        usr.Email.Address,
+	return user{
+		ID:           bus.ID,
+		Name:         bus.Name.String(),
+		Email:        bus.Email.Address,
 		Roles:        roles,
-		PasswordHash: usr.PasswordHash,
+		PasswordHash: bus.PasswordHash,
 		Department: sql.NullString{
-			String: usr.Department,
-			Valid:  usr.Department != "",
+			String: bus.Department,
+			Valid:  bus.Department != "",
 		},
-		Enabled:     usr.Enabled,
-		DateCreated: usr.DateCreated.UTC(),
-		DateUpdated: usr.DateUpdated.UTC(),
+		Enabled:     bus.Enabled,
+		DateCreated: bus.DateCreated.UTC(),
+		DateUpdated: bus.DateUpdated.UTC(),
 	}
 }
 
-func toCoreUser(dbUsr dbUser) (userbus.User, error) {
+func toBusUser(db user) (userbus.User, error) {
 	addr := mail.Address{
-		Address: dbUsr.Email,
+		Address: db.Email,
 	}
 
-	roles := make([]userbus.Role, len(dbUsr.Roles))
-	for i, value := range dbUsr.Roles {
+	roles := make([]userbus.Role, len(db.Roles))
+	for i, value := range db.Roles {
 		var err error
-		roles[i], err = userbus.ParseRole(value)
+		roles[i], err = userbus.Roles.Parse(value)
 		if err != nil {
 			return userbus.User{}, fmt.Errorf("parse role: %w", err)
 		}
 	}
 
-	usr := userbus.User{
-		ID:           dbUsr.ID,
-		Name:         dbUsr.Name,
-		Email:        addr,
-		Roles:        roles,
-		PasswordHash: dbUsr.PasswordHash,
-		Enabled:      dbUsr.Enabled,
-		Department:   dbUsr.Department.String,
-		DateCreated:  dbUsr.DateCreated.In(time.Local),
-		DateUpdated:  dbUsr.DateUpdated.In(time.Local),
+	name, err := userbus.Names.Parse(db.Name)
+	if err != nil {
+		return userbus.User{}, fmt.Errorf("parse name: %w", err)
 	}
 
-	return usr, nil
+	bus := userbus.User{
+		ID:           db.ID,
+		Name:         name,
+		Email:        addr,
+		Roles:        roles,
+		PasswordHash: db.PasswordHash,
+		Enabled:      db.Enabled,
+		Department:   db.Department.String,
+		DateCreated:  db.DateCreated.In(time.Local),
+		DateUpdated:  db.DateUpdated.In(time.Local),
+	}
+
+	return bus, nil
 }
 
-func toCoreUserSlice(dbUsers []dbUser) ([]userbus.User, error) {
-	usrs := make([]userbus.User, len(dbUsers))
+func toBusUsers(dbs []user) ([]userbus.User, error) {
+	bus := make([]userbus.User, len(dbs))
 
-	for i, dbUsr := range dbUsers {
+	for i, db := range dbs {
 		var err error
-		usrs[i], err = toCoreUser(dbUsr)
+		bus[i], err = toBusUser(db)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return usrs, nil
+	return bus, nil
 }

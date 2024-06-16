@@ -4,13 +4,15 @@ package usercache
 import (
 	"context"
 	"net/mail"
-	"sync"
+	"time"
 
+	"github.com/creativecreature/sturdyc"
 	"github.com/google/uuid"
 
-	"github.com/Housiadas/backend-system/business/data/transaction"
+	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/order"
+	"github.com/Housiadas/backend-system/business/sys/page"
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
@@ -18,23 +20,26 @@ import (
 type Store struct {
 	log    *logger.Logger
 	storer userbus.Storer
-	cache  map[string]userbus.User
-	mu     sync.RWMutex
+	cache  *sturdyc.Client[userbus.User]
 }
 
 // NewStore constructs the api for data and caching access.
-func NewStore(log *logger.Logger, storer userbus.Storer) *Store {
+func NewStore(log *logger.Logger, storer userbus.Storer, ttl time.Duration) *Store {
+	const capacity = 10000
+	const numShards = 10
+	const evictionPercentage = 10
+
 	return &Store{
 		log:    log,
 		storer: storer,
-		cache:  map[string]userbus.User{},
+		cache:  sturdyc.New[userbus.User](capacity, numShards, ttl, evictionPercentage),
 	}
 }
 
-// ExecuteUnderTransaction constructs a new Store value replacing the sqlx DB
+// NewWithTx constructs a new Store value replacing the sqlx DB
 // value with a sqlx DB value that is currently inside a transaction.
-func (s *Store) ExecuteUnderTransaction(tx transaction.Transaction) (userbus.Storer, error) {
-	return s.storer.ExecuteUnderTransaction(tx)
+func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (userbus.Storer, error) {
+	return s.storer.NewWithTx(tx)
 }
 
 // Create inserts a new user into the database.
@@ -71,8 +76,8 @@ func (s *Store) Delete(ctx context.Context, usr userbus.User) error {
 }
 
 // Query retrieves a list of existing users from the database.
-func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]userbus.User, error) {
-	return s.storer.Query(ctx, filter, orderBy, pageNumber, rowsPerPage)
+func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy order.By, page page.Page) ([]userbus.User, error) {
+	return s.storer.Query(ctx, filter, orderBy, page)
 }
 
 // Count returns the total number of cards in the DB.
@@ -97,16 +102,6 @@ func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (userbus.User, 
 	return usr, nil
 }
 
-// QueryByIDs gets the specified users from the database.
-func (s *Store) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]userbus.User, error) {
-	usr, err := s.storer.QueryByIDs(ctx, userIDs)
-	if err != nil {
-		return nil, err
-	}
-
-	return usr, nil
-}
-
 // QueryByEmail gets the specified user from the database by email.
 func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (userbus.User, error) {
 	cachedUsr, ok := s.readCache(email.Address)
@@ -126,10 +121,7 @@ func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (userbus.U
 
 // readCache performs a safe search in the cache for the specified key.
 func (s *Store) readCache(key string) (userbus.User, bool) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	usr, exists := s.cache[key]
+	usr, exists := s.cache.Get(key)
 	if !exists {
 		return userbus.User{}, false
 	}
@@ -138,19 +130,13 @@ func (s *Store) readCache(key string) (userbus.User, bool) {
 }
 
 // writeCache performs a safe write to the cache for the specified userbus.
-func (s *Store) writeCache(usr userbus.User) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	s.cache[usr.ID.String()] = usr
-	s.cache[usr.Email.Address] = usr
+func (s *Store) writeCache(bus userbus.User) {
+	s.cache.Set(bus.ID.String(), bus)
+	s.cache.Set(bus.Email.Address, bus)
 }
 
 // deleteCache performs a safe removal from the cache for the specified userbus.
-func (s *Store) deleteCache(usr userbus.User) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	delete(s.cache, usr.ID.String())
-	delete(s.cache, usr.Email.Address)
+func (s *Store) deleteCache(bus userbus.User) {
+	s.cache.Delete(bus.ID.String())
+	s.cache.Delete(bus.Email.Address)
 }

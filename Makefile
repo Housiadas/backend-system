@@ -136,7 +136,7 @@ db/migrate/down:
 # QUALITY CONTROL
 # ==================================================================================== #
 
-# vendor: tidy and vendor dependencies
+# vendor: vendor dependencies
 .PHONY: vendor
 vendor:
 	go mod tidy
@@ -169,3 +169,12 @@ coverage:
 	go test -v -coverprofile cover.out ./...
 	go tool cover -html cover.out -o cover.html
 	open cover.html
+
+# ==================================================================================== #
+# SWAGGER
+# ==================================================================================== #
+
+# swagger: Generate swagger docs
+.PHONY: swagger
+swagger:
+	docker run --rm -v $(PWD):/code --user $(UID) ghcr.io/swaggo/swag:v1.16.3 init --g app/api/main.go

@@ -33,7 +33,7 @@ func GenToken(log *logger.Logger, dbConfig sqldb.Config, keyPath string, userID 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db), nil)
+	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db))
 
 	usr, err := userBus.QueryByID(ctx, userID)
 	if err != nil {
@@ -53,7 +53,7 @@ func GenToken(log *logger.Logger, dbConfig sqldb.Config, keyPath string, userID 
 
 	a, err := auth.New(authCfg)
 	if err != nil {
-		return fmt.Errorf("constructing auth: %w", err)
+		return fmt.Errorf("constructing authapi: %w", err)
 	}
 
 	// Generating a token requires defining a set of claims. In this applications
@@ -93,7 +93,7 @@ func GenToken(log *logger.Logger, dbConfig sqldb.Config, keyPath string, userID 
 func parseRoles(roles []userbus.Role) []string {
 	appRoles := make([]string, len(roles))
 	for i, role := range roles {
-		appRoles[i] = role.Name()
+		appRoles[i] = role.String()
 	}
 	return appRoles
 }
