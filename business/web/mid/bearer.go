@@ -22,7 +22,7 @@ func (m *Mid) Bearer() func(next http.Handler) http.Handler {
 
 			if claims.Subject == "" {
 				m.Log.Info(ctx, "request unauthenticated", errs.Unauthenticated)
-				m.Web.Respond(errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, no claims"))
+				http.Error(w, errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, no claims").Error(), errs.Unauthenticated.Value())
 				return
 			}
 

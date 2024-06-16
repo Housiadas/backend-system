@@ -23,12 +23,13 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/business/web"
 	"github.com/Housiadas/backend-system/business/web/mid"
-	_ "github.com/Housiadas/backend-system/docs"
 	"github.com/Housiadas/backend-system/foundation/debug"
 	"github.com/Housiadas/backend-system/foundation/kafka"
 	"github.com/Housiadas/backend-system/foundation/keystore"
 	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/Housiadas/backend-system/foundation/tracer"
+
+	_ "github.com/Housiadas/backend-system/docs"
 )
 
 /*
@@ -111,7 +112,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	db, err := sqldb.Open(sqldb.Config{
 		User:         cfg.DB.User,
 		Password:     cfg.DB.Password,
-		HostPort:     cfg.DB.Host,
+		Host:         cfg.DB.Host,
 		Name:         cfg.DB.Name,
 		MaxIdleConns: cfg.DB.MaxIdleConns,
 		MaxOpenConns: cfg.DB.MaxOpenConns,
@@ -120,7 +121,6 @@ func run(ctx context.Context, log *logger.Logger) error {
 	if err != nil {
 		return fmt.Errorf("connecting to db: %w", err)
 	}
-
 	defer db.Close()
 
 	// -------------------------------------------------------------------------
@@ -189,8 +189,8 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing business core")
 
-	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db), producer)
-	productBus := productbus.NewBusiness(log, productdb.NewStore(log, db), userBus, producer)
+	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db))
+	productBus := productbus.NewBusiness(log, userBus, productdb.NewStore(log, db))
 
 	// -------------------------------------------------------------------------
 	// Start Debug Service
@@ -223,7 +223,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 		Build:   build,
 		Cors:    cfg.Cors,
 		Web: handler.Web{
-			Mid:     mid.New(authSrv, midBusiness, log, respond),
+			Mid:     mid.New(authSrv, midBusiness, log),
 			Respond: respond,
 		},
 		App: handler.App{

@@ -23,12 +23,12 @@ var (
 
 	// InvalidArgument indicates client specified an invalid argument.
 	// Note that this differs from FailedPrecondition. It indicates arguments
-	// that are problematic regardless of the state of the systemapi
+	// that are problematic regardless of the state of the system
 	// (e.g., a malformed file name).
 	InvalidArgument = ErrCode{value: 4}
 
 	// DeadlineExceeded means operation expired before completion.
-	// For operations that change the state of the systemapi, this error may be
+	// For operations that change the state of the system, this error may be
 	// returned even if the operation has completed successfully. For
 	// example, a successful response from a server could have been delayed
 	// long enough for the deadline to expire.
@@ -51,11 +51,11 @@ var (
 	PermissionDenied = ErrCode{value: 8}
 
 	// ResourceExhausted indicates some resource has been exhausted, perhaps
-	// a per-user quota, or perhaps the entire file systemapi is out of space.
+	// a per-user quota, or perhaps the entire file system is out of space.
 	ResourceExhausted = ErrCode{value: 9}
 
 	// FailedPrecondition indicates operation was rejected because the
-	// systemapi is not in a state required for the operation's execution.
+	// system is not in a state required for the operation's execution.
 	// For example, directory to be deleted may be non-empty, an rmdir
 	// operation is applied to a non-directory, etc.
 	FailedPrecondition = ErrCode{value: 10}
@@ -69,8 +69,8 @@ var (
 	// E.g., seeking or reading past end of file.
 	//
 	// Unlike InvalidArgument, this error indicates a problem that may
-	// be fixed if the systemapi state changes. For example, a 32-bit file
-	// systemapi will generate InvalidArgument if asked to read at an
+	// be fixed if the system state changes. For example, a 32-bit file
+	// system will generate InvalidArgument if asked to read at an
 	// offset that is not in the range [0,2^32-1], but it will generate
 	// OutOfRange if asked to read from an offset past the current
 	// file size.
@@ -87,7 +87,7 @@ var (
 	Unimplemented = ErrCode{value: 13}
 
 	// Internal errors. Means some invariants expected by underlying
-	// systemapi has been broken. If you see one of these errors,
+	// system has been broken. If you see one of these errors,
 	// something is very broken.
 	Internal = ErrCode{value: 14}
 
@@ -106,6 +106,11 @@ var (
 	// Unauthenticated indicates the request does not have valid
 	// authentication credentials for the operation.
 	Unauthenticated = ErrCode{value: 17}
+
+	// TooManyRequests TooManyRequest indicates that the client has made too many requests and
+	// exceeded their rate limit and/or quota and must wait before making
+	// further requests.
+	TooManyRequests = ErrCode{value: 18}
 )
 
 var codeNumbers = map[string]ErrCode{
@@ -127,6 +132,7 @@ var codeNumbers = map[string]ErrCode{
 	"unavailable":         Unavailable,
 	"data_loss":           DataLoss,
 	"unauthenticated":     Unauthenticated,
+	"too_many_requests":   TooManyRequests,
 }
 
 var codeNames = map[ErrCode]string{
@@ -148,6 +154,7 @@ var codeNames = map[ErrCode]string{
 	Unavailable:        "unavailable",
 	DataLoss:           "data_loss",
 	Unauthenticated:    "unauthenticated",
+	TooManyRequests:    "too_many_requests",
 }
 
 var httpStatus = map[ErrCode]int{
@@ -169,4 +176,5 @@ var httpStatus = map[ErrCode]int{
 	Unavailable:        http.StatusServiceUnavailable,
 	DataLoss:           http.StatusInternalServerError,
 	Unauthenticated:    http.StatusUnauthorized,
+	TooManyRequests:    http.StatusTooManyRequests,
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
 	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/business/web"
 )
 
 // readiness checks if the database is ready and if not will return a 500 status.
@@ -20,7 +21,7 @@ import (
 // @Success      200  {object}  systemapp.Status
 // @Failure      500  {object}  errs.Error
 // @Router       /readiness [get]
-func (h *Handler) readiness(ctx context.Context, _ http.ResponseWriter, _ *http.Request) (any, error) {
+func (h *Handler) readiness(ctx context.Context, _ http.ResponseWriter, _ *http.Request) (web.Encoder, error) {
 	if err := h.App.System.Readiness(ctx); err != nil {
 		return nil, errs.Newf(errs.Internal, "database not ready")
 	}
@@ -44,32 +45,8 @@ func (h *Handler) readiness(ctx context.Context, _ http.ResponseWriter, _ *http.
 // @Produce      json
 // @Success      200  {object}  systemapp.Info
 // @Router       /liveness [get]
-func (h *Handler) liveness(_ context.Context, _ http.ResponseWriter, _ *http.Request) (any, error) {
+func (h *Handler) liveness(_ context.Context, _ http.ResponseWriter, _ *http.Request) (web.Encoder, error) {
 	info := h.App.System.Liveness()
 
 	return info, nil
-}
-
-func (h *Handler) notFound(_ context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
-	return systemapp.ApiError{
-		StatusCode: http.StatusNotFound,
-		Message:    "Route not found",
-		Details:    "The request route not found",
-		Context: map[string]interface{}{
-			"uri":    r.RequestURI,
-			"method": r.Method,
-		},
-	}, nil
-}
-
-func (h *Handler) notAllowed(_ context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
-	return systemapp.ApiError{
-		StatusCode: http.StatusNotFound,
-		Message:    "Method not allowed",
-		Details:    "Method is not allowed for the requested route",
-		Context: map[string]interface{}{
-			"uri":    r.RequestURI,
-			"method": r.Method,
-		},
-	}, nil
 }

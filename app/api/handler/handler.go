@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"github.com/Housiadas/backend-system/business/config"
 	"github.com/jmoiron/sqlx"
 	"go.opentelemetry.io/otel/trace"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/business/auth"
+	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/web"

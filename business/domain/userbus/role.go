@@ -2,25 +2,19 @@ package userbus
 
 import "fmt"
 
-// Set of possible roles for a user.
-var (
-	RoleAdmin = Role{"ADMIN"}
-	RoleUser  = Role{"USER"}
-)
-
-// Set of known roles.
-var roles = map[string]Role{
-	RoleAdmin.name: RoleAdmin,
-	RoleUser.name:  RoleUser,
+type roleSet struct {
+	Admin Role
+	User  Role
 }
 
-// Role represents a role in the systemapi.
-type Role struct {
-	name string
+// Roles represents the set of roles that can be used.
+var Roles = roleSet{
+	Admin: newRole("ADMIN"),
+	User:  newRole("USER"),
 }
 
-// ParseRole parses the string value and returns a role if one exists.
-func ParseRole(value string) (Role, error) {
+// Parse parses the string value and returns a role if one exists.
+func (roleSet) Parse(value string) (Role, error) {
 	role, exists := roles[value]
 	if !exists {
 		return Role{}, fmt.Errorf("invalid role %q", value)
@@ -29,10 +23,10 @@ func ParseRole(value string) (Role, error) {
 	return role, nil
 }
 
-// MustParseRole parses the string value and returns a role if one exists. If
+// MustParse parses the string value and returns a role if one exists. If
 // an error occurs the function panics.
-func MustParseRole(value string) Role {
-	role, err := ParseRole(value)
+func (roleSet) MustParse(value string) Role {
+	role, err := Roles.Parse(value)
 	if err != nil {
 		panic(err)
 	}
@@ -40,14 +34,30 @@ func MustParseRole(value string) Role {
 	return role
 }
 
-// Name returns the name of the role.
-func (r Role) Name() string {
+// =============================================================================
+
+// Set of known roles.
+var roles = make(map[string]Role)
+
+// Role represents a role in the system.
+type Role struct {
+	name string
+}
+
+func newRole(role string) Role {
+	r := Role{role}
+	roles[role] = r
+	return r
+}
+
+// String returns the name of the role.
+func (r Role) String() string {
 	return r.name
 }
 
 // UnmarshalText implement the unmarshal interface for JSON conversions.
-func (r *Role) UnmarshalText(data []byte) error {
-	role, err := ParseRole(string(data))
+func (r Role) UnmarshalText(data []byte) error {
+	role, err := Roles.Parse(string(data))
 	if err != nil {
 		return err
 	}

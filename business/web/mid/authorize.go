@@ -25,7 +25,7 @@ func (m *Mid) Authorize(rule string) func(next http.Handler) http.Handler {
 			if err != nil {
 				err = errs.New(errs.Unauthenticated, err)
 				m.Log.Error(ctx, "authorize mid: get user id", err)
-				m.Web.Respond(err)
+				http.Error(w, err.Error(), errs.Unauthenticated.Value())
 				return
 			}
 
@@ -38,7 +38,7 @@ func (m *Mid) Authorize(rule string) func(next http.Handler) http.Handler {
 			if err := m.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
 				err = errs.New(errs.Unauthenticated, err)
 				m.Log.Error(ctx, "authorize mid: authorize", err)
-				m.Web.Respond(err)
+				http.Error(w, err.Error(), errs.Unauthenticated.Value())
 				return
 			}
 
@@ -63,7 +63,7 @@ func (m *Mid) AuthorizeUser(rule string) func(next http.Handler) http.Handler {
 				if err != nil {
 					err = errs.New(errs.Unauthenticated, ErrInvalidID)
 					m.Log.Error(ctx, "authorize user mid: authorize", err)
-					m.Web.Respond(err)
+					http.Error(w, err.Error(), errs.Unauthenticated.Value())
 					return
 				}
 
@@ -76,7 +76,7 @@ func (m *Mid) AuthorizeUser(rule string) func(next http.Handler) http.Handler {
 						err = errs.Newf(errs.Unauthenticated, "querybyid: userID[%s]: %s", userID, err)
 					}
 					m.Log.Error(ctx, "authorize user mid: authorize", err)
-					m.Web.Respond(err)
+					http.Error(w, err.Error(), errs.Unauthenticated.Value())
 					return
 				}
 
@@ -92,7 +92,7 @@ func (m *Mid) AuthorizeUser(rule string) func(next http.Handler) http.Handler {
 			if err := m.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
 				err = errs.New(errs.Unauthenticated, err)
 				m.Log.Error(ctx, "authorize user mid: authorize", err)
-				m.Web.Respond(err)
+				http.Error(w, err.Error(), errs.Unauthenticated.Value())
 				return
 			}
 
@@ -118,7 +118,7 @@ func (m *Mid) AuthorizeProduct(rule string) func(next http.Handler) http.Handler
 				if err != nil {
 					err = errs.New(errs.Unauthenticated, ErrInvalidID)
 					m.Log.Error(ctx, "authorize product mid: authorize", err)
-					m.Web.Respond(err)
+					http.Error(w, err.Error(), errs.Unauthenticated.Value())
 					return
 				}
 
@@ -131,7 +131,7 @@ func (m *Mid) AuthorizeProduct(rule string) func(next http.Handler) http.Handler
 						err = errs.Newf(errs.Internal, "querybyid: productID[%s]: %s", productID, err)
 					}
 					m.Log.Error(ctx, "authorize product mid: authorize", err)
-					m.Web.Respond(err)
+					http.Error(w, err.Error(), errs.Unauthenticated.Value())
 					return
 				}
 
@@ -148,7 +148,7 @@ func (m *Mid) AuthorizeProduct(rule string) func(next http.Handler) http.Handler
 			if err := m.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
 				err = errs.New(errs.Unauthenticated, err)
 				m.Log.Error(ctx, "authorize product mid: authorize", err)
-				m.Web.Respond(err)
+				http.Error(w, err.Error(), errs.Unauthenticated.Value())
 				return
 			}
 

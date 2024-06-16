@@ -2,11 +2,8 @@
 package order
 
 import (
-	"errors"
 	"fmt"
 	"strings"
-
-	"github.com/Housiadas/backend-system/foundation/validate"
 )
 
 // Set of directions for data ordering.
@@ -41,31 +38,34 @@ func NewBy(field string, direction string) By {
 	}
 }
 
-// Parse constructs a By value by parsing a string in the form
-// of "field,direction".
-func Parse(orderBy string, defaultOrder By) (By, error) {
+// Parse constructs a By value by parsing a string in the form of
+// "field,direction" ie "user_id,ASC".
+func Parse(fieldMappings map[string]string, orderBy string, defaultOrder By) (By, error) {
 	if orderBy == "" {
 		return defaultOrder, nil
 	}
 
 	orderParts := strings.Split(orderBy, ",")
 
-	var by By
-	switch len(orderParts) {
-	case 1:
-		by = NewBy(strings.TrimSpace(orderParts[0]), ASC)
-
-	case 2:
-		direction := strings.Trim(orderParts[1], " ")
-		if _, exists := directions[direction]; !exists {
-			return By{}, validate.NewFieldsError(orderBy, fmt.Errorf("unknown direction: %s", by.Direction))
-		}
-
-		by = NewBy(strings.Trim(orderParts[0], " "), direction)
-
-	default:
-		return By{}, validate.NewFieldsError(orderBy, errors.New("unknown order field"))
+	orgFieldName := strings.TrimSpace(orderParts[0])
+	fieldName, exists := fieldMappings[orgFieldName]
+	if !exists {
+		return By{}, fmt.Errorf("unknown order: %s", orgFieldName)
 	}
 
-	return by, nil
+	switch len(orderParts) {
+	case 1:
+		return NewBy(fieldName, ASC), nil
+
+	case 2:
+		direction := strings.TrimSpace(orderParts[1])
+		if _, exists := directions[direction]; !exists {
+			return By{}, fmt.Errorf("unknown direction: %s", direction)
+		}
+
+		return NewBy(fieldName, direction), nil
+
+	default:
+		return By{}, fmt.Errorf("unknown order: %s", orderBy)
+	}
 }

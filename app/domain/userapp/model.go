@@ -1,14 +1,28 @@
 package userapp
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/mail"
 	"time"
 
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/foundation/validate"
 )
+
+// QueryParams represents the set of possible query strings.
+type QueryParams struct {
+	Page             string
+	Rows             string
+	OrderBy          string
+	ID               string
+	Name             string
+	Email            string
+	StartCreatedDate string
+	EndCreatedDate   string
+}
+
+// =============================================================================
 
 // AuthenticateUser defines the data needed to authenticate a user.
 type AuthenticateUser struct {
@@ -16,17 +30,13 @@ type AuthenticateUser struct {
 	Password string `json:"password"`
 }
 
-// QueryParams represents the set of possible query strings.
-type QueryParams struct {
-	Page             int    `query:"page"`
-	Rows             int    `query:"rows"`
-	OrderBy          string `query:"orderBy"`
-	ID               string `query:"user_id"`
-	Name             string `query:"name"`
-	Email            string `query:"email"`
-	StartCreatedDate string `query:"start_created_date"`
-	EndCreatedDate   string `query:"end_created_date"`
+// Encode implements the encoder interface.
+func (app AuthenticateUser) Encode() ([]byte, string, error) {
+	data, err := json.Marshal(app)
+	return data, "application/json", err
 }
+
+// =============================================================================
 
 // User represents information about an individual user.
 type User struct {
@@ -41,33 +51,41 @@ type User struct {
 	DateUpdated  string   `json:"dateUpdated"`
 }
 
-func toAppUser(usr userbus.User) User {
-	roles := make([]string, len(usr.Roles))
-	for i, role := range usr.Roles {
-		roles[i] = role.Name()
+// Encode implements the encoder interface.
+func (app User) Encode() ([]byte, string, error) {
+	data, err := json.Marshal(app)
+	return data, "application/json", err
+}
+
+func toAppUser(bus userbus.User) User {
+	roles := make([]string, len(bus.Roles))
+	for i, role := range bus.Roles {
+		roles[i] = role.String()
 	}
 
 	return User{
-		ID:           usr.ID.String(),
-		Name:         usr.Name,
-		Email:        usr.Email.Address,
+		ID:           bus.ID.String(),
+		Name:         bus.Name.String(),
+		Email:        bus.Email.Address,
 		Roles:        roles,
-		PasswordHash: usr.PasswordHash,
-		Department:   usr.Department,
-		Enabled:      usr.Enabled,
-		DateCreated:  usr.DateCreated.Format(time.RFC3339),
-		DateUpdated:  usr.DateUpdated.Format(time.RFC3339),
+		PasswordHash: bus.PasswordHash,
+		Department:   bus.Department,
+		Enabled:      bus.Enabled,
+		DateCreated:  bus.DateCreated.Format(time.RFC3339),
+		DateUpdated:  bus.DateUpdated.Format(time.RFC3339),
 	}
 }
 
 func toAppUsers(users []userbus.User) []User {
-	items := make([]User, len(users))
+	app := make([]User, len(users))
 	for i, usr := range users {
-		items[i] = toAppUser(usr)
+		app[i] = toAppUser(usr)
 	}
 
-	return items
+	return app
 }
+
+// =============================================================================
 
 // NewUser defines the data needed to add a new user.
 type NewUser struct {
@@ -79,10 +97,24 @@ type NewUser struct {
 	PasswordConfirm string   `json:"passwordConfirm" validate:"eqfield=Password"`
 }
 
+// Decode implements the decoder interface.
+func (app *NewUser) Decode(data []byte) error {
+	return json.Unmarshal(data, &app)
+}
+
+// Validate checks the data in the model is considered clean.
+func (app *NewUser) Validate() error {
+	if err := errs.Check(app); err != nil {
+		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+	}
+
+	return nil
+}
+
 func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 	roles := make([]userbus.Role, len(app.Roles))
 	for i, roleStr := range app.Roles {
-		role, err := userbus.ParseRole(roleStr)
+		role, err := userbus.Roles.Parse(roleStr)
 		if err != nil {
 			return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 		}
@@ -94,30 +126,41 @@ func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
-	usr := userbus.NewUser{
-		Name:            app.Name,
-		Email:           *addr,
-		Roles:           roles,
-		Department:      app.Department,
-		Password:        app.Password,
-		PasswordConfirm: app.PasswordConfirm,
+	name, err := userbus.Names.Parse(app.Name)
+	if err != nil {
+		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
-	return usr, nil
-}
-
-// Validate checks the data in the model is considered clean.
-func (app NewUser) Validate() error {
-	if err := validate.Check(app); err != nil {
-		return errs.Newf(errs.FailedPrecondition, "validate: %s", err)
+	bus := userbus.NewUser{
+		Name:       name,
+		Email:      *addr,
+		Roles:      roles,
+		Department: app.Department,
+		Password:   app.Password,
 	}
 
-	return nil
+	return bus, nil
 }
+
+// =============================================================================
 
 // UpdateUserRole defines the data needed to update a user role.
 type UpdateUserRole struct {
-	Roles []string `json:"roles"`
+	Roles []string `json:"roles" validate:"required"`
+}
+
+// Decode implements the decoder interface.
+func (app *UpdateUserRole) Decode(data []byte) error {
+	return json.Unmarshal(data, &app)
+}
+
+// Validate checks the data in the model is considered clean.
+func (app *UpdateUserRole) Validate() error {
+	if err := errs.Check(app); err != nil {
+		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+	}
+
+	return nil
 }
 
 func toBusUpdateUserRole(app UpdateUserRole) (userbus.UpdateUser, error) {
@@ -125,7 +168,7 @@ func toBusUpdateUserRole(app UpdateUserRole) (userbus.UpdateUser, error) {
 	if app.Roles != nil {
 		roles = make([]userbus.Role, len(app.Roles))
 		for i, roleStr := range app.Roles {
-			role, err := userbus.ParseRole(roleStr)
+			role, err := userbus.Roles.Parse(roleStr)
 			if err != nil {
 				return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
 			}
@@ -133,12 +176,14 @@ func toBusUpdateUserRole(app UpdateUserRole) (userbus.UpdateUser, error) {
 		}
 	}
 
-	nu := userbus.UpdateUser{
+	bus := userbus.UpdateUser{
 		Roles: roles,
 	}
 
-	return nu, nil
+	return bus, nil
 }
+
+// =============================================================================
 
 // UpdateUser defines the data needed to update a user.
 type UpdateUser struct {
@@ -148,6 +193,20 @@ type UpdateUser struct {
 	Password        *string `json:"password"`
 	PasswordConfirm *string `json:"passwordConfirm" validate:"omitempty,eqfield=Password"`
 	Enabled         *bool   `json:"enabled"`
+}
+
+// Decode implements the decoder interface.
+func (app *UpdateUser) Decode(data []byte) error {
+	return json.Unmarshal(data, &app)
+}
+
+// Validate checks the data in the model is considered clean.
+func (app *UpdateUser) Validate() error {
+	if err := errs.Check(app); err != nil {
+		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+	}
+
+	return nil
 }
 
 func toBusUpdateUser(app UpdateUser) (userbus.UpdateUser, error) {
@@ -160,34 +219,22 @@ func toBusUpdateUser(app UpdateUser) (userbus.UpdateUser, error) {
 		}
 	}
 
-	nu := userbus.UpdateUser{
-		Name:            app.Name,
-		Email:           addr,
-		Department:      app.Department,
-		Password:        app.Password,
-		PasswordConfirm: app.PasswordConfirm,
-		Enabled:         app.Enabled,
+	var name *userbus.Name
+	if app.Name != nil {
+		nm, err := userbus.Names.Parse(*app.Name)
+		if err != nil {
+			return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
+		}
+		name = &nm
 	}
 
-	return nu, nil
-}
-
-// Validate checks the data in the model is considered clean.
-func (app UpdateUser) Validate() error {
-	if err := validate.Check(app); err != nil {
-		return errs.Newf(errs.FailedPrecondition, "validate: %s", err)
+	bus := userbus.UpdateUser{
+		Name:       name,
+		Email:      addr,
+		Department: app.Department,
+		Password:   app.Password,
+		Enabled:    app.Enabled,
 	}
 
-	return nil
-}
-
-// Token represents the user token when requested.
-type Token struct {
-	Token string `json:"token"`
-}
-
-func toToken(v string) Token {
-	return Token{
-		Token: v,
-	}
+	return bus, nil
 }

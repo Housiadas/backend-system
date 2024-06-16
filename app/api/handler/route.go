@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"net/http"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -33,10 +31,10 @@ func (h *Handler) Routes() *chi.Mux {
 		mid.Recoverer(),
 	)
 
-	apiRouter.Route("/v1", func(r chi.Router) {
-		r.Use(otelchi.Middleware(h.AppName, otelchi.WithChiRoutes(r)))
-		r.Use(mid.ApiVersion("v1"))
-		r.Use(cors.Handler(cors.Options{
+	apiRouter.Route("/v1", func(v1 chi.Router) {
+		v1.Use(otelchi.Middleware(h.AppName, otelchi.WithChiRoutes(v1)))
+		v1.Use(mid.ApiVersion("v1"))
+		v1.Use(cors.Handler(cors.Options{
 			AllowedOrigins: h.Cors.AllowedOrigins,
 			AllowedMethods: h.Cors.AllowedMethods,
 			AllowedHeaders: h.Cors.AllowedHeaders,
@@ -45,11 +43,11 @@ func (h *Handler) Routes() *chi.Mux {
 		}))
 
 		// Auth
-		r.Post("/auth/authenticate", h.Web.Respond.Respond(h.authenticate))
-		r.With(authenticate).Get("/auth/authorize", h.Web.Respond.Respond(h.authorize))
+		v1.Post("/auth/authenticate", h.Web.Respond.Respond(h.authenticate))
+		v1.With(authenticate).Get("/auth/authorize", h.Web.Respond.Respond(h.authorize))
 
 		// Users
-		r.With(authenticate).Route("/users", func(u chi.Router) {
+		v1.With(authenticate).Route("/users", func(u chi.Router) {
 			u.With(ruleAuthorizeAdmin).Get("/", h.Web.Respond.Respond(h.userQuery))
 			u.With(ruleAuthorizeUser).Get("/{user_id}", h.Web.Respond.Respond(h.userQueryByID))
 			u.With(ruleAdmin).Post("/users", h.Web.Respond.Respond(h.userCreate))
@@ -59,7 +57,7 @@ func (h *Handler) Routes() *chi.Mux {
 		})
 
 		// Products
-		r.With(authenticate).Route("/products", func(p chi.Router) {
+		v1.With(authenticate).Route("/products", func(p chi.Router) {
 			p.With(ruleAny).Get("/", h.Web.Respond.Respond(h.productQuery))
 			p.With(ruleUserOnly).Post("/", h.Web.Respond.Respond(h.productCreate))
 			p.With(ruleAuthorizeProduct).Get("/{product_id}", h.Web.Respond.Respond(h.productQueryByID))
@@ -70,12 +68,12 @@ func (h *Handler) Routes() *chi.Mux {
 
 	// System Routes
 	router := chi.NewRouter()
-	router.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		h.Web.Respond.Respond(h.notFound)
-	})
-	router.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
-		h.Web.Respond.Respond(h.notAllowed)
-	})
+	//router.NotFound(func(w http.ResponseWriter, r *http.Request) {
+	//	h.Web.Respond.Respond(h.notFound)
+	//})
+	//router.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
+	//	h.Web.Respond.Respond(h.notAllowed)
+	//})
 	router.Get("/readiness", h.Web.Respond.Respond(h.readiness))
 	router.Get("/liveness", h.Web.Respond.Respond(h.liveness))
 	router.Handle("/swagger/*", httpSwagger.Handler(

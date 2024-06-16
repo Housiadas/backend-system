@@ -16,7 +16,7 @@ import (
 	"github.com/Housiadas/backend-system/foundation/validate"
 )
 
-func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
+func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
 	kid := web.Header(r, "kid")
 	if kid == "" {
 		return nil, errs.New(errs.FailedPrecondition, validate.NewFieldsError("kid", errors.New("missing kid")))
@@ -29,7 +29,7 @@ func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *ht
 
 	usr, err := h.App.User.Authenticate(ctx, requestData)
 	if err != nil {
-		return nil, errs.New(errs.InvalidArgument, invalidCredentials)
+		return nil, errs.New(errs.InvalidArgument, errors.New("invalid credentials"))
 	}
 
 	// Generating a token requires defining a set of claims. In this applications
@@ -61,16 +61,12 @@ func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *ht
 		return nil, fmt.Errorf("generating token: %w", err)
 	}
 
-	data := struct {
-		Token string `json:"token"`
-	}{
+	return auth.AuthenticateResp{
 		Token: token,
-	}
-
-	return data, nil
+	}, nil
 }
 
-func (h *Handler) authorize(ctx context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
+func (h *Handler) authorize(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
 	var authData auth.Authorize
 	if err := web.Decode(r, &authData); err != nil {
 		return nil, errs.New(errs.FailedPrecondition, err)
@@ -87,7 +83,7 @@ func (h *Handler) authorize(ctx context.Context, _ http.ResponseWriter, r *http.
 	return nil, nil
 }
 
-func (h *Handler) token(ctx context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
+func (h *Handler) token(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
 	kid := web.Param(r, "kid")
 	if kid == "" {
 		return nil, errs.New(errs.FailedPrecondition, validate.NewFieldsError("kid", errors.New("missing kid")))

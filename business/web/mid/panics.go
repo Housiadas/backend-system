@@ -20,7 +20,7 @@ func (m *Mid) Recoverer() func(next http.Handler) http.Handler {
 					trace := debug.Stack()
 					err := errs.Newf(errs.Internal, "PANIC [%v] TRACE[%s]", rec, string(trace))
 					m.Log.Error(ctx, "panic mid", err)
-					m.Web.Respond(err)
+					http.Error(w, err.Error(), errs.Internal.Value())
 				}
 			}()
 

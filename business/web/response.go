@@ -1,18 +1,17 @@
 package web
 
 import (
-	"encoding/json"
+	"context"
+	"errors"
+	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/Housiadas/backend-system/foundation/tracer"
 )
-
-type httpStatus interface {
-	HTTPStatus() int
-}
 
 type Respond struct {
 	Log *logger.Logger
@@ -24,42 +23,75 @@ func NewRespond(log *logger.Logger) *Respond {
 	}
 }
 
-func (resp *Respond) Respond(data any) http.HandlerFunc {
+func (respond *Respond) Respond(handlerFunc HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		statusCode := http.StatusOK
+		ctx := SetTraceID(r.Context(), uuid.NewString())
 
-		switch v := data.(type) {
-		case httpStatus:
-			statusCode = v.HTTPStatus()
-		case error:
-			statusCode = http.StatusInternalServerError
+		resp, err := handlerFunc(ctx, w, r)
+		if err != nil {
+			if err := responseError(ctx, w, err); err != nil {
+				respond.Log.Error(ctx, "web-respond-error", "ERROR", err)
+			}
+			return
 		}
 
-		_, span := tracer.AddSpan(ctx, "web.response", attribute.Int("status", statusCode))
-		defer span.End()
+		if err := responseData(ctx, w, resp); err != nil {
+			respond.Log.Error(ctx, "web-respond", "ERROR", err)
+		}
+	}
+}
 
-		if data == nil {
+func responseError(ctx context.Context, w http.ResponseWriter, err error) error {
+	data, ok := err.(Encoder)
+	if !ok {
+		return fmt.Errorf("error value does not implement the encoder interface: %T", err)
+	}
+
+	return responseData(ctx, w, data)
+}
+
+func responseData(ctx context.Context, w http.ResponseWriter, dataModel Encoder) error {
+	// If the context has been canceled, it means the client is no longer waiting for a response.
+	if err := ctx.Err(); err != nil {
+		if errors.Is(err, context.Canceled) {
+			return errors.New("client disconnected, do not send response")
+		}
+	}
+
+	var statusCode = http.StatusOK
+
+	switch v := dataModel.(type) {
+	case httpStatus:
+		statusCode = v.HTTPStatus()
+
+	case error:
+		statusCode = http.StatusInternalServerError
+
+	default:
+		if dataModel == nil {
 			statusCode = http.StatusNoContent
 		}
-
-		if statusCode == http.StatusNoContent {
-			w.WriteHeader(statusCode)
-			return
-		}
-
-		jsonData, err := json.Marshal(data)
-		if err != nil {
-			resp.Log.Error(ctx, "web.respond: marshal error", err)
-			return
-		}
-
-		w.WriteHeader(statusCode)
-		if _, err := w.Write(jsonData); err != nil {
-			resp.Log.Error(ctx, "web.respond: write error", err)
-			return
-		}
-
-		return
 	}
+
+	_, span := tracer.AddSpan(ctx, "web.response", attribute.Int("status", statusCode))
+	defer span.End()
+
+	if statusCode == http.StatusNoContent {
+		w.WriteHeader(statusCode)
+		return nil
+	}
+
+	data, contentType, err := dataModel.Encode()
+	if err != nil {
+		return fmt.Errorf("respond: encode: %w", err)
+	}
+
+	w.Header().Set("Content-Type", contentType)
+	w.WriteHeader(statusCode)
+
+	if _, err := w.Write(data); err != nil {
+		return fmt.Errorf("respond: write: %w", err)
+	}
+
+	return nil
 }

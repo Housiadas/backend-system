@@ -9,7 +9,7 @@ import (
 	"github.com/Housiadas/backend-system/business/web"
 )
 
-func (h *Handler) userCreate(ctx context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
+func (h *Handler) userCreate(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
 	var app userapp.NewUser
 	if err := web.Decode(r, &app); err != nil {
 		return nil, errs.New(errs.FailedPrecondition, err)
@@ -23,7 +23,7 @@ func (h *Handler) userCreate(ctx context.Context, _ http.ResponseWriter, r *http
 	return usr, nil
 }
 
-func (h *Handler) userUpdate(ctx context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
+func (h *Handler) userUpdate(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
 	var app userapp.UpdateUser
 	if err := web.Decode(r, &app); err != nil {
 		return nil, errs.New(errs.FailedPrecondition, err)
@@ -37,7 +37,7 @@ func (h *Handler) userUpdate(ctx context.Context, _ http.ResponseWriter, r *http
 	return usr, nil
 }
 
-func (h *Handler) updateRole(ctx context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
+func (h *Handler) updateRole(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
 	var app userapp.UpdateUserRole
 	if err := web.Decode(r, &app); err != nil {
 		return nil, errs.New(errs.FailedPrecondition, err)
@@ -51,7 +51,7 @@ func (h *Handler) updateRole(ctx context.Context, _ http.ResponseWriter, r *http
 	return usr, nil
 }
 
-func (h *Handler) userDelete(ctx context.Context, _ http.ResponseWriter, _ *http.Request) (any, error) {
+func (h *Handler) userDelete(ctx context.Context, _ http.ResponseWriter, _ *http.Request) (web.Encoder, error) {
 	if err := h.App.User.Delete(ctx); err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (h *Handler) userDelete(ctx context.Context, _ http.ResponseWriter, _ *http
 	return nil, nil
 }
 
-func (h *Handler) userQuery(ctx context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
+func (h *Handler) userQuery(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
 	qp, err := userParseQueryParams(r)
 	if err != nil {
 		return nil, errs.New(errs.FailedPrecondition, err)
@@ -73,7 +73,7 @@ func (h *Handler) userQuery(ctx context.Context, _ http.ResponseWriter, r *http.
 	return usr, nil
 }
 
-func (h *Handler) userQueryByID(ctx context.Context, _ http.ResponseWriter, _ *http.Request) (any, error) {
+func (h *Handler) userQueryByID(ctx context.Context, _ http.ResponseWriter, _ *http.Request) (web.Encoder, error) {
 	usr, err := h.App.User.QueryByID(ctx)
 	if err != nil {
 		return nil, err

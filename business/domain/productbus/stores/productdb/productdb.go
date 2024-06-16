@@ -1,4 +1,4 @@
-// Package productdb contains productapi related CRUD functionality.
+// Package productdb contains product related CRUD functionality.
 package productdb
 
 import (
@@ -11,13 +11,13 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/Housiadas/backend-system/business/data/sqldb"
-	"github.com/Housiadas/backend-system/business/data/transaction"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/sys/order"
+	"github.com/Housiadas/backend-system/business/sys/page"
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
-// Store manages the set of APIs for productapi database access.
+// Store manages the set of APIs for product database access.
 type Store struct {
 	log *logger.Logger
 	db  sqlx.ExtContext
@@ -31,9 +31,9 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 	}
 }
 
-// ExecuteUnderTransaction constructs a new Store value replacing the sqlx DB
+// NewWithTx constructs a new Store value replacing the sqlx DB
 // value with a sqlx DB value that is currently inside a transaction.
-func (s *Store) ExecuteUnderTransaction(tx transaction.Transaction) (productbus.Storer, error) {
+func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (productbus.Storer, error) {
 	ec, err := sqldb.GetExtContext(tx)
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func (s *Store) Update(ctx context.Context, prd productbus.Product) error {
 	return nil
 }
 
-// Delete removes the productapi identified by a given ID.
+// Delete removes the product identified by a given ID.
 func (s *Store) Delete(ctx context.Context, prd productbus.Product) error {
 	data := struct {
 		ID string `db:"product_id"`
@@ -106,10 +106,10 @@ func (s *Store) Delete(ctx context.Context, prd productbus.Product) error {
 }
 
 // Query gets all Products from the database.
-func (s *Store) Query(ctx context.Context, filter productbus.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]productbus.Product, error) {
-	data := map[string]interface{}{
-		"offset":        (pageNumber - 1) * rowsPerPage,
-		"rows_per_page": rowsPerPage,
+func (s *Store) Query(ctx context.Context, filter productbus.QueryFilter, orderBy order.By, page page.Page) ([]productbus.Product, error) {
+	data := map[string]any{
+		"offset":        (page.Number() - 1) * page.RowsPerPage(),
+		"rows_per_page": page.RowsPerPage(),
 	}
 
 	const q = `
@@ -129,17 +129,17 @@ func (s *Store) Query(ctx context.Context, filter productbus.QueryFilter, orderB
 	buf.WriteString(orderByClause)
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
-	var dbPrds []dbProduct
+	var dbPrds []product
 	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbPrds); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	return toCoreProducts(dbPrds), nil
+	return toBusProducts(dbPrds)
 }
 
 // Count returns the total number of users in the DB.
 func (s *Store) Count(ctx context.Context, filter productbus.QueryFilter) (int, error) {
-	data := map[string]interface{}{}
+	data := map[string]any{}
 
 	const q = `
 	SELECT
@@ -162,7 +162,7 @@ func (s *Store) Count(ctx context.Context, filter productbus.QueryFilter) (int, 
 	return count.Count, nil
 }
 
-// QueryByID finds the productapi identified by a given ID.
+// QueryByID finds the product identified by a given ID.
 func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (productbus.Product, error) {
 	data := struct {
 		ID string `db:"product_id"`
@@ -178,7 +178,7 @@ func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (productbus.
 	WHERE
 		product_id = :product_id`
 
-	var dbPrd dbProduct
+	var dbPrd product
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbPrd); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
 			return productbus.Product{}, fmt.Errorf("db: %w", productbus.ErrNotFound)
@@ -186,10 +186,10 @@ func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (productbus.
 		return productbus.Product{}, fmt.Errorf("db: %w", err)
 	}
 
-	return toCoreProduct(dbPrd), nil
+	return toBusProduct(dbPrd)
 }
 
-// QueryByUserID finds the productapi identified by a given User ID.
+// QueryByUserID finds the product identified by a given User ID.
 func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]productbus.Product, error) {
 	data := struct {
 		ID string `db:"user_id"`
@@ -205,10 +205,10 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]productb
 	WHERE
 		user_id = :user_id`
 
-	var dbPrds []dbProduct
+	var dbPrds []product
 	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dbPrds); err != nil {
 		return nil, fmt.Errorf("db: %w", err)
 	}
 
-	return toCoreProducts(dbPrds), nil
+	return toBusProducts(dbPrds)
 }

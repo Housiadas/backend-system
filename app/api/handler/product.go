@@ -9,7 +9,7 @@ import (
 	"github.com/Housiadas/backend-system/business/web"
 )
 
-func (h *Handler) productCreate(ctx context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
+func (h *Handler) productCreate(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
 	var app productapp.NewProduct
 	if err := web.Decode(r, &app); err != nil {
 		return nil, errs.New(errs.FailedPrecondition, err)
@@ -23,7 +23,7 @@ func (h *Handler) productCreate(ctx context.Context, _ http.ResponseWriter, r *h
 	return prd, nil
 }
 
-func (h *Handler) productUpdate(ctx context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
+func (h *Handler) productUpdate(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
 	var app productapp.UpdateProduct
 	if err := web.Decode(r, &app); err != nil {
 		return nil, errs.New(errs.FailedPrecondition, err)
@@ -37,7 +37,7 @@ func (h *Handler) productUpdate(ctx context.Context, _ http.ResponseWriter, r *h
 	return prd, nil
 }
 
-func (h *Handler) productDelete(ctx context.Context, _ http.ResponseWriter, _ *http.Request) (any, error) {
+func (h *Handler) productDelete(ctx context.Context, _ http.ResponseWriter, _ *http.Request) (web.Encoder, error) {
 	if err := h.App.Product.Delete(ctx); err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (h *Handler) productDelete(ctx context.Context, _ http.ResponseWriter, _ *h
 	return nil, nil
 }
 
-func (h *Handler) productQuery(ctx context.Context, _ http.ResponseWriter, r *http.Request) (any, error) {
+func (h *Handler) productQuery(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
 	qp, err := productParseQueryParams(r)
 	if err != nil {
 		return nil, errs.New(errs.FailedPrecondition, err)
@@ -59,7 +59,7 @@ func (h *Handler) productQuery(ctx context.Context, _ http.ResponseWriter, r *ht
 	return prd, nil
 }
 
-func (h *Handler) productQueryByID(ctx context.Context, _ http.ResponseWriter, _ *http.Request) (any, error) {
+func (h *Handler) productQueryByID(ctx context.Context, _ http.ResponseWriter, _ *http.Request) (web.Encoder, error) {
 	prd, err := h.App.Product.QueryByID(ctx)
 	if err != nil {
 		return nil, err

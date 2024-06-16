@@ -66,7 +66,7 @@ func New(cfg Config) (*Auth, error) {
 	// user enabled check.
 	var userBus *userbus.Business
 	if cfg.DB != nil {
-		userBus = userbus.NewBusiness(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB), nil)
+		userBus = userbus.NewBusiness(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB))
 	}
 
 	a := Auth{

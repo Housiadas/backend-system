@@ -2,27 +2,29 @@ package productapp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"github.com/Housiadas/backend-system/business/web"
 	"time"
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/foundation/validate"
+	"github.com/Housiadas/backend-system/business/web"
 )
 
 // QueryParams represents the set of possible query strings.
 type QueryParams struct {
-	Page     int    `query:"page"`
-	Rows     int    `query:"rows"`
-	OrderBy  string `query:"orderBy"`
-	ID       string `query:"product_id"`
-	Name     string `query:"name"`
-	Cost     string `query:"cost"`
-	Quantity string `query:"quantity"`
+	Page     string
+	Rows     string
+	OrderBy  string
+	ID       string
+	Name     string
+	Cost     string
+	Quantity string
 }
 
-// Product represents information about an individual productapi.
+// =============================================================================
+
+// Product represents information about an individual product.
 type Product struct {
 	ID          string  `json:"id"`
 	UserID      string  `json:"userID"`
@@ -33,11 +35,17 @@ type Product struct {
 	DateUpdated string  `json:"dateUpdated"`
 }
 
+// Encode implements the encoder interface.
+func (app Product) Encode() ([]byte, string, error) {
+	data, err := json.Marshal(app)
+	return data, "application/json", err
+}
+
 func toAppProduct(prd productbus.Product) Product {
 	return Product{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
-		Name:        prd.Name,
+		Name:        prd.Name.String(),
 		Cost:        prd.Cost,
 		Quantity:    prd.Quantity,
 		DateCreated: prd.DateCreated.Format(time.RFC3339),
@@ -46,19 +54,35 @@ func toAppProduct(prd productbus.Product) Product {
 }
 
 func toAppProducts(prds []productbus.Product) []Product {
-	items := make([]Product, len(prds))
+	app := make([]Product, len(prds))
 	for i, prd := range prds {
-		items[i] = toAppProduct(prd)
+		app[i] = toAppProduct(prd)
 	}
 
-	return items
+	return app
 }
 
-// NewProduct defines the data needed to add a new productapi.
+// =============================================================================
+
+// NewProduct defines the data needed to add a new product.
 type NewProduct struct {
 	Name     string  `json:"name" validate:"required"`
 	Cost     float64 `json:"cost" validate:"required,gte=0"`
 	Quantity int     `json:"quantity" validate:"required,gte=1"`
+}
+
+// Decode implements the decoder interface.
+func (app *NewProduct) Decode(data []byte) error {
+	return json.Unmarshal(data, &app)
+}
+
+// Validate checks the data in the model is considered clean.
+func (app *NewProduct) Validate() error {
+	if err := errs.Check(app); err != nil {
+		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+	}
+
+	return nil
 }
 
 func toBusNewProduct(ctx context.Context, app NewProduct) (productbus.NewProduct, error) {
@@ -67,47 +91,59 @@ func toBusNewProduct(ctx context.Context, app NewProduct) (productbus.NewProduct
 		return productbus.NewProduct{}, fmt.Errorf("getuserid: %w", err)
 	}
 
-	prd := productbus.NewProduct{
+	name, err := productbus.Names.Parse(app.Name)
+	if err != nil {
+		return productbus.NewProduct{}, fmt.Errorf("parse name: %w", err)
+	}
+
+	bus := productbus.NewProduct{
 		UserID:   userID,
-		Name:     app.Name,
+		Name:     name,
 		Cost:     app.Cost,
 		Quantity: app.Quantity,
 	}
 
-	return prd, nil
+	return bus, nil
 }
 
-// Validate checks the data in the model is considered clean.
-func (app NewProduct) Validate() error {
-	if err := validate.Check(app); err != nil {
-		return errs.Newf(errs.FailedPrecondition, "validate: %s", err)
-	}
+// =============================================================================
 
-	return nil
-}
-
-// UpdateProduct defines the data needed to update a productapi.
+// UpdateProduct defines the data needed to update a product.
 type UpdateProduct struct {
 	Name     *string  `json:"name"`
 	Cost     *float64 `json:"cost" validate:"omitempty,gte=0"`
 	Quantity *int     `json:"quantity" validate:"omitempty,gte=1"`
 }
 
-func toBusUpdateProduct(app UpdateProduct) productbus.UpdateProduct {
-	core := productbus.UpdateProduct{
-		Name:     app.Name,
+// Decode implements the decoder interface.
+func (app *UpdateProduct) Decode(data []byte) error {
+	return json.Unmarshal(data, &app)
+}
+
+// Validate checks the data in the model is considered clean.
+func (app *UpdateProduct) Validate() error {
+	if err := errs.Check(app); err != nil {
+		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+	}
+
+	return nil
+}
+
+func toBusUpdateProduct(app UpdateProduct) (productbus.UpdateProduct, error) {
+	var name *productbus.Name
+	if app.Name != nil {
+		nm, err := productbus.Names.Parse(*app.Name)
+		if err != nil {
+			return productbus.UpdateProduct{}, fmt.Errorf("parse: %w", err)
+		}
+		name = &nm
+	}
+
+	bus := productbus.UpdateProduct{
+		Name:     name,
 		Cost:     app.Cost,
 		Quantity: app.Quantity,
 	}
 
-	return core
-}
-
-// Validate checks the data in the model is considered clean.
-func (app UpdateProduct) Validate() error {
-	if err := validate.Check(app); err != nil {
-		return errs.Newf(errs.FailedPrecondition, "validate: %s", err)
-	}
-
-	return nil
+	return bus, nil
 }

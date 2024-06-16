@@ -4,14 +4,15 @@ package userapp
 import (
 	"context"
 	"errors"
-	"github.com/Housiadas/backend-system/business/web"
+	"github.com/Housiadas/backend-system/foundation/validate"
 	"net/mail"
 
 	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/business/sys/order"
 	"github.com/Housiadas/backend-system/business/sys/page"
-	"github.com/Housiadas/backend-system/foundation/validate"
+	"github.com/Housiadas/backend-system/business/web"
 )
 
 // App manages the set of app layer api functions for the user domain.
@@ -20,7 +21,7 @@ type App struct {
 	auth    *auth.Auth
 }
 
-// NewApp constructs a user core API for use.
+// NewApp constructs a user app API for use.
 func NewApp(userBus *userbus.Business, auth *auth.Auth) *App {
 	return &App{
 		auth:    auth,
@@ -59,14 +60,14 @@ func (c *App) Token(ctx context.Context, kid string) (Token, error) {
 	return toToken(tkn), nil
 }
 
-// Create adds a new user to the systemapi.
-func (c *App) Create(ctx context.Context, app NewUser) (User, error) {
+// Create adds a new user to the system.
+func (a *App) Create(ctx context.Context, app NewUser) (User, error) {
 	nc, err := toBusNewUser(app)
 	if err != nil {
-		return User{}, errs.New(errs.FailedPrecondition, err)
+		return User{}, errs.New(errs.InvalidArgument, err)
 	}
 
-	usr, err := c.userBus.Create(ctx, nc)
+	usr, err := a.userBus.Create(ctx, nc)
 	if err != nil {
 		if errors.Is(err, userbus.ErrUniqueEmail) {
 			return User{}, errs.New(errs.Aborted, userbus.ErrUniqueEmail)
@@ -78,10 +79,10 @@ func (c *App) Create(ctx context.Context, app NewUser) (User, error) {
 }
 
 // Update updates an existing user.
-func (c *App) Update(ctx context.Context, app UpdateUser) (User, error) {
+func (a *App) Update(ctx context.Context, app UpdateUser) (User, error) {
 	uu, err := toBusUpdateUser(app)
 	if err != nil {
-		return User{}, errs.New(errs.FailedPrecondition, err)
+		return User{}, errs.New(errs.InvalidArgument, err)
 	}
 
 	usr, err := web.GetUser(ctx)
@@ -89,7 +90,7 @@ func (c *App) Update(ctx context.Context, app UpdateUser) (User, error) {
 		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
 	}
 
-	updUsr, err := c.userBus.Update(ctx, usr, uu)
+	updUsr, err := a.userBus.Update(ctx, usr, uu)
 	if err != nil {
 		return User{}, errs.Newf(errs.Internal, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
 	}
@@ -98,10 +99,10 @@ func (c *App) Update(ctx context.Context, app UpdateUser) (User, error) {
 }
 
 // UpdateRole updates an existing user's role.
-func (c *App) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) {
+func (a *App) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) {
 	uu, err := toBusUpdateUserRole(app)
 	if err != nil {
-		return User{}, errs.New(errs.FailedPrecondition, err)
+		return User{}, errs.New(errs.InvalidArgument, err)
 	}
 
 	usr, err := web.GetUser(ctx)
@@ -109,7 +110,7 @@ func (c *App) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) 
 		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
 	}
 
-	updUsr, err := c.userBus.Update(ctx, usr, uu)
+	updUsr, err := a.userBus.Update(ctx, usr, uu)
 	if err != nil {
 		return User{}, errs.Newf(errs.Internal, "updaterole: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
 	}
@@ -117,14 +118,14 @@ func (c *App) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) 
 	return toAppUser(updUsr), nil
 }
 
-// Delete removes a user from the systemapi.
-func (c *App) Delete(ctx context.Context) error {
+// Delete removes a user from the system.
+func (a *App) Delete(ctx context.Context) error {
 	usr, err := web.GetUser(ctx)
 	if err != nil {
 		return errs.Newf(errs.Internal, "userID missing in context: %s", err)
 	}
 
-	if err := c.userBus.Delete(ctx, usr); err != nil {
+	if err := a.userBus.Delete(ctx, usr); err != nil {
 		return errs.Newf(errs.Internal, "delete: userID[%s]: %s", usr.ID, err)
 	}
 
@@ -132,36 +133,37 @@ func (c *App) Delete(ctx context.Context) error {
 }
 
 // Query returns a list of users with paging.
-func (c *App) Query(ctx context.Context, qp QueryParams) (page.Document[User], error) {
-	if err := validatePaging(qp); err != nil {
-		return page.Document[User]{}, err
+func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[User], error) {
+	p, err := page.Parse(qp.Page, qp.Rows)
+	if err != nil {
+		return page.Result[User]{}, errs.NewFieldsError("page", err)
 	}
 
 	filter, err := parseFilter(qp)
 	if err != nil {
-		return page.Document[User]{}, err
+		return page.Result[User]{}, err
 	}
 
-	orderBy, err := parseOrder(qp)
+	orderBy, err := order.Parse(orderByFields, qp.OrderBy, defaultOrderBy)
 	if err != nil {
-		return page.Document[User]{}, err
+		return page.Result[User]{}, errs.NewFieldsError("order", err)
 	}
 
-	usrs, err := c.userBus.Query(ctx, filter, orderBy, qp.Page, qp.Rows)
+	usrs, err := a.userBus.Query(ctx, filter, orderBy, p)
 	if err != nil {
-		return page.Document[User]{}, errs.Newf(errs.Internal, "query: %s", err)
+		return page.Result[User]{}, errs.Newf(errs.Internal, "query: %s", err)
 	}
 
-	total, err := c.userBus.Count(ctx, filter)
+	total, err := a.userBus.Count(ctx, filter)
 	if err != nil {
-		return page.Document[User]{}, errs.Newf(errs.Internal, "count: %s", err)
+		return page.Result[User]{}, errs.Newf(errs.Internal, "count: %s", err)
 	}
 
-	return page.NewDocument(toAppUsers(usrs), total, qp.Page, qp.Rows), nil
+	return page.NewResult(toAppUsers(usrs), total, p), nil
 }
 
-// QueryByID returns a user by its ID.
-func (c *App) QueryByID(ctx context.Context) (User, error) {
+// QueryByID returns a user by its Ia.
+func (a *App) QueryByID(ctx context.Context) (User, error) {
 	usr, err := web.GetUser(ctx)
 	if err != nil {
 		return User{}, errs.Newf(errs.Internal, "querybyid: %s", err)
