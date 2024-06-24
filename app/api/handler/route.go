@@ -7,7 +7,7 @@ import (
 	"github.com/riandyrn/otelchi"
 	httpSwagger "github.com/swaggo/http-swagger"
 
-	"github.com/Housiadas/backend-system/business/auth"
+	"github.com/Housiadas/backend-system/business/domain/authbus"
 )
 
 // Routes returns applications router
@@ -15,13 +15,13 @@ func (h *Handler) Routes() *chi.Mux {
 	mid := h.Web.Mid
 
 	authenticate := mid.Bearer()
-	ruleAny := mid.Authorize(auth.RuleAny)
-	ruleUserOnly := mid.Authorize(auth.RuleUserOnly)
-	ruleAdmin := mid.Authorize(auth.RuleAdminOnly)
+	ruleAny := mid.Authorize(authbus.RuleAny)
+	ruleUserOnly := mid.Authorize(authbus.RuleUserOnly)
+	ruleAdmin := mid.Authorize(authbus.RuleAdminOnly)
 
-	ruleAuthorizeUser := mid.AuthorizeUser(auth.RuleAdminOrSubject)
-	ruleAuthorizeAdmin := mid.AuthorizeUser(auth.RuleAdminOnly)
-	ruleAuthorizeProduct := mid.AuthorizeProduct(auth.RuleAdminOrSubject)
+	ruleAuthorizeUser := mid.AuthorizeUser(authbus.RuleAdminOrSubject)
+	ruleAuthorizeAdmin := mid.AuthorizeUser(authbus.RuleAdminOnly)
+	ruleAuthorizeProduct := mid.AuthorizeProduct(authbus.RuleAdminOrSubject)
 
 	apiRouter := chi.NewRouter()
 	apiRouter.Use(
