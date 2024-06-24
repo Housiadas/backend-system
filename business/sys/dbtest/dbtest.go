@@ -29,9 +29,6 @@ const (
 	DBPassword = "secret123"
 	DBName     = "housi_db"
 	DBPort     = "5432"
-
-	MigrateImage = "migrate/migrate"
-	MigrateName  = "test_migrate"
 )
 
 var migrateDbUrl = "postgres://housi:secret123@localhost:5432/%s?sslmode=disable"
@@ -118,7 +115,7 @@ func NewDatabase(t *testing.T, testName string) *Database {
 	db, err := sqldb.Open(sqldb.Config{
 		User:       DBUser,
 		Password:   DBPassword,
-		Host:       DBPassword,
+		Host:       c.HostPort,
 		Name:       dbName,
 		DisableTLS: true,
 	})
@@ -126,10 +123,11 @@ func NewDatabase(t *testing.T, testName string) *Database {
 		t.Fatalf("[TEST]: Opening database connection: %v", err)
 	}
 
+	// -------------------------------------------------------------------------
 	t.Logf("[TEST]: migrate Database UP %s\n", dbName)
-	mc, err := migrateUp(fmt.Sprintf(migrateDbUrl, dbName))
+
+	err = migration(fmt.Sprintf(migrateDbUrl, dbName))
 	if err != nil {
-		t.Logf("[TEST]: Logs for %s\n%s:", mc.Name, docker.DumpContainerLogs(mc.Name))
 		t.Fatalf("[TEST]: Migrating error: %s", err)
 	}
 
@@ -140,8 +138,7 @@ func NewDatabase(t *testing.T, testName string) *Database {
 
 	// -------------------------------------------------------------------------
 
-	// teardown is the function that should be invoked when the caller is done
-	// with the database.
+	// teardown is the function that should be invoked when the caller is done with the database.
 	teardown := func() {
 		t.Helper()
 

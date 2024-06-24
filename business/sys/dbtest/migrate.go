@@ -1,33 +1,23 @@
 package dbtest
 
 import (
-	"github.com/Housiadas/backend-system/foundation/docker"
+	"database/sql"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-func migrateUp(dbTestURL string) (docker.Container, error) {
-	dockerArgs := []string{
-		"--entrypoint", "migrate",
+func migration(dbTestURL string) error {
+	db, err := sql.Open("postgres", dbTestURL)
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://../../data/migrations",
+		"postgres",
+		driver,
+	)
+	err = m.Up() // or m.Step(2) if you want to explicitly set the number of migrations to run
+	if err != nil {
+		return err
 	}
-	appArgs := []string{
-		"-path", "./business/data/migrations",
-		"-database", dbTestURL,
-		"up",
-	}
-
-	c, err := docker.StartContainer(MigrateImage, MigrateName, "", "", dockerArgs, appArgs)
-	return c, err
+	return nil
 }
-
-//func migrateDown(dbTestURL string) (docker.Container, error) {
-//	dockerArgs := []string{
-//		"--entrypoint", "migrate",
-//	}
-//	appArgs := []string{
-//		"-path", "./business/data/migrations",
-//		"-database", dbTestURL,
-//		"down",
-//	}
-//
-//	c, err := docker.StartContainer(MigrateImage, MigrateName, "", dockerArgs, appArgs)
-//	return c, err
-//}
