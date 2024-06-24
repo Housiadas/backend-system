@@ -8,6 +8,7 @@ import (
 
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/business/sys/validation"
 )
 
 // QueryParams represents the set of possible query strings.
@@ -38,8 +39,8 @@ func (app *AuthenticateUser) Encode() ([]byte, string, error) {
 
 // Validate checks the data in the model is considered clean.
 func (app *AuthenticateUser) Validate() error {
-	if err := errs.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+	if err := validation.Check(app); err != nil {
+		return errs.Newf(errs.InvalidArgument, "validation: %s", err)
 	}
 
 	return nil
@@ -113,8 +114,8 @@ func (app *NewUser) Decode(data []byte) error {
 
 // Validate checks the data in the model is considered clean.
 func (app *NewUser) Validate() error {
-	if err := errs.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+	if err := validation.Check(app); err != nil {
+		return errs.Newf(errs.InvalidArgument, "validation: %s", err)
 	}
 
 	return nil
@@ -155,7 +156,7 @@ func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 
 // UpdateUserRole defines the data needed to update a user role.
 type UpdateUserRole struct {
-	Roles []string `json:"roles" validate:"required"`
+	Roles []string `json:"roles" validation:"required"`
 }
 
 // Decode implements the decoder interface.
@@ -165,8 +166,8 @@ func (app *UpdateUserRole) Decode(data []byte) error {
 
 // Validate checks the data in the model is considered clean.
 func (app *UpdateUserRole) Validate() error {
-	if err := errs.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+	if err := validation.Check(app); err != nil {
+		return errs.Newf(errs.InvalidArgument, "validation: %s", err)
 	}
 
 	return nil
@@ -211,8 +212,8 @@ func (app *UpdateUser) Decode(data []byte) error {
 
 // Validate checks the data in the model is considered clean.
 func (app *UpdateUser) Validate() error {
-	if err := errs.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+	if err := validation.Check(app); err != nil {
+		return errs.Newf(errs.InvalidArgument, "validation: %s", err)
 	}
 
 	return nil

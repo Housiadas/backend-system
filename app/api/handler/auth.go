@@ -12,14 +12,14 @@ import (
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/business/sys/validation"
 	"github.com/Housiadas/backend-system/business/web"
-	"github.com/Housiadas/backend-system/foundation/validate"
 )
 
 func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
 	kid := web.Header(r, "kid")
 	if kid == "" {
-		return nil, errs.New(errs.FailedPrecondition, validate.NewFieldsError("kid", errors.New("missing kid")))
+		return nil, errs.New(errs.FailedPrecondition, validation.NewFieldsError("kid", errors.New("missing kid")))
 	}
 
 	var requestData userapp.AuthenticateUser
@@ -55,7 +55,7 @@ func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *ht
 
 	// This will generate a JWT with the claims embedded in them. The database
 	// with need to be configured with the information found in the public key
-	// file to validate these claims. Dgraph does not support key rotate at this time.
+	// file to validation these claims. Dgraph does not support key rotate at this time.
 	token, err := h.Business.Auth.GenerateToken(kid, claims)
 	if err != nil {
 		return nil, fmt.Errorf("generating token: %w", err)
@@ -86,7 +86,7 @@ func (h *Handler) authorize(ctx context.Context, _ http.ResponseWriter, r *http.
 func (h *Handler) token(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
 	kid := web.Param(r, "kid")
 	if kid == "" {
-		return nil, errs.New(errs.FailedPrecondition, validate.NewFieldsError("kid", errors.New("missing kid")))
+		return nil, errs.New(errs.FailedPrecondition, validation.NewFieldsError("kid", errors.New("missing kid")))
 	}
 
 	token, err := h.App.User.Token(ctx, kid)

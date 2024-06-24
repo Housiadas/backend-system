@@ -11,13 +11,13 @@ import (
 func TestNewUsers(n int, role Role) []NewUser {
 	newUsrs := make([]NewUser, n)
 
-	idx := rand.Intn(10000)
+	idx := rand.Intn(1000)
 	for i := 0; i < n; i++ {
 		idx++
 
 		nu := NewUser{
 			Name:       Names.MustParse(fmt.Sprintf("Name%d", idx)),
-			Email:      mail.Address{Address: fmt.Sprintf("Email%d@gmail.com", idx)},
+			Email:      mail.Address{Address: fmt.Sprintf("Email%d@example.com", idx)},
 			Roles:      []Role{role},
 			Department: fmt.Sprintf("Department%d", idx),
 			Password:   fmt.Sprintf("Password%d", idx),

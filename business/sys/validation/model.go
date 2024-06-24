@@ -1,4 +1,4 @@
-package validate
+package validation
 
 import (
 	"encoding/json"
@@ -14,7 +14,7 @@ type FieldError struct {
 // FieldErrors represents a collection of field errors.
 type FieldErrors []FieldError
 
-// NewFieldsError creates an fields error.
+// NewFieldsError creates a fields' error.
 func NewFieldsError(field string, err error) error {
 	return FieldErrors{
 		{

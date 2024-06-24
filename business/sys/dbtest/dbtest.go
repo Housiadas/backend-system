@@ -4,6 +4,7 @@ package dbtest
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -16,8 +17,21 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/business/web"
+	"github.com/Housiadas/backend-system/foundation/docker"
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
+
+const (
+	PostgresImage         = "postgres:15.4"
+	PostgresContainerName = "db-container"
+
+	DBUser     = "housi"
+	DBPassword = "secret123"
+	DBName     = "housi_db"
+	DBPort     = "5432"
+)
+
+var migrateDbUrl = "postgres://housi:secret123@localhost:5432/%s?sslmode=disable"
 
 // BusDomain represents all the business domain apis needed for testing.
 type BusDomain struct {
@@ -26,7 +40,7 @@ type BusDomain struct {
 }
 
 func newBusDomains(log *logger.Logger, db *sqlx.DB) BusDomain {
-	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db), nil)
+	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db))
 	productBus := productbus.NewBusiness(log, userBus, productdb.NewStore(log, db))
 
 	return BusDomain{
@@ -48,36 +62,38 @@ type Database struct {
 // to handle testing. The database is migrated to the current version and
 // a connection pool is provided with business domain packages.
 func NewDatabase(t *testing.T, testName string) *Database {
-	image := "postgres:16.3"
-	name := "servicetest"
-	port := "5432"
-	dockerArgs := []string{"-e", "POSTGRES_PASSWORD=postgres"}
+
+	dockerArgs := []string{
+		"-e", "POSTGRES_DB=housi_db",
+		"-e", "POSTGRES_USER=housi",
+		"-e", "POSTGRES_PASSWORD=secret123",
+	}
 	appArgs := []string{"-c", "log_statement=all"}
 
-	c, err := docker.StartContainer(image, name, port, dockerArgs, appArgs)
+	c, err := docker.StartContainer(PostgresImage, PostgresContainerName, DBPort, "5432", dockerArgs, appArgs)
 	if err != nil {
-		t.Fatalf("Starting database: %v", err)
+		t.Fatalf("[TEST]: Starting database: %v", err)
 	}
 
 	t.Logf("Name    : %s\n", c.Name)
 	t.Logf("Host: %s\n", c.HostPort)
 
 	dbM, err := sqldb.Open(sqldb.Config{
-		User:       "postgres",
-		Password:   "postgres",
+		User:       DBUser,
+		Password:   DBPassword,
 		Host:       c.HostPort,
-		Name:       "postgres",
+		Name:       DBName,
 		DisableTLS: true,
 	})
 	if err != nil {
-		t.Fatalf("Opening database connection: %v", err)
+		t.Fatalf("[TEST]: Opening database connection: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := sqldb.StatusCheck(ctx, dbM); err != nil {
-		t.Fatalf("status check database: %v", err)
+		t.Fatalf("[TEST]: status check database: %v", err)
 	}
 
 	// -------------------------------------------------------------------------
@@ -91,26 +107,28 @@ func NewDatabase(t *testing.T, testName string) *Database {
 
 	t.Logf("Create Database: %s\n", dbName)
 	if _, err := dbM.ExecContext(context.Background(), "CREATE DATABASE "+dbName); err != nil {
-		t.Fatalf("creating database %s: %v", dbName, err)
+		t.Fatalf("[TEST]: creating database %s: %v", dbName, err)
 	}
 
 	// -------------------------------------------------------------------------
 
 	db, err := sqldb.Open(sqldb.Config{
-		User:       "postgres",
-		Password:   "postgres",
+		User:       DBUser,
+		Password:   DBPassword,
 		Host:       c.HostPort,
 		Name:       dbName,
 		DisableTLS: true,
 	})
 	if err != nil {
-		t.Fatalf("Opening database connection: %v", err)
+		t.Fatalf("[TEST]: Opening database connection: %v", err)
 	}
 
-	t.Logf("Migrate Database: %s\n", dbName)
-	if err := migrate.Migrate(ctx, db); err != nil {
-		t.Logf("Logs for %s\n%s:", c.Name, docker.DumpContainerLogs(c.Name))
-		t.Fatalf("Migrating error: %s", err)
+	// -------------------------------------------------------------------------
+	t.Logf("[TEST]: migrate Database UP %s\n", dbName)
+
+	err = migration(fmt.Sprintf(migrateDbUrl, dbName))
+	if err != nil {
+		t.Fatalf("[TEST]: Migrating error: %s", err)
 	}
 
 	// -------------------------------------------------------------------------
@@ -120,14 +138,13 @@ func NewDatabase(t *testing.T, testName string) *Database {
 
 	// -------------------------------------------------------------------------
 
-	// teardown is the function that should be invoked when the caller is done
-	// with the database.
-	teardown := func() {
+	// should be invoked when the caller is done with the database.
+	t.Cleanup(func() {
 		t.Helper()
 
-		t.Logf("Drop Database: %s\n", dbName)
-		if _, err := dbM.ExecContext(context.Background(), "DROP DATABASE "+dbName); err != nil {
-			t.Fatalf("dropping database %s: %v", dbName, err)
+		t.Logf("[TEST]: Drop Database: %s\n", dbName)
+		if _, err := dbM.ExecContext(context.Background(), "DROP DATABASE "+dbName+" WITH (force)"); err != nil {
+			t.Fatalf("[TEST]: dropping database %s: %v", dbName, err)
 		}
 
 		db.Close()
@@ -136,9 +153,7 @@ func NewDatabase(t *testing.T, testName string) *Database {
 		t.Logf("******************** LOGS (%s) ********************\n\n", testName)
 		t.Log(buf.String())
 		t.Logf("******************** LOGS (%s) ********************\n", testName)
-	}
-
-	t.Cleanup(teardown)
+	})
 
 	return &Database{
 		DB:        db,
@@ -150,28 +165,28 @@ func NewDatabase(t *testing.T, testName string) *Database {
 // =============================================================================
 
 // StringPointer is a helper to get a *string from a string. It is in the tests
-// package because we normally don't want to deal with pointers to basic types
+// package because we normally don't want to deal with pointers to basic types,
 // but it's useful in some tests.
 func StringPointer(s string) *string {
 	return &s
 }
 
-// IntPointer is a helper to get a *int from a int. It is in the tests package
-// because we normally don't want to deal with pointers to basic types but it's
+// IntPointer is a helper to get a *int from an int. It is in the tests package
+// because we normally don't want to deal with pointers to basic types, but it's
 // useful in some tests.
 func IntPointer(i int) *int {
 	return &i
 }
 
 // FloatPointer is a helper to get a *float64 from a float64. It is in the tests
-// package because we normally don't want to deal with pointers to basic types
+// package because we normally don't want to deal with pointers to basic types,
 // but it's useful in some tests.
 func FloatPointer(f float64) *float64 {
 	return &f
 }
 
 // BoolPointer is a helper to get a *bool from a bool. It is in the tests package
-// because we normally don't want to deal with pointers to basic types but it's
+// because we normally don't want to deal with pointers to basic types, but it's
 // useful in some tests.
 func BoolPointer(b bool) *bool {
 	return &b

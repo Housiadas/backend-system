@@ -4,7 +4,6 @@ package userapp
 import (
 	"context"
 	"errors"
-	"github.com/Housiadas/backend-system/foundation/validate"
 	"net/mail"
 
 	"github.com/Housiadas/backend-system/business/auth"
@@ -12,6 +11,7 @@ import (
 	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/business/sys/order"
 	"github.com/Housiadas/backend-system/business/sys/page"
+	"github.com/Housiadas/backend-system/business/sys/validation"
 	"github.com/Housiadas/backend-system/business/web"
 )
 
@@ -33,7 +33,7 @@ func NewApp(userBus *userbus.Business, auth *auth.Auth) *App {
 func (c *App) Authenticate(ctx context.Context, authUser AuthenticateUser) (User, error) {
 	addr, err := mail.ParseAddress(authUser.Email)
 	if err != nil {
-		return User{}, validate.NewFieldsError("email", err)
+		return User{}, validation.NewFieldsError("email", err)
 	}
 
 	usr, err := c.userBus.Authenticate(ctx, *addr, authUser.Password)
@@ -136,7 +136,7 @@ func (a *App) Delete(ctx context.Context) error {
 func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[User], error) {
 	p, err := page.Parse(qp.Page, qp.Rows)
 	if err != nil {
-		return page.Result[User]{}, errs.NewFieldsError("page", err)
+		return page.Result[User]{}, validation.NewFieldsError("page", err)
 	}
 
 	filter, err := parseFilter(qp)
@@ -146,7 +146,7 @@ func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[User], err
 
 	orderBy, err := order.Parse(orderByFields, qp.OrderBy, defaultOrderBy)
 	if err != nil {
-		return page.Result[User]{}, errs.NewFieldsError("order", err)
+		return page.Result[User]{}, validation.NewFieldsError("order", err)
 	}
 
 	usrs, err := a.userBus.Query(ctx, filter, orderBy, p)
