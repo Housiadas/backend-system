@@ -3,7 +3,6 @@ package mid
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -106,8 +105,6 @@ func (m *Mid) AuthorizeUser(rule string) func(next http.Handler) http.Handler {
 				Rule:   rule,
 			}
 
-			fmt.Println(web.GetClaims(ctx))
-			fmt.Println(web.GetUser(ctx))
 			if err := m.Bus.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
 				err = errs.New(errs.Unauthenticated, err)
 				m.Log.Error(ctx, "authorize user mid: authorize", err)

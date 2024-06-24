@@ -52,7 +52,7 @@ func (h *Handler) Routes() *chi.Mux {
 			u.With(ruleAuthorizeAdmin).Get("/", h.Web.Respond.Respond(h.userQuery))
 			u.With(ruleAuthorizeUser).Get("/{user_id}", h.Web.Respond.Respond(h.userQueryByID))
 			u.With(ruleAdmin).Post("/users", h.Web.Respond.Respond(h.userCreate))
-			u.With(ruleAuthorizeAdmin).Put("/role/{user_id}", h.Web.Respond.Respond(h.updateRole))
+			u.With(ruleAdmin).Put("/role/{user_id}", h.Web.Respond.Respond(h.updateRole))
 			u.With(ruleAuthorizeUser).Put("/{user_id}", h.Web.Respond.Respond(h.userUpdate))
 			u.With(ruleAuthorizeUser).Delete("/{user_id}", h.Web.Respond.Respond(h.userDelete))
 		})
