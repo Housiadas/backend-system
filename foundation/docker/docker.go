@@ -19,13 +19,13 @@ type Container struct {
 }
 
 // StartContainer starts the specified container for running tests.
-func StartContainer(image string, name string, port string, dockerArgs []string, appArgs []string) (Container, error) {
+func StartContainer(image string, name string, externalPort string, internalPort string, dockerArgs []string, appArgs []string) (Container, error) {
 
 	// When this code is used in tests, each test could be running in its own
 	// process, so there is no way to serialize the call. The idea is to wait
 	// for the container to exist if the code fails to start it.
 	for i := 1; i <= 2; i++ {
-		c, err := startContainer(image, name, port, dockerArgs, appArgs)
+		c, err := startContainer(image, name, externalPort, internalPort, dockerArgs, appArgs)
 		if err != nil {
 			time.Sleep(time.Duration(i+1) * 100 * time.Millisecond)
 			continue
@@ -34,7 +34,7 @@ func StartContainer(image string, name string, port string, dockerArgs []string,
 		return c, nil
 	}
 
-	return startContainer(image, name, port, dockerArgs, appArgs)
+	return startContainer(image, name, externalPort, internalPort, dockerArgs, appArgs)
 }
 
 // StopContainer stops and removes the specified container.
@@ -62,12 +62,15 @@ func DumpContainerLogs(id string) []byte {
 
 // =============================================================================
 
-func startContainer(image string, name string, port string, dockerArgs []string, appArgs []string) (Container, error) {
-	if c, err := exists(name, port); err == nil {
+func startContainer(image string, name string, externalPort string, internalPort string, dockerArgs []string, appArgs []string) (Container, error) {
+	if c, err := exists(name, externalPort); err == nil {
 		return c, nil
 	}
 
 	arg := []string{"run", "-P", "-d", "--name", name}
+	if externalPort != "" && internalPort != "" {
+		arg = []string{"run", "-d", "-p", externalPort + ":" + internalPort, "--name", name}
+	}
 	arg = append(arg, dockerArgs...)
 	arg = append(arg, image)
 	arg = append(arg, appArgs...)
@@ -80,7 +83,7 @@ func startContainer(image string, name string, port string, dockerArgs []string,
 	}
 
 	id := out.String()[:12]
-	hostIP, hostPort, err := extractIPPort(id, port)
+	hostIP, hostPort, err := extractIPPort(id, externalPort)
 	if err != nil {
 		err := StopContainer(id)
 		if err != nil {

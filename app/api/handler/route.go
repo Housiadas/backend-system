@@ -31,6 +31,7 @@ func (h *Handler) Routes() *chi.Mux {
 		mid.Recoverer(),
 	)
 
+	// v1 routes
 	apiRouter.Route("/v1", func(v1 chi.Router) {
 		v1.Use(otelchi.Middleware(h.AppName, otelchi.WithChiRoutes(v1)))
 		v1.Use(mid.ApiVersion("v1"))
@@ -68,12 +69,6 @@ func (h *Handler) Routes() *chi.Mux {
 
 	// System Routes
 	router := chi.NewRouter()
-	//router.NotFound(func(w http.ResponseWriter, r *http.Request) {
-	//	h.Web.Respond.Respond(h.notFound)
-	//})
-	//router.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
-	//	h.Web.Respond.Respond(h.notAllowed)
-	//})
 	router.Get("/readiness", h.Web.Respond.Respond(h.readiness))
 	router.Get("/liveness", h.Web.Respond.Respond(h.liveness))
 	router.Handle("/swagger/*", httpSwagger.Handler(

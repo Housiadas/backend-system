@@ -4,6 +4,7 @@ package dbtest
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -21,16 +22,19 @@ import (
 )
 
 const (
-	PostgresImage = "postgres:15.4"
-	DBName        = "db_test"
-	DBPort        = "5434"
-	DBUser        = "test"
-	DBPassword    = "secret123"
-	TestURL       = "postgres://test:secret123@db:5433/test_db?sslmode=disable"
+	PostgresImage         = "postgres:15.4"
+	PostgresContainerName = "db-container"
+
+	DBUser     = "housi"
+	DBPassword = "secret123"
+	DBName     = "housi_db"
+	DBPort     = "5432"
 
 	MigrateImage = "migrate/migrate"
 	MigrateName  = "test_migrate"
 )
+
+var migrateDbUrl = "postgres://housi:secret123@localhost:5432/%s?sslmode=disable"
 
 // BusDomain represents all the business domain apis needed for testing.
 type BusDomain struct {
@@ -62,10 +66,14 @@ type Database struct {
 // a connection pool is provided with business domain packages.
 func NewDatabase(t *testing.T, testName string) *Database {
 
-	dockerArgs := []string{"-e", "POSTGRES_PASSWORD=secret123"}
+	dockerArgs := []string{
+		"-e", "POSTGRES_DB=housi_db",
+		"-e", "POSTGRES_USER=housi",
+		"-e", "POSTGRES_PASSWORD=secret123",
+	}
 	appArgs := []string{"-c", "log_statement=all"}
 
-	c, err := docker.StartContainer(PostgresImage, DBName, DBPort, dockerArgs, appArgs)
+	c, err := docker.StartContainer(PostgresImage, PostgresContainerName, DBPort, "5432", dockerArgs, appArgs)
 	if err != nil {
 		t.Fatalf("[TEST]: Starting database: %v", err)
 	}
@@ -119,7 +127,7 @@ func NewDatabase(t *testing.T, testName string) *Database {
 	}
 
 	t.Logf("[TEST]: migrate Database UP %s\n", dbName)
-	mc, err := migrateUp(TestURL)
+	mc, err := migrateUp(fmt.Sprintf(migrateDbUrl, dbName))
 	if err != nil {
 		t.Logf("[TEST]: Logs for %s\n%s:", mc.Name, docker.DumpContainerLogs(mc.Name))
 		t.Fatalf("[TEST]: Migrating error: %s", err)
