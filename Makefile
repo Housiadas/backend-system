@@ -161,7 +161,8 @@ lint:
 # tests: run tests
 .PHONY: tests
 tests:
-	go test ./... -v --cover --short --race
+	go install github.com/mfridman/tparse@latest
+	CGO_ENABLED=1 go test -v --cover --short --race -json ./... | tparse --all
 
 # coverage: Inspect coverage
 .PHONY: coverage
