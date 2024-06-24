@@ -143,7 +143,7 @@ func NewDatabase(t *testing.T, testName string) *Database {
 		t.Helper()
 
 		t.Logf("[TEST]: Drop Database: %s\n", dbName)
-		if _, err := dbM.ExecContext(context.Background(), "DROP DATABASE "+dbName); err != nil {
+		if _, err := dbM.ExecContext(context.Background(), "DROP DATABASE "+dbName+" WITH (force)"); err != nil {
 			t.Fatalf("[TEST]: dropping database %s: %v", dbName, err)
 		}
 
