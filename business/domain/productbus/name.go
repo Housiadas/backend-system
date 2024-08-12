@@ -21,6 +21,17 @@ func (nameSet) Parse(value string) (Name, error) {
 	return Name{value}, nil
 }
 
+// ParseName parses the string value and returns a name if the value complies
+// with the rules for a name.
+func ParseName(value string) (Name, error) {
+	name, err := Names.Parse(value)
+	if err != nil {
+		panic(err)
+	}
+
+	return name, nil
+}
+
 // MustParse parses the string value and returns a name if the value complies
 // with the rules for a name. If an error occurs the function panics.
 func (nameSet) MustParse(value string) Name {

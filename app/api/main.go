@@ -13,6 +13,7 @@ import (
 	"github.com/Housiadas/backend-system/app/api/handler"
 	"github.com/Housiadas/backend-system/app/domain/productapp"
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
+	"github.com/Housiadas/backend-system/app/domain/tranapp"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/data/sqldb"
@@ -226,6 +227,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 			User:    userapp.NewApp(userBus, authSrv),
 			Product: productapp.NewApp(productBus),
 			System:  systemapp.NewApp(cfg.Version.Build, log, db),
+			Tx:      tranapp.NewApp(userBus, productBus),
 		},
 		Business: handler.Business{
 			Auth:    authSrv,

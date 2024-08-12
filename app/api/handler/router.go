@@ -69,11 +69,14 @@ func (h *Handler) Routes() *chi.Mux {
 			p.With(ruleAuthorizeProduct).Put("/{product_id}", h.Web.Respond.Respond(h.productUpdate))
 			p.With(ruleAuthorizeProduct).Delete("/{product_id}", h.Web.Respond.Respond(h.productDelete))
 		})
+
+		// Transaction example
+		v1.With(tran).Post("/transaction", h.Web.Respond.Respond(h.transaction))
 	})
 
 	// System Routes
 	router := chi.NewRouter()
-	router.With(tran).Get("/readiness", h.Web.Respond.Respond(h.readiness))
+	router.Get("/readiness", h.Web.Respond.Respond(h.readiness))
 	router.Get("/liveness", h.Web.Respond.Respond(h.liveness))
 	router.Handle("/swagger/*", httpSwagger.Handler(
 		httpSwagger.URL("./doc.json"),
