@@ -10,8 +10,7 @@ import (
 func (m *Mid) Otel() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-			ctx = otel.InjectTracing(ctx, m.Tracer)
+			ctx := otel.InjectTracing(r.Context(), m.Tracer)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

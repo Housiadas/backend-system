@@ -31,10 +31,6 @@ import (
 	"github.com/Housiadas/backend-system/foundation/otel"
 )
 
-/*
-	Need to figure out timeouts for http service.
-*/
-
 var build = "develop"
 
 // @title           Backend System
@@ -106,7 +102,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	// Database Support
 	// -------------------------------------------------------------------------
-	log.Info(ctx, "startup", "status", "initializing database support", "hostport", cfg.DB.Host)
+	log.Info(ctx, "startup", "status", "initializing database support", "host port", cfg.DB.Host)
 
 	db, err := sqldb.Open(sqldb.Config{
 		User:         cfg.DB.User,
@@ -127,7 +123,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing authentication support")
 
-	// Load the private keys files from disk. We can assume some systemapi like
+	// Load the private keys files from disk. We can assume some system api like
 	// Vault has created these files already. How that happens is not our concern.
 	ks := keystore.New()
 	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
