@@ -23,6 +23,8 @@ func (h *Handler) Routes() *chi.Mux {
 	ruleAuthorizeAdmin := mid.AuthorizeUser(authbus.RuleAdminOnly)
 	ruleAuthorizeProduct := mid.AuthorizeProduct(authbus.RuleAdminOrSubject)
 
+	tran := mid.BeginCommitRollback()
+
 	apiRouter := chi.NewRouter()
 	apiRouter.Use(
 		mid.Recoverer(),
@@ -71,7 +73,7 @@ func (h *Handler) Routes() *chi.Mux {
 
 	// System Routes
 	router := chi.NewRouter()
-	router.Get("/readiness", h.Web.Respond.Respond(h.readiness))
+	router.With(tran).Get("/readiness", h.Web.Respond.Respond(h.readiness))
 	router.Get("/liveness", h.Web.Respond.Respond(h.liveness))
 	router.Handle("/swagger/*", httpSwagger.Handler(
 		httpSwagger.URL("./doc.json"),

@@ -219,7 +219,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 		Build:   build,
 		Cors:    cfg.Cors,
 		Web: handler.Web{
-			Mid:     mid.New(midBusiness, log, trace),
+			Mid:     mid.New(midBusiness, log, trace, sqldb.NewBeginner(db)),
 			Respond: respond,
 		},
 		App: handler.App{
