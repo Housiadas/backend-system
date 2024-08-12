@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/Housiadas/backend-system/foundation/logger"
-	"github.com/Housiadas/backend-system/foundation/tracer"
+	"github.com/Housiadas/backend-system/foundation/otel"
 )
 
 // HandlerFunc represents a function that handles a http request
@@ -38,7 +37,7 @@ func NewRespond(log *logger.Logger) *Respond {
 func (respond *Respond) Respond(handlerFunc HandlerFunc) http.HandlerFunc {
 	// This is the decorator/middleware pattern in golang
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := SetTraceID(r.Context(), uuid.NewString())
+		ctx := r.Context()
 
 		// Executes the handlerFunc for the specific route
 		resp, err := handlerFunc(ctx, w, r)
@@ -87,7 +86,7 @@ func responseData(ctx context.Context, w http.ResponseWriter, dataModel Encoder)
 		}
 	}
 
-	_, span := tracer.AddSpan(ctx, "web.response", attribute.Int("status", statusCode))
+	_, span := otel.AddSpan(ctx, "web.response", attribute.Int("status", statusCode))
 	defer span.End()
 
 	if statusCode == http.StatusNoContent {

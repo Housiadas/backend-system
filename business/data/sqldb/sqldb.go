@@ -16,7 +16,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/Housiadas/backend-system/foundation/logger"
-	"github.com/Housiadas/backend-system/foundation/tracer"
+	"github.com/Housiadas/backend-system/foundation/otel"
 )
 
 // lib/pq errorCodeNames
@@ -133,7 +133,7 @@ func NamedExecContext(ctx context.Context, log *logger.Logger, db sqlx.ExtContex
 		}
 	}()
 
-	ctx, span := tracer.AddSpan(ctx, "business.api.sqldb.exec", attribute.String("query", q))
+	ctx, span := otel.AddSpan(ctx, "business.api.sqldb.exec", attribute.String("query", q))
 	defer span.End()
 
 	if _, err := sqlx.NamedExecContext(ctx, db, query, data); err != nil {
@@ -181,7 +181,7 @@ func namedQuerySlice[T any](ctx context.Context, log *logger.Logger, db sqlx.Ext
 		}
 	}()
 
-	ctx, span := tracer.AddSpan(ctx, "business.api.sqldb.queryslice", attribute.String("query", q))
+	ctx, span := otel.AddSpan(ctx, "business.api.sqldb.queryslice", attribute.String("query", q))
 	defer span.End()
 
 	var rows *sqlx.Rows
@@ -257,7 +257,7 @@ func namedQueryStruct(ctx context.Context, log *logger.Logger, db sqlx.ExtContex
 		}
 	}()
 
-	ctx, span := tracer.AddSpan(ctx, "business.api.sqldb.query", attribute.String("query", q))
+	ctx, span := otel.AddSpan(ctx, "business.api.sqldb.query", attribute.String("query", q))
 	defer span.End()
 
 	var rows *sqlx.Rows

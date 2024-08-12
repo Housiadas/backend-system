@@ -1,5 +1,5 @@
-// Package tracer provides otel support.
-package tracer
+// Package otel provides otel support.
+package otel
 
 import (
 	"context"
@@ -16,13 +16,10 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
-
-	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
 // Config defines the information needed to init tracing.
 type Config struct {
-	Log            *logger.Logger
 	ServiceName    string
 	Host           string
 	ExcludedRoutes map[string]struct{}
@@ -48,7 +45,7 @@ func InitTracing(cfg Config) (*sdktrace.TracerProvider, error) {
 	}
 
 	traceProvider := sdktrace.NewTracerProvider(
-		sdktrace.WithSampler(newEndpointExcluder(cfg.Log, cfg.ExcludedRoutes, cfg.Probability)),
+		sdktrace.WithSampler(newEndpointExcluder(cfg.ExcludedRoutes, cfg.Probability)),
 		sdktrace.WithBatcher(exporter,
 			sdktrace.WithMaxExportBatchSize(sdktrace.DefaultMaxExportBatchSize),
 			sdktrace.WithBatchTimeout(sdktrace.DefaultScheduleDelay*time.Millisecond),
@@ -67,8 +64,7 @@ func InitTracing(cfg Config) (*sdktrace.TracerProvider, error) {
 	// our traces.
 	otel.SetTracerProvider(traceProvider)
 
-	// Chooses the HTTP header formats we extract incoming trace contexts from,
-	// and the headers we set in outgoing requests.
+	// Extract incoming trace contexts and the headers we set in outgoing requests.
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
 		propagation.TraceContext{},
 		propagation.Baggage{},
@@ -77,25 +73,34 @@ func InitTracing(cfg Config) (*sdktrace.TracerProvider, error) {
 	return traceProvider, nil
 }
 
-// StartTrace initializes a trace by creating an initial span and writing otel
-// related information into the response writer. It also saves the tracer
-// in the context for later use.
-func StartTrace(ctx context.Context, tracer trace.Tracer, spanName string, endpoint string, w http.ResponseWriter) (context.Context, trace.Span) {
-	var span trace.Span
+// InjectTracing initializes the request for tracing by writing otel related
+// information into the response and saving the tracer and trace id in the
+// context for later use.
+func InjectTracing(ctx context.Context, tracer trace.Tracer) context.Context {
+	ctx = setTracer(ctx, tracer)
+	ctx = setTraceID(ctx, trace.SpanFromContext(ctx).SpanContext().TraceID().String())
 
-	switch {
-	case tracer != nil:
-		ctx, span = tracer.Start(ctx, spanName)
-		span.SetAttributes(attribute.String("endpoint", endpoint))
+	return ctx
+}
 
-	default:
-		span = trace.SpanFromContext(ctx)
+// AddSpan adds an otel span to the existing trace.
+func AddSpan(ctx context.Context, spanName string, keyValues ...attribute.KeyValue) (context.Context, trace.Span) {
+	v, ok := ctx.Value(tracerKey).(trace.Tracer)
+	if !ok || v == nil {
+		return ctx, trace.SpanFromContext(ctx)
 	}
 
-	// Inject the trace information into the response.
-	otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(w.Header()))
-
-	ctx = setTracer(ctx, tracer)
+	ctx, span := v.Start(ctx, spanName)
+	for _, kv := range keyValues {
+		span.SetAttributes(kv)
+	}
 
 	return ctx, span
+}
+
+// AddTraceToRequest adds the current trace id to the request so it
+// can be delivered to the service being called.
+func AddTraceToRequest(ctx context.Context, r *http.Request) {
+	hc := propagation.HeaderCarrier(r.Header)
+	otel.GetTextMapPropagator().Inject(ctx, hc)
 }

@@ -90,7 +90,7 @@ func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[Product], 
 		return page.Result[Product]{}, validation.NewFieldsError("order", err)
 	}
 
-	prds, err := a.productBus.Query(ctx, filter, orderBy, p)
+	products, err := a.productBus.Query(ctx, filter, orderBy, p)
 	if err != nil {
 		return page.Result[Product]{}, errs.Newf(errs.Internal, "query: %s", err)
 	}
@@ -100,7 +100,7 @@ func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[Product], 
 		return page.Result[Product]{}, errs.Newf(errs.Internal, "count: %s", err)
 	}
 
-	return page.NewResult(toAppProducts(prds), total, p), nil
+	return page.NewResult(toAppProducts(products), total, p), nil
 }
 
 // QueryByID returns a product by its Ia.

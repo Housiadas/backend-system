@@ -25,10 +25,12 @@ func (h *Handler) Routes() *chi.Mux {
 
 	apiRouter := chi.NewRouter()
 	apiRouter.Use(
+		mid.Recoverer(),
 		mid.RequestID,
+		mid.Otel(),
+		mid.Logger(),
 		middleware.SetHeader("Content-Type", "application/json"),
 		middleware.GetHead,
-		mid.Recoverer(),
 	)
 
 	// v1 routes

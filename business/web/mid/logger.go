@@ -22,6 +22,7 @@ func (m *Mid) Logger() func(next http.Handler) http.Handler {
 			}
 
 			m.Log.Info(ctx, "request started", "method", method, "path", path, "remoteaddr", remoteAddr)
+
 			defer func() {
 				m.Log.Info(ctx, "request completed",
 					"path", path,
@@ -32,7 +33,7 @@ func (m *Mid) Logger() func(next http.Handler) http.Handler {
 				)
 			}()
 
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }
