@@ -8,9 +8,9 @@ import (
 // The values are read by viper from a config file or environment variable.
 type Config struct {
 	App     App
+	Version Version
 	DB      DB
 	Server  Server
-	Version Version
 	Auth    Auth
 	Kafka   Kafka
 	Tempo   Tempo

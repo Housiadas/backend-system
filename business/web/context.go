@@ -3,7 +3,6 @@ package web
 import (
 	"context"
 	"errors"
-
 	"github.com/google/uuid"
 
 	"github.com/Housiadas/backend-system/business/domain/authbus"
@@ -11,16 +10,15 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 )
 
-type ctxKey int
+type ctxKey string
 
 const (
-	requestID ctxKey = iota + 1
-	apiVersion
-	traceKey
-	claimKey
-	userIDKey
-	userKey
-	productKey
+	requestID  ctxKey = "requestID"
+	apiVersion ctxKey = "apiVersion"
+	claimKey   ctxKey = "claimKey"
+	userIDKey  ctxKey = "userIDKey"
+	userKey    ctxKey = "userKey"
+	productKey ctxKey = "productKey"
 )
 
 func SetRequestID(ctx context.Context, reqId string) context.Context {
@@ -100,18 +98,4 @@ func GetProduct(ctx context.Context) (productbus.Product, error) {
 	}
 
 	return v, nil
-}
-
-func SetTraceID(ctx context.Context, traceID string) context.Context {
-	return context.WithValue(ctx, traceKey, traceID)
-}
-
-// GetTraceID returns the trace id from the context.
-func GetTraceID(ctx context.Context) string {
-	v, ok := ctx.Value(traceKey).(string)
-	if !ok {
-		return "00000000-0000-0000-0000-000000000000"
-	}
-
-	return v
 }

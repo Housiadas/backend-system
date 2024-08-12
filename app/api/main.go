@@ -28,7 +28,7 @@ import (
 	"github.com/Housiadas/backend-system/foundation/kafka"
 	"github.com/Housiadas/backend-system/foundation/keystore"
 	"github.com/Housiadas/backend-system/foundation/logger"
-	"github.com/Housiadas/backend-system/foundation/tracer"
+	"github.com/Housiadas/backend-system/foundation/otel"
 )
 
 /*
@@ -62,7 +62,7 @@ func main() {
 		},
 	}
 	traceIDFn := func(ctx context.Context) string {
-		return web.GetTraceID(ctx)
+		return otel.GetTraceID(ctx)
 	}
 
 	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "API", traceIDFn, events)
@@ -149,6 +149,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// Initialize Kafka Producer
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing kafka support")
+
 	producer, err := kafka.NewProducer(kafka.ProducerConfig{
 		Brokers:          cfg.Kafka.Brokers,
 		LogLevel:         cfg.Kafka.LogLevel,
@@ -166,8 +167,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing tracing support")
 
-	traceProvider, err := tracer.InitTracing(tracer.Config{
-		Log:         log,
+	traceProvider, err := otel.InitTracing(otel.Config{
 		ServiceName: cfg.App.Name,
 		Host:        cfg.Tempo.Host,
 		ExcludedRoutes: map[string]struct{}{
@@ -179,12 +179,13 @@ func run(ctx context.Context, log *logger.Logger) error {
 	if err != nil {
 		return fmt.Errorf("starting tracing: %w", err)
 	}
+
 	defer traceProvider.Shutdown(context.Background())
 
-	tr := traceProvider.Tracer(cfg.App.Name)
+	trace := traceProvider.Tracer(cfg.App.Name)
 
 	// -------------------------------------------------------------------------
-	// Build Business APIs
+	// Build Business Layer
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing business core")
 
@@ -218,11 +219,11 @@ func run(ctx context.Context, log *logger.Logger) error {
 		AppName: cfg.App.Name,
 		Log:     log,
 		DB:      db,
-		Tracer:  tr,
+		Tracer:  trace,
 		Build:   build,
 		Cors:    cfg.Cors,
 		Web: handler.Web{
-			Mid:     mid.New(midBusiness, log),
+			Mid:     mid.New(midBusiness, log, trace),
 			Respond: respond,
 		},
 		App: handler.App{

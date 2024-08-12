@@ -12,7 +12,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/foundation/tracer"
+	"github.com/Housiadas/backend-system/foundation/otel"
 )
 
 func (cln *Client) rawRequest(ctx context.Context, method string, endpoint string, headers map[string]string, r io.Reader, v any) error {
@@ -29,7 +29,7 @@ func (cln *Client) rawRequest(ctx context.Context, method string, endpoint strin
 		cln.log.Info(ctx, "http request: completed", "status", statusCode)
 	}()
 
-	ctx, span := tracer.AddSpan(ctx, fmt.Sprintf("app.api.authclient.%s", base), attribute.String("endpoint", endpoint))
+	ctx, span := otel.AddSpan(ctx, fmt.Sprintf("app.api.authclient.%s", base), attribute.String("endpoint", endpoint))
 	defer func() {
 		span.SetAttributes(attribute.Int("status", statusCode))
 		span.End()
