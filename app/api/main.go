@@ -55,7 +55,9 @@ func main() {
 
 	events := logger.Events{
 		Error: func(ctx context.Context, r logger.Record) {
-			log.Info(ctx, "******* SEND ALERT *******")
+			log.Info(ctx, "******* SEND ALERT *******",
+				"attributes:", r.Attributes, // this contains all the necessary information for the alert
+			)
 		},
 	}
 	traceIDFn := func(ctx context.Context) string {
