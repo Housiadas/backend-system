@@ -1,7 +1,6 @@
 package mid
 
 import (
-	"bytes"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -10,22 +9,6 @@ import (
 	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 )
-
-type responseRecorder struct {
-	http.ResponseWriter
-	statusCode int
-	body       bytes.Buffer
-}
-
-func (rec *responseRecorder) WriteHeader(code int) {
-	rec.statusCode = code
-	rec.ResponseWriter.WriteHeader(code)
-}
-
-func (rec *responseRecorder) Write(b []byte) (int, error) {
-	rec.body.Write(b) // Capture the response body
-	return rec.ResponseWriter.Write(b)
-}
 
 // BeginCommitRollback starts a transaction for the domain call.
 func (m *Mid) BeginCommitRollback() func(next http.Handler) http.Handler {
@@ -63,7 +46,7 @@ func (m *Mid) BeginCommitRollback() func(next http.Handler) http.Handler {
 			ctx = sqldb.SetTran(ctx, tx)
 
 			// Create a response recorder to capture the response
-			rec := &responseRecorder{ResponseWriter: w, statusCode: http.StatusOK}
+			rec := &ResponseRecorder{ResponseWriter: w, statusCode: http.StatusOK}
 			next.ServeHTTP(rec, r.WithContext(ctx))
 
 			// Access the recorded response

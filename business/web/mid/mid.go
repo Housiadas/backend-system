@@ -2,7 +2,9 @@
 package mid
 
 import (
+	"bytes"
 	"go.opentelemetry.io/otel/trace"
+	"net/http"
 
 	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/domain/authbus"
@@ -31,4 +33,22 @@ func New(b Business, l *logger.Logger, t trace.Tracer, tx *sqldb.DBBeginner) *Mi
 		Tracer: t,
 		Tx:     tx,
 	}
+}
+
+// ResponseRecorder a custom http.ResponseWriter to capture the response
+// before it's sent to the client. We are capturing the result of the handlers to the middleware
+type ResponseRecorder struct {
+	http.ResponseWriter
+	statusCode int
+	body       bytes.Buffer
+}
+
+func (rec *ResponseRecorder) WriteHeader(code int) {
+	rec.statusCode = code
+	rec.ResponseWriter.WriteHeader(code)
+}
+
+func (rec *ResponseRecorder) Write(b []byte) (int, error) {
+	rec.body.Write(b) // Capture the response body
+	return rec.ResponseWriter.Write(b)
 }
