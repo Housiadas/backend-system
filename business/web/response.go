@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"path"
 
 	"go.opentelemetry.io/otel/attribute"
 
+	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/Housiadas/backend-system/foundation/otel"
 )
@@ -38,15 +40,24 @@ func (respond *Respond) Respond(handlerFunc HandlerFunc) http.HandlerFunc {
 	// This is the decorator/middleware pattern in golang
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
+
 		// Executes the handlerFunc for the specific route
 		resp := handlerFunc(ctx, w, r)
-		if err := response(ctx, w, resp); err != nil {
+
+		// Record error
+		err := isError(resp)
+		if err != nil {
+			resp = respond.errorRecorder(ctx, err)
+		}
+
+		// Send response
+		if err := respond.response(ctx, w, resp); err != nil {
 			respond.Log.Error(ctx, "web-respond", "ERROR", err)
 		}
 	}
 }
 
-func response(ctx context.Context, w http.ResponseWriter, dataModel Encoder) error {
+func (respond *Respond) response(ctx context.Context, w http.ResponseWriter, dataModel Encoder) error {
 	// If the context has been canceled, it means the client is no longer waiting for a response.
 	if err := ctx.Err(); err != nil {
 		if errors.Is(err, context.Canceled) {
@@ -87,5 +98,39 @@ func response(ctx context.Context, w http.ResponseWriter, dataModel Encoder) err
 		return fmt.Errorf("respond: write: %w", err)
 	}
 
+	return nil
+}
+
+func (respond *Respond) errorRecorder(ctx context.Context, err error) Encoder {
+	_, span := otel.AddSpan(ctx, "app.sdk.mid.error")
+	span.RecordError(err)
+	defer span.End()
+
+	var appErr *errs.Error
+	ok := errors.As(err, &appErr)
+	if !ok {
+		appErr = errs.Newf(errs.Internal, "Internal Server Error")
+	}
+
+	respond.Log.Error(ctx, "error during request",
+		"err", err,
+		"source_err_file", path.Base(appErr.FileName),
+		"source_err_func", path.Base(appErr.FuncName),
+	)
+
+	if appErr.Code == errs.InternalOnlyLog {
+		appErr = errs.Newf(errs.Internal, "Internal Server Error")
+	}
+
+	// Send the error back so it can be used as the response.
+	return appErr
+}
+
+// isError checks if the Encoder has an error inside of it.
+func isError(e Encoder) error {
+	err, isError := e.(error)
+	if isError {
+		return err
+	}
 	return nil
 }

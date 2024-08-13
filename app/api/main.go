@@ -220,8 +220,8 @@ func run(ctx context.Context, log *logger.Logger) error {
 		Build:   build,
 		Cors:    cfg.Cors,
 		Web: handler.Web{
-			Mid:     mid.New(midBusiness, log, trace, sqldb.NewBeginner(db)),
-			Respond: respond,
+			Mid: mid.New(midBusiness, log, trace, sqldb.NewBeginner(db)),
+			Res: respond,
 		},
 		App: handler.App{
 			User:    userapp.NewApp(userBus, authSrv),

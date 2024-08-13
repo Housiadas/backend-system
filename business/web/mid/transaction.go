@@ -51,8 +51,8 @@ func (m *Mid) BeginCommitRollback() func(next http.Handler) http.Handler {
 
 			// Access the recorded response
 			// Check if we can commit transaction
-			if rec.statusCode != 200 {
-				m.Log.Info(ctx, "TRANSACTION STATUS FALSE")
+			if rec.statusCode >= 400 {
+				m.Log.Info(ctx, "TRANSACTION FAILED, WILL ROLLBACK")
 				return
 			}
 

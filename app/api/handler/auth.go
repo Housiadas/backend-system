@@ -58,7 +58,7 @@ func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *ht
 	// file to validation these claims. Dgraph does not support key rotate at this time.
 	token, err := h.Business.Auth.GenerateToken(kid, claims)
 	if err != nil {
-		return errs.NewInternalError(fmt.Errorf("generating token: %w", err))
+		return errs.New(errs.Internal, fmt.Errorf("generating token: %w", err))
 	}
 
 	return authbus.AuthenticateResp{
@@ -91,7 +91,7 @@ func (h *Handler) token(ctx context.Context, _ http.ResponseWriter, r *http.Requ
 
 	token, err := h.App.User.Token(ctx, kid)
 	if err != nil {
-		return errs.NewInternalError(err)
+		return errs.New(errs.Internal, err)
 	}
 
 	return token
