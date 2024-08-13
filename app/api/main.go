@@ -55,7 +55,9 @@ func main() {
 
 	events := logger.Events{
 		Error: func(ctx context.Context, r logger.Record) {
-			log.Info(ctx, "******* SEND ALERT *******")
+			log.Info(ctx, "******* SEND ALERT *******",
+				"attributes:", r.Attributes, // this contains all the necessary information for the alert
+			)
 		},
 	}
 	traceIDFn := func(ctx context.Context) string {
@@ -220,8 +222,8 @@ func run(ctx context.Context, log *logger.Logger) error {
 		Build:   build,
 		Cors:    cfg.Cors,
 		Web: handler.Web{
-			Mid:     mid.New(midBusiness, log, trace, sqldb.NewBeginner(db)),
-			Respond: respond,
+			Mid: mid.New(midBusiness, log, trace, sqldb.NewBeginner(db)),
+			Res: respond,
 		},
 		App: handler.App{
 			User:    userapp.NewApp(userBus, authSrv),

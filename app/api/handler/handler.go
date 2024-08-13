@@ -32,8 +32,8 @@ type Handler struct {
 
 // Web represents the set of services for the http.
 type Web struct {
-	Mid     *mid.Mid
-	Respond *web.Respond
+	Mid *mid.Mid
+	Res *web.Respond
 }
 
 // App represents the core app layer

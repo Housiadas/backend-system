@@ -5,15 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"path"
 
 	"go.opentelemetry.io/otel/attribute"
 
+	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/Housiadas/backend-system/foundation/otel"
 )
 
 // HandlerFunc represents a function that handles a http request
-type HandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request) (Encoder, error)
+type HandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request) Encoder
 
 // Encoder defines behavior that can encode a data model and provide the content type for that encoding.
 type Encoder interface {
@@ -40,30 +42,22 @@ func (respond *Respond) Respond(handlerFunc HandlerFunc) http.HandlerFunc {
 		ctx := r.Context()
 
 		// Executes the handlerFunc for the specific route
-		resp, err := handlerFunc(ctx, w, r)
+		resp := handlerFunc(ctx, w, r)
+
+		// Record error
+		err := isError(resp)
 		if err != nil {
-			if err := responseError(ctx, w, err); err != nil {
-				respond.Log.Error(ctx, "web-respond-error", "ERROR", err)
-			}
-			return
+			resp = respond.errorRecorder(ctx, err)
 		}
 
-		if err := responseData(ctx, w, resp); err != nil {
+		// Send response
+		if err := respond.response(ctx, w, resp); err != nil {
 			respond.Log.Error(ctx, "web-respond", "ERROR", err)
 		}
 	}
 }
 
-func responseError(ctx context.Context, w http.ResponseWriter, err error) error {
-	data, ok := err.(Encoder)
-	if !ok {
-		return fmt.Errorf("error value does not implement the encoder interface: %T", err)
-	}
-
-	return responseData(ctx, w, data)
-}
-
-func responseData(ctx context.Context, w http.ResponseWriter, dataModel Encoder) error {
+func (respond *Respond) response(ctx context.Context, w http.ResponseWriter, dataModel Encoder) error {
 	// If the context has been canceled, it means the client is no longer waiting for a response.
 	if err := ctx.Err(); err != nil {
 		if errors.Is(err, context.Canceled) {
@@ -76,10 +70,8 @@ func responseData(ctx context.Context, w http.ResponseWriter, dataModel Encoder)
 	switch v := dataModel.(type) {
 	case httpStatus:
 		statusCode = v.HTTPStatus()
-
 	case error:
 		statusCode = http.StatusInternalServerError
-
 	default:
 		if dataModel == nil {
 			statusCode = http.StatusNoContent
@@ -106,5 +98,39 @@ func responseData(ctx context.Context, w http.ResponseWriter, dataModel Encoder)
 		return fmt.Errorf("respond: write: %w", err)
 	}
 
+	return nil
+}
+
+func (respond *Respond) errorRecorder(ctx context.Context, err error) Encoder {
+	_, span := otel.AddSpan(ctx, "app.sdk.mid.error")
+	span.RecordError(err)
+	defer span.End()
+
+	var appErr *errs.Error
+	ok := errors.As(err, &appErr)
+	if !ok {
+		appErr = errs.Newf(errs.Internal, "Internal Server Error")
+	}
+
+	respond.Log.Error(ctx, "error during request",
+		"err", err,
+		"source_err_file", path.Base(appErr.FileName),
+		"source_err_func", path.Base(appErr.FuncName),
+	)
+
+	if appErr.Code == errs.InternalOnlyLog {
+		appErr = errs.Newf(errs.Internal, "Internal Server Error")
+	}
+
+	// Send the error back so it can be used as the response.
+	return appErr
+}
+
+// isError checks if the Encoder has an error inside of it.
+func isError(e Encoder) error {
+	err, isError := e.(error)
+	if isError {
+		return err
+	}
 	return nil
 }

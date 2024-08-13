@@ -16,20 +16,20 @@ import (
 	"github.com/Housiadas/backend-system/business/web"
 )
 
-func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
+func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	kid := web.Header(r, "kid")
 	if kid == "" {
-		return nil, errs.New(errs.FailedPrecondition, validation.NewFieldsError("kid", errors.New("missing kid")))
+		return errs.New(errs.FailedPrecondition, validation.NewFieldsError("kid", errors.New("missing kid")))
 	}
 
 	var requestData userapp.AuthenticateUser
 	if err := web.Decode(r, &requestData); err != nil {
-		return nil, errs.New(errs.FailedPrecondition, err)
+		return errs.New(errs.FailedPrecondition, err)
 	}
 
 	usr, err := h.App.User.Authenticate(ctx, requestData)
 	if err != nil {
-		return nil, errs.New(errs.InvalidArgument, errors.New("invalid credentials"))
+		return errs.New(errs.InvalidArgument, errors.New("invalid credentials"))
 	}
 
 	// Generating a token requires defining a set of claims. In this applications
@@ -58,41 +58,41 @@ func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *ht
 	// file to validation these claims. Dgraph does not support key rotate at this time.
 	token, err := h.Business.Auth.GenerateToken(kid, claims)
 	if err != nil {
-		return nil, fmt.Errorf("generating token: %w", err)
+		return errs.New(errs.Internal, fmt.Errorf("generating token: %w", err))
 	}
 
 	return authbus.AuthenticateResp{
 		Token: token,
-	}, nil
+	}
 }
 
-func (h *Handler) authorize(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
+func (h *Handler) authorize(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	var authData authbus.Authorize
 	if err := web.Decode(r, &authData); err != nil {
-		return nil, errs.New(errs.FailedPrecondition, err)
+		return errs.New(errs.FailedPrecondition, err)
 	}
 
 	if err := h.Business.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
-		return nil, errs.Newf(errs.Unauthenticated,
+		return errs.Newf(errs.Unauthenticated,
 			"authorize: you are not authorized for that action, claims[%v] rule[%v]: %s",
 			authData.Claims.Roles,
 			authData.Rule, err,
 		)
 	}
 
-	return nil, nil
+	return nil
 }
 
-func (h *Handler) token(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
+func (h *Handler) token(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	kid := web.Param(r, "kid")
 	if kid == "" {
-		return nil, errs.New(errs.FailedPrecondition, validation.NewFieldsError("kid", errors.New("missing kid")))
+		return errs.New(errs.FailedPrecondition, validation.NewFieldsError("kid", errors.New("missing kid")))
 	}
 
 	token, err := h.App.User.Token(ctx, kid)
 	if err != nil {
-		return nil, err
+		return errs.New(errs.Internal, err)
 	}
 
-	return token, nil
+	return token
 }

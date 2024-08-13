@@ -21,16 +21,16 @@ import (
 // @Success      200  {object}  systemapp.Status
 // @Failure      500  {object}  errs.Error
 // @Router       /readiness [get]
-func (h *Handler) readiness(ctx context.Context, _ http.ResponseWriter, _ *http.Request) (web.Encoder, error) {
+func (h *Handler) readiness(ctx context.Context, _ http.ResponseWriter, _ *http.Request) web.Encoder {
 	if err := h.App.System.Readiness(ctx); err != nil {
-		return nil, errs.Newf(errs.Internal, "database not ready")
+		return errs.Newf(errs.Internal, "database not ready")
 	}
 
 	data := systemapp.Status{
 		Status: "OK",
 	}
 
-	return data, nil
+	return data
 }
 
 // liveness returns simple status info if the service is alive. If the
@@ -45,8 +45,8 @@ func (h *Handler) readiness(ctx context.Context, _ http.ResponseWriter, _ *http.
 // @Produce      json
 // @Success      200  {object}  systemapp.Info
 // @Router       /liveness [get]
-func (h *Handler) liveness(_ context.Context, _ http.ResponseWriter, _ *http.Request) (web.Encoder, error) {
+func (h *Handler) liveness(_ context.Context, _ http.ResponseWriter, _ *http.Request) web.Encoder {
 	info := h.App.System.Liveness()
 
-	return info, nil
+	return info
 }
