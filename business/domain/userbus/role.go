@@ -23,6 +23,20 @@ func (roleSet) Parse(value string) (Role, error) {
 	return role, nil
 }
 
+// ParseRoles takes a collection of strings and converts them to a slice  of roles.
+func (roleSet) ParseRoles(roles []string) ([]Role, error) {
+	usrRoles := make([]Role, len(roles))
+	for i, roleStr := range roles {
+		role, err := Roles.Parse(roleStr)
+		if err != nil {
+			return nil, err
+		}
+		usrRoles[i] = role
+	}
+
+	return usrRoles, nil
+}
+
 // MustParse parses the string value and returns a role if one exists. If
 // an error occurs the function panics.
 func (roleSet) MustParse(value string) Role {

@@ -1,9 +1,17 @@
 package sqldb
 
 import (
+	"context"
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+)
+
+type ctxKey string
+
+const (
+	tranKey ctxKey = "tranKey"
 )
 
 // Beginner represents a value that can begin a transaction.
@@ -46,4 +54,18 @@ func GetExtContext(tx CommitRollbacker) (sqlx.ExtContext, error) {
 	}
 
 	return ec, nil
+}
+
+func SetTran(ctx context.Context, tx CommitRollbacker) context.Context {
+	return context.WithValue(ctx, tranKey, tx)
+}
+
+// GetTran retrieves the value that can manage a transaction.
+func GetTran(ctx context.Context) (CommitRollbacker, error) {
+	v, ok := ctx.Value(tranKey).(CommitRollbacker)
+	if !ok {
+		return nil, errors.New("transaction not found in context")
+	}
+
+	return v, nil
 }

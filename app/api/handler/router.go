@@ -23,6 +23,8 @@ func (h *Handler) Routes() *chi.Mux {
 	ruleAuthorizeAdmin := mid.AuthorizeUser(authbus.RuleAdminOnly)
 	ruleAuthorizeProduct := mid.AuthorizeProduct(authbus.RuleAdminOrSubject)
 
+	tran := mid.BeginCommitRollback()
+
 	apiRouter := chi.NewRouter()
 	apiRouter.Use(
 		mid.Recoverer(),
@@ -67,6 +69,9 @@ func (h *Handler) Routes() *chi.Mux {
 			p.With(ruleAuthorizeProduct).Put("/{product_id}", h.Web.Respond.Respond(h.productUpdate))
 			p.With(ruleAuthorizeProduct).Delete("/{product_id}", h.Web.Respond.Respond(h.productDelete))
 		})
+
+		// Transaction example
+		v1.With(tran).Post("/transaction", h.Web.Respond.Respond(h.transaction))
 	})
 
 	// System Routes

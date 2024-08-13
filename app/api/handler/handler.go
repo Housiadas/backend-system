@@ -6,6 +6,7 @@ import (
 
 	"github.com/Housiadas/backend-system/app/domain/productapp"
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
+	"github.com/Housiadas/backend-system/app/domain/tranapp"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/domain/authbus"
@@ -40,6 +41,7 @@ type App struct {
 	User    *userapp.App
 	Product *productapp.App
 	System  *systemapp.App
+	Tx      *tranapp.App
 }
 
 // Business represents the core business layer.
