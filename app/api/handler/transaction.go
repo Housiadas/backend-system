@@ -9,16 +9,16 @@ import (
 	"github.com/Housiadas/backend-system/business/web"
 )
 
-func (h *Handler) transaction(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
+func (h *Handler) transaction(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	var app tranapp.NewTran
 	if err := web.Decode(r, &app); err != nil {
-		return nil, errs.New(errs.InvalidArgument, err)
+		return errs.New(errs.InvalidArgument, err)
 	}
 
 	prd, err := h.App.Tx.Create(ctx, app)
 	if err != nil {
-		return nil, err
+		return errs.New(errs.Internal, err)
 	}
 
-	return prd, nil
+	return prd
 }

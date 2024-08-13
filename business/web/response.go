@@ -13,7 +13,7 @@ import (
 )
 
 // HandlerFunc represents a function that handles a http request
-type HandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request) (Encoder, error)
+type HandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request) Encoder
 
 // Encoder defines behavior that can encode a data model and provide the content type for that encoding.
 type Encoder interface {
@@ -38,32 +38,15 @@ func (respond *Respond) Respond(handlerFunc HandlerFunc) http.HandlerFunc {
 	// This is the decorator/middleware pattern in golang
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-
 		// Executes the handlerFunc for the specific route
-		resp, err := handlerFunc(ctx, w, r)
-		if err != nil {
-			if err := responseError(ctx, w, err); err != nil {
-				respond.Log.Error(ctx, "web-respond-error", "ERROR", err)
-			}
-			return
-		}
-
-		if err := responseData(ctx, w, resp); err != nil {
+		resp := handlerFunc(ctx, w, r)
+		if err := response(ctx, w, resp); err != nil {
 			respond.Log.Error(ctx, "web-respond", "ERROR", err)
 		}
 	}
 }
 
-func responseError(ctx context.Context, w http.ResponseWriter, err error) error {
-	data, ok := err.(Encoder)
-	if !ok {
-		return fmt.Errorf("error value does not implement the encoder interface: %T", err)
-	}
-
-	return responseData(ctx, w, data)
-}
-
-func responseData(ctx context.Context, w http.ResponseWriter, dataModel Encoder) error {
+func response(ctx context.Context, w http.ResponseWriter, dataModel Encoder) error {
 	// If the context has been canceled, it means the client is no longer waiting for a response.
 	if err := ctx.Err(); err != nil {
 		if errors.Is(err, context.Canceled) {
@@ -76,10 +59,8 @@ func responseData(ctx context.Context, w http.ResponseWriter, dataModel Encoder)
 	switch v := dataModel.(type) {
 	case httpStatus:
 		statusCode = v.HTTPStatus()
-
 	case error:
 		statusCode = http.StatusInternalServerError
-
 	default:
 		if dataModel == nil {
 			statusCode = http.StatusNoContent
