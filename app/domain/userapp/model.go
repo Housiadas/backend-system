@@ -156,7 +156,7 @@ func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 
 // UpdateUserRole defines the data needed to update a user role.
 type UpdateUserRole struct {
-	Roles []string `json:"roles" validation:"required"`
+	Roles []string `json:"roles" validate:"required"`
 }
 
 // Decode implements the decoder interface.

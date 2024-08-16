@@ -112,8 +112,8 @@ func toBusNewProduct(ctx context.Context, app NewProduct) (productbus.NewProduct
 // UpdateProduct defines the data needed to update a product.
 type UpdateProduct struct {
 	Name     *string  `json:"name"`
-	Cost     *float64 `json:"cost" validation:"omitempty,gte=0"`
-	Quantity *int     `json:"quantity" validation:"omitempty,gte=1"`
+	Cost     *float64 `json:"cost" validate:"omitempty,gte=0"`
+	Quantity *int     `json:"quantity" validate:"omitempty,gte=1"`
 }
 
 // Decode implements the decoder interface.

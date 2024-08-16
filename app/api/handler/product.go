@@ -12,7 +12,7 @@ import (
 func (h *Handler) productCreate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	var app productapp.NewProduct
 	if err := web.Decode(r, &app); err != nil {
-		return errs.New(errs.FailedPrecondition, err)
+		return errs.New(errs.InvalidArgument, err)
 	}
 
 	prd, err := h.App.Product.Create(ctx, app)
@@ -26,7 +26,7 @@ func (h *Handler) productCreate(ctx context.Context, _ http.ResponseWriter, r *h
 func (h *Handler) productUpdate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	var app productapp.UpdateProduct
 	if err := web.Decode(r, &app); err != nil {
-		return errs.New(errs.FailedPrecondition, err)
+		return errs.New(errs.InvalidArgument, err)
 	}
 
 	prd, err := h.App.Product.Update(ctx, app)
@@ -48,7 +48,7 @@ func (h *Handler) productDelete(ctx context.Context, _ http.ResponseWriter, _ *h
 func (h *Handler) productQuery(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	qp, err := productParseQueryParams(r)
 	if err != nil {
-		return errs.New(errs.FailedPrecondition, err)
+		return errs.New(errs.InvalidArgument, err)
 	}
 
 	prd, err := h.App.Product.Query(ctx, qp)

@@ -179,3 +179,16 @@ coverage:
 .PHONY: swagger
 swagger:
 	docker run --rm -v $(PWD):/code --user $(UID) ghcr.io/swaggo/swag:v1.16.3 init --g app/api/main.go
+
+# =================================================================================== #
+# Metrics and Tracing
+# ==================================================================================== #
+
+metrics/view/sc:
+	expvarmon -ports="localhost:4010" -vars="build,requests,goroutines,errors,panics,mem:memstats.HeapAlloc,mem:memstats.HeapSys,mem:memstats.Sys"
+
+grafana:
+	open http://localhost:3000/
+
+statsviz:
+	open http://localhost:4010/debug/statsviz
