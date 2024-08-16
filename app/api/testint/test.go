@@ -1,4 +1,4 @@
-// Package tests provides support for executing api test logic.
+// Package testint provides support for integration api tests.
 package testint
 
 import (

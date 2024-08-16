@@ -23,8 +23,9 @@ import (
 
 // StartTest initialized the system to run a test.
 func StartTest(t *testing.T, testName string) (*Test, error) {
-	db := dbtest.NewDatabase(t, testName)
+	db := dbtest.NewDatabase(t, testName, "file://../../../../business/data/migrations")
 
+	// auth
 	auth := authbus.New(authbus.Config{
 		Log:       db.Log,
 		DB:        db.DB,
@@ -32,6 +33,7 @@ func StartTest(t *testing.T, testName string) (*Test, error) {
 		Userbus:   userbus.NewBusiness(db.Log, userdb.NewStore(db.Log, db.DB)),
 	})
 
+	// tracer
 	traceProvider, err := otel.InitTracing(otel.Config{
 		ServiceName: "Service Name",
 		Host:        "Test host",
