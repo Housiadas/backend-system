@@ -49,12 +49,10 @@ func GenToken(log *logger.Logger, dbConfig sqldb.Config, keyPath string, userID 
 		Log:       log,
 		DB:        db,
 		KeyLookup: ks,
+		Userbus:   userBus,
 	}
 
-	a, err := authbus.New(authCfg)
-	if err != nil {
-		return fmt.Errorf("constructing authapi: %w", err)
-	}
+	a := authbus.New(authCfg)
 
 	// Generating a token requires defining a set of claims. In this applications
 	// case, we only care about defining the subject and the user in question and

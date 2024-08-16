@@ -37,7 +37,7 @@ func (h *Handler) Routes() *chi.Mux {
 
 	// v1 routes
 	apiRouter.Route("/v1", func(v1 chi.Router) {
-		v1.Use(otelchi.Middleware(h.AppName, otelchi.WithChiRoutes(v1)))
+		v1.Use(otelchi.Middleware(h.ServiceName, otelchi.WithChiRoutes(v1)))
 		v1.Use(mid.ApiVersion("v1"))
 		v1.Use(cors.Handler(cors.Options{
 			AllowedOrigins: h.Cors.AllowedOrigins,
@@ -54,8 +54,8 @@ func (h *Handler) Routes() *chi.Mux {
 		// Users
 		v1.With(authenticate).Route("/users", func(u chi.Router) {
 			u.With(ruleAuthorizeAdmin).Get("/", h.Web.Res.Respond(h.userQuery))
+			u.With(ruleAdmin).Post("/", h.Web.Res.Respond(h.userCreate))
 			u.With(ruleAuthorizeUser).Get("/{user_id}", h.Web.Res.Respond(h.userQueryByID))
-			u.With(ruleAdmin).Post("/users", h.Web.Res.Respond(h.userCreate))
 			u.With(ruleAdmin).Put("/role/{user_id}", h.Web.Res.Respond(h.updateRole))
 			u.With(ruleAuthorizeUser).Put("/{user_id}", h.Web.Res.Respond(h.userUpdate))
 			u.With(ruleAuthorizeUser).Delete("/{user_id}", h.Web.Res.Respond(h.userDelete))

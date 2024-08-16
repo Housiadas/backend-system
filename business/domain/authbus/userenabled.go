@@ -7,13 +7,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// isUserEnabled hits the database and checks the user is not disabled. If the
-// no database connection was provided, this check is skipped.
+// isUserEnabled hits the database and checks the user is not disabled
 func (a *Auth) isUserEnabled(ctx context.Context, claims Claims) error {
-	if a.userBus == nil {
-		return nil
-	}
-
 	userID, err := uuid.Parse(claims.Subject)
 	if err != nil {
 		return fmt.Errorf("parse user: %w", err)

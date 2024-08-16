@@ -19,15 +19,15 @@ import (
 
 // Handler contains all the mandatory systems required by handlers.
 type Handler struct {
-	AppName  string
-	Build    string
-	Log      *logger.Logger
-	DB       *sqlx.DB
-	Tracer   trace.Tracer
-	Cors     config.CorsSettings
-	Web      Web
-	App      App
-	Business Business
+	ServiceName string
+	Build       string
+	Cors        config.CorsSettings
+	DB          *sqlx.DB
+	Log         *logger.Logger
+	Tracer      trace.Tracer
+	Web         Web
+	App         App
+	Business    Business
 }
 
 // Web represents the set of services for the http.
