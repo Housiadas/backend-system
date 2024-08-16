@@ -101,8 +101,8 @@ func Test_API_User_Create_400(t *testing.T) {
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
 			Input: &userapp.NewUser{
-				Name:            "Bill Kennedy",
-				Email:           "bill@ardanlabs.com",
+				Name:            "Chris Housi",
+				Email:           "chris@housi.com",
 				Roles:           []string{"SUPER"},
 				Department:      "IT",
 				Password:        "123",
@@ -167,7 +167,7 @@ func Test_API_User_Create_401(t *testing.T) {
 		},
 		{
 			Name:       "badtoken",
-			URL:        "/v1/users",
+			URL:        "/api/v1/users",
 			Token:      sd.Admins[0].Token[:10],
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -179,7 +179,7 @@ func Test_API_User_Create_401(t *testing.T) {
 		},
 		{
 			Name:       "badsig",
-			URL:        "/v1/users",
+			URL:        "/api/v1/users",
 			Token:      sd.Admins[0].Token + "A",
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -191,7 +191,7 @@ func Test_API_User_Create_401(t *testing.T) {
 		},
 		{
 			Name:       "wronguser",
-			URL:        "/v1/users",
+			URL:        "/api/v1/users",
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,

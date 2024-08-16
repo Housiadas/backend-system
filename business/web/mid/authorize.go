@@ -37,7 +37,7 @@ func (m *Mid) Authorize(rule string) func(next http.Handler) http.Handler {
 			}
 
 			if err := m.Bus.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
-				err = errs.New(errs.Unauthenticated, err)
+				err = errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", authData.Claims.Roles, authData.Rule, err)
 				m.Log.Error(ctx, "authorize mid: authorize", err)
 
 				w.Header().Set("Content-Type", "application/json")
@@ -106,7 +106,7 @@ func (m *Mid) AuthorizeUser(rule string) func(next http.Handler) http.Handler {
 			}
 
 			if err := m.Bus.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
-				err = errs.New(errs.Unauthenticated, err)
+				err = errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", authData.Claims.Roles, authData.Rule, err)
 				m.Log.Error(ctx, "authorize user mid: authorize", err)
 
 				w.Header().Set("Content-Type", "application/json")
@@ -177,7 +177,7 @@ func (m *Mid) AuthorizeProduct(rule string) func(next http.Handler) http.Handler
 			}
 
 			if err := m.Bus.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
-				err = errs.New(errs.Unauthenticated, err)
+				err = errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", authData.Claims.Roles, authData.Rule, err)
 				m.Log.Error(ctx, "authorize product mid: authorize", err)
 
 				w.Header().Set("Content-Type", "application/json")

@@ -35,8 +35,8 @@ func Test_API_User_Update_200(t *testing.T) {
 			Method:     http.MethodPut,
 			StatusCode: http.StatusOK,
 			Input: &userapp.UpdateUser{
-				Name:            dbtest.StringPointer("Jack Kennedy"),
-				Email:           dbtest.StringPointer("jack@ardanlabs.com"),
+				Name:            dbtest.StringPointer("Jack Housi"),
+				Email:           dbtest.StringPointer("chris@housi2.com"),
 				Department:      dbtest.StringPointer("IT"),
 				Password:        dbtest.StringPointer("123"),
 				PasswordConfirm: dbtest.StringPointer("123"),
@@ -44,8 +44,8 @@ func Test_API_User_Update_200(t *testing.T) {
 			GotResp: &userapp.User{},
 			ExpResp: &userapp.User{
 				ID:          sd.Users[0].ID.String(),
-				Name:        "Jack Kennedy",
-				Email:       "jack@ardanlabs.com",
+				Name:        "Jack Housi",
+				Email:       "chris@housi2.com",
 				Roles:       []string{"USER"},
 				Department:  "IT",
 				Enabled:     true,
@@ -98,7 +98,7 @@ func Test_API_User_Update_200(t *testing.T) {
 		},
 	}
 
-	test.Run(t, table, "update200-200")
+	test.Run(t, table, "update-200")
 }
 
 func Test_API_User_Update_400(t *testing.T) {
@@ -126,14 +126,14 @@ func Test_API_User_Update_400(t *testing.T) {
 				PasswordConfirm: dbtest.StringPointer("jack"),
 			},
 			GotResp: &errs.Error{},
-			ExpResp: errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"email\",\"error\":\"email must be a valid email address\"},{\"field\":\"passwordConfirm\",\"error\":\"passwordConfirm must be equal to Password\"}]"),
+			ExpResp: errs.Newf(errs.InvalidArgument, "validation: [{\"field\":\"email\",\"error\":\"email must be a valid email address\"},{\"field\":\"passwordConfirm\",\"error\":\"passwordConfirm must be equal to Password\"}]"),
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},
 		},
 		{
 			Name:       "bad-role",
-			URL:        fmt.Sprintf("/v1/users/role/%s", sd.Admins[0].ID),
+			URL:        fmt.Sprintf("/api/v1/users/role/%s", sd.Admins[0].ID),
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusBadRequest,
@@ -148,7 +148,7 @@ func Test_API_User_Update_400(t *testing.T) {
 		},
 	}
 
-	test.Run(t, table, "update200-400")
+	test.Run(t, table, "update-400")
 }
 
 func Test_API_User_Update_401(t *testing.T) {
@@ -166,7 +166,7 @@ func Test_API_User_Update_401(t *testing.T) {
 
 	table := []testint.Table{
 		{
-			Name:       "emptytoken",
+			Name:       "empty token",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),
 			Token:      "&nbsp;",
 			Method:     http.MethodPut,
@@ -178,8 +178,8 @@ func Test_API_User_Update_401(t *testing.T) {
 			},
 		},
 		{
-			Name:       "badsig",
-			URL:        fmt.Sprintf("/v1/users/%s", sd.Users[0].ID),
+			Name:       "bad signature",
+			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),
 			Token:      sd.Users[0].Token + "A",
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
@@ -190,7 +190,7 @@ func Test_API_User_Update_401(t *testing.T) {
 			},
 		},
 		{
-			Name:       "wronguser",
+			Name:       "wrong user",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Admins[0].ID),
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPut,
@@ -209,7 +209,7 @@ func Test_API_User_Update_401(t *testing.T) {
 			},
 		},
 		{
-			Name:       "roleadminonly",
+			Name:       "role admin only",
 			URL:        fmt.Sprintf("/api/v1/users/role/%s", sd.Users[0].ID),
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPut,
@@ -225,5 +225,5 @@ func Test_API_User_Update_401(t *testing.T) {
 		},
 	}
 
-	test.Run(t, table, "update200-401")
+	test.Run(t, table, "update-401")
 }
