@@ -21,7 +21,7 @@ func (m *Mid) Recoverer() func(next http.Handler) http.Handler {
 				if rec := recover(); rec != nil {
 					metrics.AddPanics(ctx)
 					trace := debug.Stack()
-					err := errs.Newf(errs.Internal, "PANIC [%v] TRACE[%s]", rec, string(trace))
+					err := errs.Newf(errs.InternalOnlyLog, "PANIC [%v] TRACE[%s]", rec, string(trace))
 					m.Log.Error(ctx, "panic mid", err)
 
 					w.Header().Set("Content-Type", "application/json")
