@@ -2,6 +2,7 @@ package user_test
 
 import (
 	"net/http"
+	"testing"
 
 	"github.com/google/go-cmp/cmp"
 
@@ -10,7 +11,19 @@ import (
 	"github.com/Housiadas/backend-system/business/sys/errs"
 )
 
-func create200(sd testint.SeedData) []testint.Table {
+func Test_API_User_Create_200(t *testing.T) {
+	t.Parallel()
+
+	test, err := testint.StartTest(t, "Test_API_User")
+	if err != nil {
+		t.Fatalf("Start error: %s", err)
+	}
+
+	sd, err := insertSeedData(test.DB, test.Auth)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
+
 	table := []testint.Table{
 		{
 			Name:       "basic",
@@ -51,10 +64,22 @@ func create200(sd testint.SeedData) []testint.Table {
 		},
 	}
 
-	return table
+	test.Run(t, table, "user-create-200")
 }
 
-func create400(sd testint.SeedData) []testint.Table {
+func Test_API_User_Create_400(t *testing.T) {
+	t.Parallel()
+
+	test, err := testint.StartTest(t, "Test_API_User")
+	if err != nil {
+		t.Fatalf("Start error: %s", err)
+	}
+
+	sd, err := insertSeedData(test.DB, test.Auth)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
+
 	table := []testint.Table{
 		{
 			Name:       "missing-input",
@@ -64,14 +89,14 @@ func create400(sd testint.SeedData) []testint.Table {
 			StatusCode: http.StatusBadRequest,
 			Input:      &userapp.NewUser{},
 			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"email\",\"error\":\"email is a required field\"},{\"field\":\"roles\",\"error\":\"roles is a required field\"},{\"field\":\"password\",\"error\":\"password is a required field\"}]"),
+			ExpResp:    errs.Newf(errs.InvalidArgument, "validation: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"email\",\"error\":\"email is a required field\"},{\"field\":\"roles\",\"error\":\"roles is a required field\"},{\"field\":\"password\",\"error\":\"password is a required field\"}]"),
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},
 		},
 		{
 			Name:       "bad-role",
-			URL:        "/v1/users",
+			URL:        "/api/v1/users",
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
@@ -91,7 +116,7 @@ func create400(sd testint.SeedData) []testint.Table {
 		},
 		{
 			Name:       "bad-name",
-			URL:        "/v1/users",
+			URL:        "/api/v1/users",
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
@@ -111,10 +136,22 @@ func create400(sd testint.SeedData) []testint.Table {
 		},
 	}
 
-	return table
+	test.Run(t, table, "user-create-400")
 }
 
-func create401(sd testint.SeedData) []testint.Table {
+func Test_API_User_Create_401(t *testing.T) {
+	t.Parallel()
+
+	test, err := testint.StartTest(t, "Test_API_User")
+	if err != nil {
+		t.Fatalf("Start error: %s", err)
+	}
+
+	sd, err := insertSeedData(test.DB, test.Auth)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
+
 	table := []testint.Table{
 		{
 			Name:       "emptytoken",
@@ -166,5 +203,5 @@ func create401(sd testint.SeedData) []testint.Table {
 		},
 	}
 
-	return table
+	test.Run(t, table, "user-create-401")
 }

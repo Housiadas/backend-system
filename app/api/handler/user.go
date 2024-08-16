@@ -12,7 +12,7 @@ import (
 func (h *Handler) userCreate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	var app userapp.NewUser
 	if err := web.Decode(r, &app); err != nil {
-		return errs.New(errs.FailedPrecondition, err)
+		return errs.New(errs.InvalidArgument, err)
 	}
 
 	usr, err := h.App.User.Create(ctx, app)

@@ -3,6 +3,7 @@ package user_test
 import (
 	"fmt"
 	"net/http"
+	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -13,7 +14,19 @@ import (
 	"github.com/Housiadas/backend-system/business/sys/errs"
 )
 
-func update200(sd testint.SeedData) []testint.Table {
+func Test_API_User_Update_200(t *testing.T) {
+	t.Parallel()
+
+	test, err := testint.StartTest(t, "Test_API_User")
+	if err != nil {
+		t.Fatalf("Start error: %s", err)
+	}
+
+	sd, err := insertSeedData(test.DB, test.Auth)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
+
 	table := []testint.Table{
 		{
 			Name:       "basic",
@@ -85,10 +98,22 @@ func update200(sd testint.SeedData) []testint.Table {
 		},
 	}
 
-	return table
+	test.Run(t, table, "update200-200")
 }
 
-func update400(sd testint.SeedData) []testint.Table {
+func Test_API_User_Update_400(t *testing.T) {
+	t.Parallel()
+
+	test, err := testint.StartTest(t, "Test_API_User")
+	if err != nil {
+		t.Fatalf("Start error: %s", err)
+	}
+
+	sd, err := insertSeedData(test.DB, test.Auth)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
+
 	table := []testint.Table{
 		{
 			Name:       "bad-input",
@@ -123,10 +148,22 @@ func update400(sd testint.SeedData) []testint.Table {
 		},
 	}
 
-	return table
+	test.Run(t, table, "update200-400")
 }
 
-func update401(sd testint.SeedData) []testint.Table {
+func Test_API_User_Update_401(t *testing.T) {
+	t.Parallel()
+
+	test, err := testint.StartTest(t, "Test_API_User")
+	if err != nil {
+		t.Fatalf("Start error: %s", err)
+	}
+
+	sd, err := insertSeedData(test.DB, test.Auth)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
+
 	table := []testint.Table{
 		{
 			Name:       "emptytoken",
@@ -188,5 +225,5 @@ func update401(sd testint.SeedData) []testint.Table {
 		},
 	}
 
-	return table
+	test.Run(t, table, "update200-401")
 }

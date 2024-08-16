@@ -3,6 +3,7 @@ package user_test
 import (
 	"fmt"
 	"net/http"
+	"testing"
 
 	"github.com/google/go-cmp/cmp"
 
@@ -10,7 +11,19 @@ import (
 	"github.com/Housiadas/backend-system/business/sys/errs"
 )
 
-func delete200(sd testint.SeedData) []testint.Table {
+func Test_API_User_Delete_200(t *testing.T) {
+	t.Parallel()
+
+	test, err := testint.StartTest(t, "Test_API_User")
+	if err != nil {
+		t.Fatalf("Start error: %s", err)
+	}
+
+	sd, err := insertSeedData(test.DB, test.Auth)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
+
 	table := []testint.Table{
 		{
 			Name:       "asuser",
@@ -28,10 +41,22 @@ func delete200(sd testint.SeedData) []testint.Table {
 		},
 	}
 
-	return table
+	test.Run(t, table, "delete-200")
 }
 
-func delete401(sd testint.SeedData) []testint.Table {
+func Test_API_User_Delete_401(t *testing.T) {
+	t.Parallel()
+
+	test, err := testint.StartTest(t, "Test_API_User")
+	if err != nil {
+		t.Fatalf("Start error: %s", err)
+	}
+
+	sd, err := insertSeedData(test.DB, test.Auth)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
+
 	table := []testint.Table{
 		{
 			Name:       "emptytoken",
@@ -71,5 +96,5 @@ func delete401(sd testint.SeedData) []testint.Table {
 		},
 	}
 
-	return table
+	test.Run(t, table, "delete-401")
 }

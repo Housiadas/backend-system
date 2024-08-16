@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"testing"
 
 	"github.com/google/go-cmp/cmp"
 
@@ -13,7 +14,19 @@ import (
 	"github.com/Housiadas/backend-system/business/sys/page"
 )
 
-func query200(sd testint.SeedData) []testint.Table {
+func Test_API_User_Query_200(t *testing.T) {
+	t.Parallel()
+
+	test, err := testint.StartTest(t, "Test_API_User")
+	if err != nil {
+		t.Fatalf("Start error: %s", err)
+	}
+
+	sd, err := insertSeedData(test.DB, test.Auth)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
+
 	usrs := make([]userbus.User, 0, len(sd.Admins)+len(sd.Users))
 
 	for _, adm := range sd.Admins {
@@ -41,7 +54,7 @@ func query200(sd testint.SeedData) []testint.Table {
 				Metadata: page.Metadata{
 					FirstPage:   1,
 					CurrentPage: 1,
-					LastPage:    2,
+					LastPage:    1,
 					RowsPerPage: 10,
 					Total:       len(usrs),
 				},
@@ -52,10 +65,22 @@ func query200(sd testint.SeedData) []testint.Table {
 		},
 	}
 
-	return table
+	test.Run(t, table, "user-query-200")
 }
 
-func queryByID200(sd testint.SeedData) []testint.Table {
+func Test_API_User_Query_BY_ID_200(t *testing.T) {
+	t.Parallel()
+
+	test, err := testint.StartTest(t, "Test_API_User")
+	if err != nil {
+		t.Fatalf("Start error: %s", err)
+	}
+
+	sd, err := insertSeedData(test.DB, test.Auth)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
+
 	table := []testint.Table{
 		{
 			Name:       "basic",
@@ -71,5 +96,5 @@ func queryByID200(sd testint.SeedData) []testint.Table {
 		},
 	}
 
-	return table
+	test.Run(t, table, "user-query-by-id-200")
 }
