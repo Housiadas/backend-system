@@ -1,5 +1,5 @@
 # Backend System
-A backend system built with Go `v1.22`.
+A backend system built with Go `v1.23`.
 
 ## Setup
 
