@@ -48,6 +48,16 @@ func (roleSet) MustParse(value string) Role {
 	return role
 }
 
+// ParseRolesToString takes a collection of user roles and converts them to a slice of string.
+func ParseRolesToString(usrRoles []Role) []string {
+	roles := make([]string, len(usrRoles))
+	for i, role := range usrRoles {
+		roles[i] = role.String()
+	}
+
+	return roles
+}
+
 // =============================================================================
 
 // Set of known roles.

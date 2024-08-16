@@ -72,7 +72,7 @@ func GenToken(log *logger.Logger, dbConfig sqldb.Config, keyPath string, userID 
 			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(8760 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		},
-		Roles: parseRoles(usr.Roles),
+		Roles: userbus.ParseRolesToString(usr.Roles),
 	}
 
 	// This will generate a JWT with the claims embedded in them. The database
@@ -86,12 +86,4 @@ func GenToken(log *logger.Logger, dbConfig sqldb.Config, keyPath string, userID 
 
 	fmt.Printf("-----BEGIN TOKEN-----\n%s\n-----END TOKEN-----\n", token)
 	return nil
-}
-
-func parseRoles(roles []userbus.Role) []string {
-	appRoles := make([]string, len(roles))
-	for i, role := range roles {
-		appRoles[i] = role.String()
-	}
-	return appRoles
 }
