@@ -17,7 +17,7 @@ func (h *Handler) productCreate(ctx context.Context, _ http.ResponseWriter, r *h
 
 	prd, err := h.App.Product.Create(ctx, app)
 	if err != nil {
-		return errs.New(errs.Internal, err)
+		return errs.NewError(err)
 	}
 
 	return prd
@@ -31,7 +31,7 @@ func (h *Handler) productUpdate(ctx context.Context, _ http.ResponseWriter, r *h
 
 	prd, err := h.App.Product.Update(ctx, app)
 	if err != nil {
-		return errs.New(errs.Internal, err)
+		return errs.NewError(err)
 	}
 
 	return prd
@@ -53,7 +53,7 @@ func (h *Handler) productQuery(ctx context.Context, _ http.ResponseWriter, r *ht
 
 	prd, err := h.App.Product.Query(ctx, qp)
 	if err != nil {
-		return errs.New(errs.Internal, err)
+		return errs.NewError(err)
 	}
 
 	return prd
@@ -62,7 +62,7 @@ func (h *Handler) productQuery(ctx context.Context, _ http.ResponseWriter, r *ht
 func (h *Handler) productQueryByID(ctx context.Context, _ http.ResponseWriter, _ *http.Request) web.Encoder {
 	prd, err := h.App.Product.QueryByID(ctx)
 	if err != nil {
-		return errs.New(errs.Internal, err)
+		return errs.NewError(err)
 	}
 
 	return prd

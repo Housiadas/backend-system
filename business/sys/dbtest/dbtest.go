@@ -31,7 +31,7 @@ const (
 	DBPort     = "5432"
 )
 
-var migrateDbUrl = "postgres://housi:secret123@localhost:5432/%s?sslmode=disable"
+var dbTestURL = "postgres://housi:secret123@localhost:5432/%s?sslmode=disable"
 
 // BusDomain represents all the business domain apis needed for testing.
 type BusDomain struct {
@@ -61,7 +61,7 @@ type Database struct {
 // NewDatabase creates a new test database inside the database that was started
 // to handle testing. The database is migrated to the current version and
 // a connection pool is provided with business domain packages.
-func NewDatabase(t *testing.T, testName string) *Database {
+func NewDatabase(t *testing.T, testName string, migrationsPath string) *Database {
 
 	dockerArgs := []string{
 		"-e", "POSTGRES_DB=housi_db",
@@ -126,7 +126,7 @@ func NewDatabase(t *testing.T, testName string) *Database {
 	// -------------------------------------------------------------------------
 	t.Logf("[TEST]: migrate Database UP %s\n", dbName)
 
-	err = migration(fmt.Sprintf(migrateDbUrl, dbName))
+	err = migration(fmt.Sprintf(dbTestURL, dbName), migrationsPath)
 	if err != nil {
 		t.Fatalf("[TEST]: Migrating error: %s", err)
 	}

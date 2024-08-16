@@ -13,7 +13,6 @@ import (
 	"github.com/open-policy-agent/opa/rego"
 
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
@@ -37,6 +36,7 @@ type Config struct {
 	DB        *sqlx.DB
 	KeyLookup KeyLookup
 	Issuer    string
+	Userbus   *userbus.Business
 }
 
 // Auth is used to authenticate clients. It can generate a token for a
@@ -50,23 +50,16 @@ type Auth struct {
 }
 
 // New creates an Auth to support authentication/authorization.
-func New(cfg Config) (*Auth, error) {
-
-	// If a database connection is not provided, we won't perform the user enabled check.
-	var userBus *userbus.Business
-	if cfg.DB != nil {
-		userBus = userbus.NewBusiness(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB))
-	}
-
+func New(cfg Config) *Auth {
 	a := Auth{
 		keyLookup: cfg.KeyLookup,
-		userBus:   userBus,
+		userBus:   cfg.Userbus,
 		method:    jwt.GetSigningMethod(jwt.SigningMethodRS256.Name),
 		parser:    jwt.NewParser(jwt.WithValidMethods([]string{jwt.SigningMethodRS256.Name})),
 		issuer:    cfg.Issuer,
 	}
 
-	return &a, nil
+	return &a
 }
 
 // Issuer provides the configured issuer used to authenticate tokens.

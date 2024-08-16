@@ -17,7 +17,7 @@ import (
 // ErrInvalidID represents a condition where the id is not an uuid.
 var ErrInvalidID = errors.New("ID is not in its proper form")
 
-// Authorize validates authorization.
+// Authorize validates user's role.
 func (m *Mid) Authorize(rule string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +37,7 @@ func (m *Mid) Authorize(rule string) func(next http.Handler) http.Handler {
 			}
 
 			if err := m.Bus.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
-				err = errs.New(errs.Unauthenticated, err)
+				err = errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", authData.Claims.Roles, authData.Rule, err)
 				m.Log.Error(ctx, "authorize mid: authorize", err)
 
 				w.Header().Set("Content-Type", "application/json")
@@ -96,6 +96,7 @@ func (m *Mid) AuthorizeUser(rule string) func(next http.Handler) http.Handler {
 					return
 				}
 
+				// Here adds in the context the requested user based on (user_id)
 				ctx = web.SetUser(ctx, usr)
 			}
 
@@ -106,7 +107,7 @@ func (m *Mid) AuthorizeUser(rule string) func(next http.Handler) http.Handler {
 			}
 
 			if err := m.Bus.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
-				err = errs.New(errs.Unauthenticated, err)
+				err = errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", authData.Claims.Roles, authData.Rule, err)
 				m.Log.Error(ctx, "authorize user mid: authorize", err)
 
 				w.Header().Set("Content-Type", "application/json")
@@ -177,7 +178,7 @@ func (m *Mid) AuthorizeProduct(rule string) func(next http.Handler) http.Handler
 			}
 
 			if err := m.Bus.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
-				err = errs.New(errs.Unauthenticated, err)
+				err = errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", authData.Claims.Roles, authData.Rule, err)
 				m.Log.Error(ctx, "authorize product mid: authorize", err)
 
 				w.Header().Set("Content-Type", "application/json")

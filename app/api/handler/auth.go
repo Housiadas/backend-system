@@ -91,7 +91,7 @@ func (h *Handler) token(ctx context.Context, _ http.ResponseWriter, r *http.Requ
 
 	token, err := h.App.User.Token(ctx, kid)
 	if err != nil {
-		return errs.New(errs.Internal, err)
+		return errs.NewError(err)
 	}
 
 	return token

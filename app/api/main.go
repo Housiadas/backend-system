@@ -51,49 +51,49 @@ var build = "develop"
 // @externalDocs.url	https://swagger.io/resources/open-api/
 // @host				localhost:4000
 func main() {
-	var log *logger.Logger
+	// -------------------------------------------------------------------------
+	// Initialize Configuration
+	// -------------------------------------------------------------------------
+	cfg, err := config.LoadConfig("../../")
+	if err != nil {
+		fmt.Errorf("parsing config: %w", err)
+		os.Exit(1)
+	}
+	cfg.Version = config.Version{
+		Build: build,
+		Desc:  "API",
+	}
 
+	// -------------------------------------------------------------------------
+	// Initialize Logger
+	// -------------------------------------------------------------------------
+	var log *logger.Logger
 	events := logger.Events{
 		Error: func(ctx context.Context, r logger.Record) {
-			log.Info(ctx, "******* SEND ALERT *******",
-				"attributes:", r.Attributes, // this contains all the necessary information for the alert
-			)
+			log.Info(ctx, "******* SEND ALERT *******")
+			// r.Attributes, contains all the necessary information for the alert
 		},
 	}
 	traceIDFn := func(ctx context.Context) string {
 		return otel.GetTraceID(ctx)
 	}
-
 	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "API", traceIDFn, events)
 
 	// -------------------------------------------------------------------------
 	// Run the application
 	// -------------------------------------------------------------------------
 	ctx := context.Background()
-	if err := run(ctx, log); err != nil {
-		log.Error(ctx, "startup", "msg", err)
+	if err := run(ctx, cfg, log); err != nil {
+		log.Error(ctx, "error during startup", "msg", err)
 		os.Exit(1)
 	}
 }
 
-func run(ctx context.Context, log *logger.Logger) error {
-
+func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	// GOMAXPROCS
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
-
-	// -------------------------------------------------------------------------
-	// Configuration
-	// -------------------------------------------------------------------------
-	cfg, err := config.LoadConfig("../../")
-	if err != nil {
-		return fmt.Errorf("parsing config: %w", err)
-	}
-	cfg.Version = config.Version{
-		Build: build,
-		Desc:  "API",
-	}
 
 	// -------------------------------------------------------------------------
 	// App Starting
@@ -103,10 +103,9 @@ func run(ctx context.Context, log *logger.Logger) error {
 	expvar.NewString("build").Set(cfg.Version.Build)
 
 	// -------------------------------------------------------------------------
-	// Database Support
+	// Initialize Database
 	// -------------------------------------------------------------------------
-	log.Info(ctx, "startup", "status", "initializing database support", "host port", cfg.DB.Host)
-
+	log.Info(ctx, "startup", "status", "initializing database", "host port", cfg.DB.Host)
 	db, err := sqldb.Open(sqldb.Config{
 		User:         cfg.DB.User,
 		Password:     cfg.DB.Password,
@@ -120,29 +119,6 @@ func run(ctx context.Context, log *logger.Logger) error {
 		return fmt.Errorf("connecting to db: %w", err)
 	}
 	defer db.Close()
-
-	// -------------------------------------------------------------------------
-	// Initialize authentication support
-	// -------------------------------------------------------------------------
-	log.Info(ctx, "startup", "status", "initializing authentication support")
-
-	// Load the private keys files from disk. We can assume some system api like
-	// Vault has created these files already. How that happens is not our concern.
-	ks := keystore.New()
-	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
-		return fmt.Errorf("reading keys: %w", err)
-	}
-
-	authCfg := authbus.Config{
-		Log:       log,
-		DB:        db,
-		KeyLookup: ks,
-	}
-
-	authSrv, err := authbus.New(authCfg)
-	if err != nil {
-		return fmt.Errorf("constructing authapi: %w", err)
-	}
 
 	// -------------------------------------------------------------------------
 	// Initialize Kafka Producer
@@ -178,24 +154,35 @@ func run(ctx context.Context, log *logger.Logger) error {
 	if err != nil {
 		return fmt.Errorf("starting tracing: %w", err)
 	}
-
 	defer traceProvider.Shutdown(context.Background())
-
-	trace := traceProvider.Tracer(cfg.App.Name)
+	tracer := traceProvider.Tracer(cfg.App.Name)
 
 	// -------------------------------------------------------------------------
 	// Build Business Layer
 	// -------------------------------------------------------------------------
-	log.Info(ctx, "startup", "status", "initializing business core")
+	log.Info(ctx, "startup", "status", "initializing business layer")
 
 	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db))
 	productBus := productbus.NewBusiness(log, userBus, productdb.NewStore(log, db))
+
+	// Load the private keys files from disk. We can assume some system api like
+	// Vault has created these files already. How that happens is not our concern.
+	ks := keystore.New()
+	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
+		return fmt.Errorf("reading keys: %w", err)
+	}
+	authBus := authbus.New(authbus.Config{
+		Log:       log,
+		DB:        db,
+		KeyLookup: ks,
+		Userbus:   userBus,
+	})
 
 	// -------------------------------------------------------------------------
 	// Start Debug Service
 	// -------------------------------------------------------------------------
 	go func() {
-		log.Info(ctx, "startup", "status", "debug v1 router started", "host", cfg.Server.Debug)
+		log.Info(ctx, "startup", "status", "Debug server starting", "host", cfg.Server.Debug)
 
 		if err := http.ListenAndServe(cfg.Server.Debug, debug.Mux()); err != nil {
 			log.Error(ctx, "shutdown", "status", "debug v1 router closed", "host", cfg.Server.Debug, "msg", err)
@@ -203,36 +190,39 @@ func run(ctx context.Context, log *logger.Logger) error {
 	}()
 
 	// -------------------------------------------------------------------------
-	// Start Http Server
+	// Start API Server
 	// -------------------------------------------------------------------------
-	log.Info(ctx, "startup", "status", "initializing Http Server")
+	log.Info(ctx, "startup", "status", "API server starting")
 
 	// Initialize handler
-	respond := web.NewRespond(log)
-	midBusiness := mid.Business{
-		Auth:    authSrv,
-		User:    userBus,
-		Product: productBus,
-	}
 	h := handler.Handler{
-		AppName: cfg.App.Name,
-		Log:     log,
-		DB:      db,
-		Tracer:  trace,
-		Build:   build,
-		Cors:    cfg.Cors,
+		ServiceName: cfg.App.Name,
+		Build:       build,
+		Cors:        cfg.Cors,
+		DB:          db,
+		Log:         log,
+		Tracer:      tracer,
 		Web: handler.Web{
-			Mid: mid.New(midBusiness, log, trace, sqldb.NewBeginner(db)),
-			Res: respond,
+			Mid: mid.New(
+				mid.Business{
+					Auth:    authBus,
+					User:    userBus,
+					Product: productBus,
+				},
+				log,
+				tracer,
+				sqldb.NewBeginner(db),
+			),
+			Res: web.NewRespond(log),
 		},
 		App: handler.App{
-			User:    userapp.NewApp(userBus, authSrv),
+			User:    userapp.NewApp(userBus, authBus),
 			Product: productapp.NewApp(productBus),
 			System:  systemapp.NewApp(cfg.Version.Build, log, db),
 			Tx:      tranapp.NewApp(userBus, productBus),
 		},
 		Business: handler.Business{
-			Auth:    authSrv,
+			Auth:    authBus,
 			User:    userBus,
 			Product: productBus,
 		},
@@ -252,8 +242,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		log.Info(ctx, "startup", "status", "api router started", "host", api.Addr)
-
+		log.Info(ctx, "startup", "status", "API server started", "host", api.Addr)
 		serverErrors <- api.ListenAndServe()
 	}()
 

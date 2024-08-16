@@ -7,11 +7,11 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-func migration(dbTestURL string) error {
+func migration(dbTestURL, migrationsPath string) error {
 	db, err := sql.Open("postgres", dbTestURL)
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://../../data/migrations",
+		migrationsPath,
 		"postgres",
 		driver,
 	)

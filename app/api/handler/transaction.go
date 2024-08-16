@@ -17,7 +17,7 @@ func (h *Handler) transaction(ctx context.Context, _ http.ResponseWriter, r *htt
 
 	prd, err := h.App.Tx.Create(ctx, app)
 	if err != nil {
-		return errs.New(errs.Internal, err)
+		return errs.NewError(err)
 	}
 
 	return prd

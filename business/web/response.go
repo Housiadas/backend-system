@@ -44,37 +44,27 @@ func (respond *Respond) Respond(handlerFunc HandlerFunc) http.HandlerFunc {
 		// Executes the handlerFunc for the specific route
 		resp := handlerFunc(ctx, w, r)
 
-		// Record error
+		// Get status code
+		statusCode := respond.statusCode(resp)
+
+		// Record errors with status code 500 and above
 		err := isError(resp)
 		if err != nil {
-			resp = respond.errorRecorder(ctx, err)
+			resp = respond.errorRecorder(ctx, statusCode, err)
 		}
 
-		// Send response
-		if err := respond.response(ctx, w, resp); err != nil {
+		// Send response back to client
+		if err := respond.response(ctx, w, statusCode, resp); err != nil {
 			respond.Log.Error(ctx, "web-respond", "ERROR", err)
 		}
 	}
 }
 
-func (respond *Respond) response(ctx context.Context, w http.ResponseWriter, dataModel Encoder) error {
+func (respond *Respond) response(ctx context.Context, w http.ResponseWriter, statusCode int, dataModel Encoder) error {
 	// If the context has been canceled, it means the client is no longer waiting for a response.
 	if err := ctx.Err(); err != nil {
 		if errors.Is(err, context.Canceled) {
 			return errors.New("client disconnected, do not send response")
-		}
-	}
-
-	var statusCode = http.StatusOK
-
-	switch v := dataModel.(type) {
-	case httpStatus:
-		statusCode = v.HTTPStatus()
-	case error:
-		statusCode = http.StatusInternalServerError
-	default:
-		if dataModel == nil {
-			statusCode = http.StatusNoContent
 		}
 	}
 
@@ -101,16 +91,21 @@ func (respond *Respond) response(ctx context.Context, w http.ResponseWriter, dat
 	return nil
 }
 
-func (respond *Respond) errorRecorder(ctx context.Context, err error) Encoder {
-	_, span := otel.AddSpan(ctx, "app.sdk.mid.error")
-	span.RecordError(err)
-	defer span.End()
-
+func (respond *Respond) errorRecorder(ctx context.Context, statusCode int, err error) Encoder {
 	var appErr *errs.Error
 	ok := errors.As(err, &appErr)
 	if !ok {
 		appErr = errs.Newf(errs.Internal, "Internal Server Error")
 	}
+
+	// If not critical error do not record it
+	if statusCode < 500 {
+		return appErr
+	}
+
+	_, span := otel.AddSpan(ctx, "app.sdk.mid.error")
+	span.RecordError(err)
+	defer span.End()
 
 	respond.Log.Error(ctx, "error during request",
 		"err", err,
@@ -133,4 +128,21 @@ func isError(e Encoder) error {
 		return err
 	}
 	return nil
+}
+
+func (respond *Respond) statusCode(dataModel Encoder) int {
+	var statusCode = http.StatusOK
+
+	switch v := dataModel.(type) {
+	case httpStatus:
+		statusCode = v.HTTPStatus()
+	case error:
+		statusCode = http.StatusInternalServerError
+	default:
+		if dataModel == nil {
+			statusCode = http.StatusNoContent
+		}
+	}
+
+	return statusCode
 }

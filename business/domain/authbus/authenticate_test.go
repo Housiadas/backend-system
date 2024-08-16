@@ -1,56 +1,50 @@
 package authbus_test
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"runtime/debug"
 	"testing"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
+	"github.com/Housiadas/backend-system/business/sys/dbtest"
+	"github.com/Housiadas/backend-system/business/sys/unitest"
 )
 
 func Test_Auth(t *testing.T) {
-	log, db, teardown := newUnit(t)
-	defer func() {
-		if r := recover(); r != nil {
-			t.Log(r)
-			t.Error(string(debug.Stack()))
-		}
-		teardown()
-	}()
 
-	ath, err := authbus.New(authbus.Config{
-		Log:       log,
-		DB:        db,
-		KeyLookup: &keyStore{},
-		Issuer:    "service project",
-	})
+	db := dbtest.NewDatabase(t, "Test_Auth", "file://../../data/migrations")
+	sd, err := insertSeedData(db.BusDomain)
 	if err != nil {
-		t.Fatalf("Should be able to create an authenticator: %s", err)
+		t.Fatalf("Seeding error: %s", err)
 	}
 
-	t.Run("test1", test1(ath))
-	t.Run("test2", test2(ath))
-	t.Run("test3", test3(ath))
-	t.Run("test4", test4(ath))
-	t.Run("test5", test5(ath))
-	t.Run("test6", test6(ath))
+	ath := authbus.New(authbus.Config{
+		Log:       db.Log,
+		DB:        db.DB,
+		KeyLookup: &keyStore{},
+		Issuer:    "service project",
+		Userbus:   userbus.NewBusiness(db.Log, userdb.NewStore(db.Log, db.DB)),
+	})
+
+	t.Run("testAdminAuthorization", testAdminAuthorization(ath, sd))
+	t.Run("testUserAuthorization", testUserAuthorization(ath, sd))
+	t.Run("testUserWithDifferentUUID", testUserWithDifferentUUID(ath, sd))
+	t.Run("testUserAdminAuthorization", testUserAdminAuthorization(ath, sd))
+	t.Run("testUserRuleAny", testUserRuleAny(ath, sd))
 }
 
-func test1(ath *authbus.Auth) func(t *testing.T) {
+func testAdminAuthorization(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 	f := func(t *testing.T) {
 		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
-				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				Subject:   sd.Admins[0].ID.String(),
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
@@ -88,12 +82,12 @@ func test1(ath *authbus.Auth) func(t *testing.T) {
 	return f
 }
 
-func test2(ath *authbus.Auth) func(t *testing.T) {
+func testUserAuthorization(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 	f := func(t *testing.T) {
 		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
-				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				Subject:   sd.Users[0].ID.String(),
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
@@ -136,12 +130,12 @@ func test2(ath *authbus.Auth) func(t *testing.T) {
 	return f
 }
 
-func test3(ath *authbus.Auth) func(t *testing.T) {
+func testUserWithDifferentUUID(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 	f := func(t *testing.T) {
 		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
-				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				Subject:   sd.Users[0].ID.String(),
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
@@ -169,12 +163,12 @@ func test3(ath *authbus.Auth) func(t *testing.T) {
 	return f
 }
 
-func test4(ath *authbus.Auth) func(t *testing.T) {
+func testUserAdminAuthorization(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 	f := func(t *testing.T) {
 		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
-				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				Subject:   sd.Admins[0].ID.String(),
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
@@ -201,12 +195,12 @@ func test4(ath *authbus.Auth) func(t *testing.T) {
 	return f
 }
 
-func test5(ath *authbus.Auth) func(t *testing.T) {
+func testUserRuleAny(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 	f := func(t *testing.T) {
 		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
-				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				Subject:   sd.Users[0].ID.String(),
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
@@ -233,55 +227,47 @@ func test5(ath *authbus.Auth) func(t *testing.T) {
 	return f
 }
 
-func test6(ath *authbus.Auth) func(t *testing.T) {
-	f := func(t *testing.T) {
-		claims := authbus.Claims{
-			RegisteredClaims: jwt.RegisteredClaims{
-				Issuer:    ath.Issuer(),
-				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
-				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
-				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-			},
-			Roles: parseRoles([]userbus.Role{userbus.Roles.Admin}),
-		}
-		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
-
-		token, err := ath.GenerateToken(kid, claims)
-		if err != nil {
-			t.Fatalf("Should be able to generate a JWT : %s", err)
-		}
-
-		parsedClaims, err := ath.Authenticate(context.Background(), "Bearer "+token)
-		if err != nil {
-			t.Fatalf("Should be able to authenticate the claims : %s", err)
-		}
-
-		err = ath.Authorize(context.Background(), parsedClaims, userID, authbus.RuleAny)
-		if err != nil {
-			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.Admin only : %s", err)
-		}
-	}
-
-	return f
-}
-
 // =============================================================================
 
-func newUnit(t *testing.T) (*logger.Logger, *sqlx.DB, func()) {
-	var buf bytes.Buffer
-	log := logger.New(&buf, logger.LevelInfo, "TEST", func(context.Context) string { return "00000000-0000-0000-0000-000000000000" })
+func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
+	ctx := context.Background()
 
-	// teardown is the function that should be invoked when the caller is done
-	// with the database.
-	teardown := func() {
-		t.Helper()
-
-		fmt.Println("******************** LOGS ********************")
-		fmt.Print(buf.String())
-		fmt.Println("******************** LOGS ********************")
+	usrs, err := userbus.TestSeedUsers(ctx, 2, userbus.Roles.Admin, busDomain.User)
+	if err != nil {
+		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	return log, nil, teardown
+	tu1 := unitest.User{
+		User: usrs[0],
+	}
+
+	tu2 := unitest.User{
+		User: usrs[1],
+	}
+
+	// -------------------------------------------------------------------------
+
+	usrs, err = userbus.TestSeedUsers(ctx, 2, userbus.Roles.User, busDomain.User)
+	if err != nil {
+		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
+	}
+
+	tu3 := unitest.User{
+		User: usrs[0],
+	}
+
+	tu4 := unitest.User{
+		User: usrs[1],
+	}
+
+	// -------------------------------------------------------------------------
+
+	sd := unitest.SeedData{
+		Users:  []unitest.User{tu3, tu4},
+		Admins: []unitest.User{tu1, tu2},
+	}
+
+	return sd, nil
 }
 
 // =============================================================================

@@ -20,7 +20,7 @@ import (
 func Test_User(t *testing.T) {
 	t.Parallel()
 
-	db := dbtest.NewDatabase(t, "Test_User")
+	db := dbtest.NewDatabase(t, "Test_User", "file://../../data/migrations")
 
 	sd, err := insertSeedData(db.BusDomain)
 	if err != nil {
@@ -168,13 +168,13 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 }
 
 func create(busDomain dbtest.BusDomain) []unitest.Table {
-	email, _ := mail.ParseAddress("bill@ardanlabs.com")
+	email, _ := mail.ParseAddress("chris@housi.com")
 
 	table := []unitest.Table{
 		{
 			Name: "basic",
 			ExpResp: userbus.User{
-				Name:       userbus.Names.MustParse("Bill Kennedy"),
+				Name:       userbus.Names.MustParse("Chris Housi"),
 				Email:      *email,
 				Roles:      []userbus.Role{userbus.Roles.Admin},
 				Department: "IT",
@@ -182,7 +182,7 @@ func create(busDomain dbtest.BusDomain) []unitest.Table {
 			},
 			ExcFunc: func(ctx context.Context) any {
 				nu := userbus.NewUser{
-					Name:       userbus.Names.MustParse("Bill Kennedy"),
+					Name:       userbus.Names.MustParse("Chris Housi"),
 					Email:      *email,
 					Roles:      []userbus.Role{userbus.Roles.Admin},
 					Department: "IT",
@@ -222,14 +222,14 @@ func create(busDomain dbtest.BusDomain) []unitest.Table {
 }
 
 func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
-	email, _ := mail.ParseAddress("jack@ardanlabs.com")
+	email, _ := mail.ParseAddress("chris2@housi.com")
 
 	table := []unitest.Table{
 		{
 			Name: "basic",
 			ExpResp: userbus.User{
 				ID:          sd.Users[0].ID,
-				Name:        userbus.Names.MustParse("Jack Kennedy"),
+				Name:        userbus.Names.MustParse("Chris Housi 2"),
 				Email:       *email,
 				Roles:       []userbus.Role{userbus.Roles.Admin},
 				Department:  "IT",
@@ -238,7 +238,7 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			},
 			ExcFunc: func(ctx context.Context) any {
 				uu := userbus.UpdateUser{
-					Name:       dbtest.UserNamePointer("Jack Kennedy"),
+					Name:       dbtest.UserNamePointer("Chris Housi 2"),
 					Email:      email,
 					Roles:      []userbus.Role{userbus.Roles.Admin},
 					Department: dbtest.StringPointer("IT"),

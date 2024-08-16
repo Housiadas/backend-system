@@ -17,8 +17,8 @@ import (
 
 // App manages the set of app layer api functions for the user domain.
 type App struct {
-	userBus *userbus.Business
 	authbus *authbus.Auth
+	userBus *userbus.Business
 }
 
 // NewApp constructs a user app API for use.
@@ -27,37 +27,6 @@ func NewApp(userBus *userbus.Business, authbus *authbus.Auth) *App {
 		authbus: authbus,
 		userBus: userBus,
 	}
-}
-
-// Authenticate provides an API to authenticate the user.
-func (c *App) Authenticate(ctx context.Context, authUser AuthenticateUser) (User, error) {
-	addr, err := mail.ParseAddress(authUser.Email)
-	if err != nil {
-		return User{}, validation.NewFieldsError("email", err)
-	}
-
-	usr, err := c.userBus.Authenticate(ctx, *addr, authUser.Password)
-	if err != nil {
-		return User{}, err
-	}
-
-	return toAppUser(usr), nil
-}
-
-// Token provides an API token for the authenticated user.
-func (c *App) Token(ctx context.Context, kid string) (Token, error) {
-	if c.authbus == nil {
-		return Token{}, errs.Newf(errs.Internal, "authapi not configured")
-	}
-
-	claims := web.GetClaims(ctx)
-
-	tkn, err := c.authbus.GenerateToken(kid, claims)
-	if err != nil {
-		return Token{}, errs.New(errs.Internal, err)
-	}
-
-	return toToken(tkn), nil
 }
 
 // Create adds a new user to the system.
@@ -170,4 +139,35 @@ func (a *App) QueryByID(ctx context.Context) (User, error) {
 	}
 
 	return toAppUser(usr), nil
+}
+
+// Authenticate provides an API to authenticate the user.
+func (a *App) Authenticate(ctx context.Context, authUser AuthenticateUser) (User, error) {
+	addr, err := mail.ParseAddress(authUser.Email)
+	if err != nil {
+		return User{}, validation.NewFieldsError("email", err)
+	}
+
+	usr, err := a.userBus.Authenticate(ctx, *addr, authUser.Password)
+	if err != nil {
+		return User{}, err
+	}
+
+	return toAppUser(usr), nil
+}
+
+// Token provides an API token for the authenticated user.
+func (a *App) Token(ctx context.Context, kid string) (Token, error) {
+	if a.authbus == nil {
+		return Token{}, errs.Newf(errs.Internal, "authapi not configured")
+	}
+
+	claims := web.GetClaims(ctx)
+
+	tkn, err := a.authbus.GenerateToken(kid, claims)
+	if err != nil {
+		return Token{}, errs.New(errs.Internal, err)
+	}
+
+	return toToken(tkn), nil
 }
