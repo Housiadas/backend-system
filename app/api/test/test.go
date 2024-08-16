@@ -1,5 +1,5 @@
-// Package testint provides support for integration api tests.
-package testint
+// Package test provides support for integration api tests.
+package test
 
 import (
 	"bytes"

@@ -47,8 +47,8 @@ func (m *Mid) Bearer() func(next http.Handler) http.Handler {
 				return
 			}
 
-			ctx = web.SetUserID(ctx, subjectID)
 			ctx = web.SetClaims(ctx, claims)
+			ctx = web.SetUserID(ctx, subjectID)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

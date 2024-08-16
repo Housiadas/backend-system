@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/Housiadas/backend-system/app/api/testint"
+	testPck "github.com/Housiadas/backend-system/app/api/test"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/business/sys/dbtest"
 	"github.com/Housiadas/backend-system/business/sys/errs"
@@ -17,7 +17,7 @@ import (
 func Test_API_User_Update_200(t *testing.T) {
 	t.Parallel()
 
-	test, err := testint.StartTest(t, "Test_API_User")
+	test, err := testPck.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -27,7 +27,7 @@ func Test_API_User_Update_200(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testint.Table{
+	table := []testPck.Table{
 		{
 			Name:       "basic",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),
@@ -104,7 +104,7 @@ func Test_API_User_Update_200(t *testing.T) {
 func Test_API_User_Update_400(t *testing.T) {
 	t.Parallel()
 
-	test, err := testint.StartTest(t, "Test_API_User")
+	test, err := testPck.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -114,7 +114,7 @@ func Test_API_User_Update_400(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testint.Table{
+	table := []testPck.Table{
 		{
 			Name:       "bad-input",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),
@@ -154,7 +154,7 @@ func Test_API_User_Update_400(t *testing.T) {
 func Test_API_User_Update_401(t *testing.T) {
 	t.Parallel()
 
-	test, err := testint.StartTest(t, "Test_API_User")
+	test, err := testPck.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -164,7 +164,7 @@ func Test_API_User_Update_401(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testint.Table{
+	table := []testPck.Table{
 		{
 			Name:       "empty token",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),
@@ -196,8 +196,8 @@ func Test_API_User_Update_401(t *testing.T) {
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
 			Input: &userapp.UpdateUser{
-				Name:            dbtest.StringPointer("Bill Kennedy"),
-				Email:           dbtest.StringPointer("bill@ardanlabs.com"),
+				Name:            dbtest.StringPointer("Chris Housi"),
+				Email:           dbtest.StringPointer("chris@housi.com"),
 				Department:      dbtest.StringPointer("IT"),
 				Password:        dbtest.StringPointer("123"),
 				PasswordConfirm: dbtest.StringPointer("123"),

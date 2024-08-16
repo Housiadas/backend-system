@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/Housiadas/backend-system/app/api/testint"
+	testPck "github.com/Housiadas/backend-system/app/api/test"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 )
@@ -14,7 +14,7 @@ import (
 func Test_API_User_Create_200(t *testing.T) {
 	t.Parallel()
 
-	test, err := testint.StartTest(t, "Test_API_User")
+	test, err := testPck.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -24,7 +24,7 @@ func Test_API_User_Create_200(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testint.Table{
+	table := []testPck.Table{
 		{
 			Name:       "basic",
 			URL:        "/api/v1/users",
@@ -70,7 +70,7 @@ func Test_API_User_Create_200(t *testing.T) {
 func Test_API_User_Create_400(t *testing.T) {
 	t.Parallel()
 
-	test, err := testint.StartTest(t, "Test_API_User")
+	test, err := testPck.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -80,7 +80,7 @@ func Test_API_User_Create_400(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testint.Table{
+	table := []testPck.Table{
 		{
 			Name:       "missing-input",
 			URL:        "/api/v1/users",
@@ -122,7 +122,7 @@ func Test_API_User_Create_400(t *testing.T) {
 			StatusCode: http.StatusBadRequest,
 			Input: &userapp.NewUser{
 				Name:            "Bi",
-				Email:           "bill@ardanlabs.com",
+				Email:           "chris@housi.com",
 				Roles:           []string{"USER"},
 				Department:      "IT",
 				Password:        "123",
@@ -142,7 +142,7 @@ func Test_API_User_Create_400(t *testing.T) {
 func Test_API_User_Create_401(t *testing.T) {
 	t.Parallel()
 
-	test, err := testint.StartTest(t, "Test_API_User")
+	test, err := testPck.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -152,7 +152,7 @@ func Test_API_User_Create_401(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testint.Table{
+	table := []testPck.Table{
 		{
 			Name:       "emptytoken",
 			URL:        "/api/v1/users",

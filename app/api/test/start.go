@@ -1,4 +1,4 @@
-package testint
+package test
 
 import (
 	"context"

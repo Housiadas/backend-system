@@ -14,12 +14,19 @@ import (
 func (h *Handler) Routes() *chi.Mux {
 	mid := h.Web.Mid
 
+	// Bearer middleware
 	authenticate := mid.Bearer()
-	ruleAuthorizeAny := mid.AuthorizeUser(authbus.RuleAny)
-	ruleAuthorizeUserOnly := mid.AuthorizeUser(authbus.RuleUserOnly)
-	ruleAuthorizeUser := mid.AuthorizeUser(authbus.RuleAdminOrSubject)
-	ruleAuthorizeAdmin := mid.AuthorizeUser(authbus.RuleAdminOnly)
-	ruleAuthorizeProduct := mid.AuthorizeProduct(authbus.RuleAdminOrSubject)
+
+	// authorization middleware
+	ruleAny := mid.Authorize(authbus.RuleAny)
+	ruleAdmin := mid.Authorize(authbus.RuleAdminOnly)
+	ruleUserOnly := mid.Authorize(authbus.RuleUserOnly)
+
+	// authorization for resource (entity) actions
+	// Check if a user is allowed to modify other user's resources
+	requestUserAuthorizeAdmin := mid.AuthorizeUser(authbus.RuleAdminOnly)
+	requestUserAdminOrSubject := mid.AuthorizeUser(authbus.RuleAdminOrSubject)
+	requestProductAdminOrSubject := mid.AuthorizeProduct(authbus.RuleAdminOrSubject)
 
 	tran := mid.BeginCommitRollback()
 
@@ -51,21 +58,21 @@ func (h *Handler) Routes() *chi.Mux {
 
 		// Users
 		v1.With(authenticate).Route("/users", func(u chi.Router) {
-			u.With(ruleAuthorizeAdmin).Get("/", h.Web.Res.Respond(h.userQuery))
-			u.With(ruleAuthorizeAdmin).Post("/", h.Web.Res.Respond(h.userCreate))
-			u.With(ruleAuthorizeUser).Get("/{user_id}", h.Web.Res.Respond(h.userQueryByID))
-			u.With(ruleAuthorizeAdmin).Put("/role/{user_id}", h.Web.Res.Respond(h.updateRole))
-			u.With(ruleAuthorizeUser).Put("/{user_id}", h.Web.Res.Respond(h.userUpdate))
-			u.With(ruleAuthorizeUser).Delete("/{user_id}", h.Web.Res.Respond(h.userDelete))
+			u.With(ruleAdmin).Get("/", h.Web.Res.Respond(h.userQuery))
+			u.With(ruleAdmin).Post("/", h.Web.Res.Respond(h.userCreate))
+			u.With(requestUserAdminOrSubject).Get("/{user_id}", h.Web.Res.Respond(h.userQueryByID))
+			u.With(requestUserAuthorizeAdmin).Put("/role/{user_id}", h.Web.Res.Respond(h.updateRole))
+			u.With(requestUserAdminOrSubject).Put("/{user_id}", h.Web.Res.Respond(h.userUpdate))
+			u.With(requestUserAdminOrSubject).Delete("/{user_id}", h.Web.Res.Respond(h.userDelete))
 		})
 
 		// Products
 		v1.With(authenticate).Route("/products", func(p chi.Router) {
-			p.With(ruleAuthorizeAny).Get("/", h.Web.Res.Respond(h.productQuery))
-			p.With(ruleAuthorizeUserOnly).Post("/", h.Web.Res.Respond(h.productCreate))
-			p.With(ruleAuthorizeProduct).Get("/{product_id}", h.Web.Res.Respond(h.productQueryByID))
-			p.With(ruleAuthorizeProduct).Put("/{product_id}", h.Web.Res.Respond(h.productUpdate))
-			p.With(ruleAuthorizeProduct).Delete("/{product_id}", h.Web.Res.Respond(h.productDelete))
+			p.With(ruleAny).Get("/", h.Web.Res.Respond(h.productQuery))
+			p.With(ruleUserOnly).Post("/", h.Web.Res.Respond(h.productCreate))
+			p.With(requestProductAdminOrSubject).Get("/{product_id}", h.Web.Res.Respond(h.productQueryByID))
+			p.With(requestProductAdminOrSubject).Put("/{product_id}", h.Web.Res.Respond(h.productUpdate))
+			p.With(requestProductAdminOrSubject).Delete("/{product_id}", h.Web.Res.Respond(h.productDelete))
 		})
 
 		// Transaction example

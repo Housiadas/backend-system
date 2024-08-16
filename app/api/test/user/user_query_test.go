@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/Housiadas/backend-system/app/api/testint"
+	testPck "github.com/Housiadas/backend-system/app/api/test"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/page"
@@ -17,7 +17,7 @@ import (
 func Test_API_User_Query_200(t *testing.T) {
 	t.Parallel()
 
-	test, err := testint.StartTest(t, "Test_API_User")
+	test, err := testPck.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -41,7 +41,7 @@ func Test_API_User_Query_200(t *testing.T) {
 		return usrs[i].ID.String() <= usrs[j].ID.String()
 	})
 
-	table := []testint.Table{
+	table := []testPck.Table{
 		{
 			Name:       "basic",
 			URL:        "/api/v1/users?page=1&rows=10&orderBy=user_id,ASC&name=Name",
@@ -71,7 +71,7 @@ func Test_API_User_Query_200(t *testing.T) {
 func Test_API_User_Query_BY_ID_200(t *testing.T) {
 	t.Parallel()
 
-	test, err := testint.StartTest(t, "Test_API_User")
+	test, err := testPck.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -81,7 +81,7 @@ func Test_API_User_Query_BY_ID_200(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testint.Table{
+	table := []testPck.Table{
 		{
 			Name:       "basic",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),

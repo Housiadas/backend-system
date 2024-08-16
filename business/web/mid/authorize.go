@@ -17,7 +17,7 @@ import (
 // ErrInvalidID represents a condition where the id is not an uuid.
 var ErrInvalidID = errors.New("ID is not in its proper form")
 
-// Authorize validates authorization.
+// Authorize validates user's role.
 func (m *Mid) Authorize(rule string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -96,6 +96,7 @@ func (m *Mid) AuthorizeUser(rule string) func(next http.Handler) http.Handler {
 					return
 				}
 
+				// Here adds in the context the requested user based on (user_id)
 				ctx = web.SetUser(ctx, usr)
 			}
 
