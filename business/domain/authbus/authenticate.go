@@ -46,7 +46,6 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, er
 	}
 
 	// Check the database for this user to verify they are still enabled.
-
 	if err := a.isUserEnabled(ctx, claims); err != nil {
 		return Claims{}, fmt.Errorf("user not enabled : %w", err)
 	}

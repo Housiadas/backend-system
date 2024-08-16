@@ -32,15 +32,14 @@ func Test_Auth(t *testing.T) {
 		Userbus:   userbus.NewBusiness(db.Log, userdb.NewStore(db.Log, db.DB)),
 	})
 
-	t.Run("test1", test1(ath, sd))
-	t.Run("test2", test2(ath, sd))
-	t.Run("test3", test3(ath, sd))
-	t.Run("test4", test4(ath, sd))
-	t.Run("test5", test5(ath, sd))
-	t.Run("test6", test6(ath, sd))
+	t.Run("testAdminAuthorization", testAdminAuthorization(ath, sd))
+	t.Run("testUserAuthorization", testUserAuthorization(ath, sd))
+	t.Run("testUserWithDifferentUUID", testUserWithDifferentUUID(ath, sd))
+	t.Run("testUserAdminAuthorization", testUserAdminAuthorization(ath, sd))
+	t.Run("testUserRuleAny", testUserRuleAny(ath, sd))
 }
 
-func test1(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
+func testAdminAuthorization(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 	f := func(t *testing.T) {
 		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
@@ -83,12 +82,12 @@ func test1(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 	return f
 }
 
-func test2(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
+func testUserAuthorization(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 	f := func(t *testing.T) {
 		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
-				Subject:   sd.Admins[0].ID.String(),
+				Subject:   sd.Users[0].ID.String(),
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
@@ -131,12 +130,12 @@ func test2(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 	return f
 }
 
-func test3(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
+func testUserWithDifferentUUID(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 	f := func(t *testing.T) {
 		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
-				Subject:   sd.Admins[0].ID.String(),
+				Subject:   sd.Users[0].ID.String(),
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
@@ -164,7 +163,7 @@ func test3(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 	return f
 }
 
-func test4(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
+func testUserAdminAuthorization(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 	f := func(t *testing.T) {
 		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
@@ -196,12 +195,12 @@ func test4(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 	return f
 }
 
-func test5(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
+func testUserRuleAny(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 	f := func(t *testing.T) {
 		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
-				Subject:   sd.Admins[0].ID.String(),
+				Subject:   sd.Users[0].ID.String(),
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
@@ -222,38 +221,6 @@ func test5(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
 		err = ath.Authorize(context.Background(), parsedClaims, userID, authbus.RuleAny)
 		if err != nil {
 			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.User only : %s", err)
-		}
-	}
-
-	return f
-}
-
-func test6(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) {
-	f := func(t *testing.T) {
-		claims := authbus.Claims{
-			RegisteredClaims: jwt.RegisteredClaims{
-				Issuer:    ath.Issuer(),
-				Subject:   sd.Admins[0].ID.String(),
-				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
-				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-			},
-			Roles: parseRoles([]userbus.Role{userbus.Roles.Admin}),
-		}
-		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
-
-		token, err := ath.GenerateToken(kid, claims)
-		if err != nil {
-			t.Fatalf("Should be able to generate a JWT : %s", err)
-		}
-
-		parsedClaims, err := ath.Authenticate(context.Background(), "Bearer "+token)
-		if err != nil {
-			t.Fatalf("Should be able to authenticate the claims : %s", err)
-		}
-
-		err = ath.Authorize(context.Background(), parsedClaims, userID, authbus.RuleAny)
-		if err != nil {
-			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.Admin only : %s", err)
 		}
 	}
 
