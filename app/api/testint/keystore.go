@@ -1,4 +1,4 @@
-package test
+package testint
 
 // KeyStore represents a mock keystore with a hardcoded key.
 type KeyStore struct{}

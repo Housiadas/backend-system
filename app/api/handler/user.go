@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	"github.com/Housiadas/backend-system/app/domain/userapp"
@@ -13,7 +12,6 @@ import (
 func (h *Handler) userCreate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	var app userapp.NewUser
 	if err := web.Decode(r, &app); err != nil {
-		return errs.New(errs.Internal, errs.New(errs.Internal, errors.New("test")))
 		return errs.New(errs.FailedPrecondition, err)
 	}
 

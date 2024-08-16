@@ -1,4 +1,4 @@
-package test
+package testint
 
 import (
 	"github.com/Housiadas/backend-system/business/domain/productbus"

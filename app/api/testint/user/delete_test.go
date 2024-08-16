@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/Housiadas/backend-system/app/api/test"
+	"github.com/Housiadas/backend-system/app/api/testint"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 )
 
-func delete200(sd test.SeedData) []test.Table {
-	table := []test.Table{
+func delete200(sd testint.SeedData) []testint.Table {
+	table := []testint.Table{
 		{
 			Name:       "asuser",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[1].ID),
@@ -31,8 +31,8 @@ func delete200(sd test.SeedData) []test.Table {
 	return table
 }
 
-func delete401(sd test.SeedData) []test.Table {
-	table := []test.Table{
+func delete401(sd testint.SeedData) []testint.Table {
+	table := []testint.Table{
 		{
 			Name:       "emptytoken",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),

@@ -1,5 +1,5 @@
 // Package tests provides support for executing api test logic.
-package test
+package testint
 
 import (
 	"bytes"

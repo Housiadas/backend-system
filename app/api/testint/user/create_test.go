@@ -5,13 +5,13 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/Housiadas/backend-system/app/api/test"
+	"github.com/Housiadas/backend-system/app/api/testint"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 )
 
-func create200(sd test.SeedData) []test.Table {
-	table := []test.Table{
+func create200(sd testint.SeedData) []testint.Table {
+	table := []testint.Table{
 		{
 			Name:       "basic",
 			URL:        "/api/v1/users",
@@ -54,8 +54,8 @@ func create200(sd test.SeedData) []test.Table {
 	return table
 }
 
-func create400(sd test.SeedData) []test.Table {
-	table := []test.Table{
+func create400(sd testint.SeedData) []testint.Table {
+	table := []testint.Table{
 		{
 			Name:       "missing-input",
 			URL:        "/api/v1/users",
@@ -114,8 +114,8 @@ func create400(sd test.SeedData) []test.Table {
 	return table
 }
 
-func create401(sd test.SeedData) []test.Table {
-	table := []test.Table{
+func create401(sd testint.SeedData) []testint.Table {
+	table := []testint.Table{
 		{
 			Name:       "emptytoken",
 			URL:        "/api/v1/users",

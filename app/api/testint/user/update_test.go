@@ -7,14 +7,14 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/Housiadas/backend-system/app/api/test"
+	"github.com/Housiadas/backend-system/app/api/testint"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/business/sys/dbtest"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 )
 
-func update200(sd test.SeedData) []test.Table {
-	table := []test.Table{
+func update200(sd testint.SeedData) []testint.Table {
+	table := []testint.Table{
 		{
 			Name:       "basic",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),
@@ -88,8 +88,8 @@ func update200(sd test.SeedData) []test.Table {
 	return table
 }
 
-func update400(sd test.SeedData) []test.Table {
-	table := []test.Table{
+func update400(sd testint.SeedData) []testint.Table {
+	table := []testint.Table{
 		{
 			Name:       "bad-input",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),
@@ -126,8 +126,8 @@ func update400(sd test.SeedData) []test.Table {
 	return table
 }
 
-func update401(sd test.SeedData) []test.Table {
-	table := []test.Table{
+func update401(sd testint.SeedData) []testint.Table {
+	table := []testint.Table{
 		{
 			Name:       "emptytoken",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),
