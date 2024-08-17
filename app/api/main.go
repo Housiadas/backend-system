@@ -100,6 +100,8 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "starting service", "version", cfg.Version.Build)
 	defer log.Info(ctx, "shutdown complete")
+
+	log.BuildInfo(ctx)
 	expvar.NewString("build").Set(cfg.Version.Build)
 
 	// -------------------------------------------------------------------------

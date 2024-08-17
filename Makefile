@@ -184,11 +184,17 @@ swagger:
 # Metrics and Tracing
 # ==================================================================================== #
 
-metrics/view/sc:
+# metrics: see metrics from cli
+.PHONY: metrics
+metrics:
 	expvarmon -ports="localhost:4010" -vars="build,requests,goroutines,errors,panics,mem:memstats.HeapAlloc,mem:memstats.HeapSys,mem:memstats.Sys"
 
+# grafana: open grafana
+.PHONY: grafana
 grafana:
 	open http://localhost:3000/
 
+# grafana: open statsviz
+.PHONY: statsviz
 statsviz:
 	open http://localhost:4010/debug/statsviz
