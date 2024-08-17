@@ -77,7 +77,10 @@ func main() {
 	traceIDFn := func(ctx context.Context) string {
 		return otel.GetTraceID(ctx)
 	}
-	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "API", traceIDFn, events)
+	requestIDFn := func(ctx context.Context) string {
+		return web.GetRequestID(ctx)
+	}
+	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "API", traceIDFn, requestIDFn, events)
 
 	// -------------------------------------------------------------------------
 	// Run the application
@@ -100,6 +103,8 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "starting service", "version", cfg.Version.Build)
 	defer log.Info(ctx, "shutdown complete")
+
+	log.BuildInfo(ctx)
 	expvar.NewString("build").Set(cfg.Version.Build)
 
 	// -------------------------------------------------------------------------

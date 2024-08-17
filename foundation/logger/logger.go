@@ -12,24 +12,27 @@ import (
 	"time"
 )
 
-// TraceIDFn represents a function that can return the trace id from
-// the specified context.
+// TraceIDFn represents a function that can return the trace id from the specified context.
 type TraceIDFn func(ctx context.Context) string
+
+// RequestIDFn represents a function that can return the request id from the specified context.
+type RequestIDFn func(ctx context.Context) string
 
 // Logger represents a logger for logging information.
 type Logger struct {
-	handler   slog.Handler
-	traceIDFn TraceIDFn
+	handler     slog.Handler
+	traceIDFn   TraceIDFn
+	requestIDFn RequestIDFn
 }
 
 // New constructs a new log for application use.
-func New(w io.Writer, minLevel Level, serviceName string, traceIDFn TraceIDFn) *Logger {
-	return new(w, minLevel, serviceName, traceIDFn, Events{})
+func New(w io.Writer, minLevel Level, serviceName string, traceIDFn TraceIDFn, requestIDFn RequestIDFn) *Logger {
+	return new(w, minLevel, serviceName, traceIDFn, requestIDFn, Events{})
 }
 
 // NewWithEvents constructs a new log for application use with events.
-func NewWithEvents(w io.Writer, minLevel Level, serviceName string, traceIDFn TraceIDFn, events Events) *Logger {
-	return new(w, minLevel, serviceName, traceIDFn, events)
+func NewWithEvents(w io.Writer, minLevel Level, serviceName string, traceIDFn TraceIDFn, requestIDFn RequestIDFn, events Events) *Logger {
+	return new(w, minLevel, serviceName, traceIDFn, requestIDFn, events)
 }
 
 // NewWithHandler returns a new log for application use with the underlying
@@ -98,12 +101,15 @@ func (log *Logger) write(ctx context.Context, level Level, caller int, msg strin
 	if log.traceIDFn != nil {
 		args = append(args, "trace_id", log.traceIDFn(ctx))
 	}
+	if log.requestIDFn != nil {
+		args = append(args, "request_id", log.requestIDFn(ctx))
+	}
 	r.Add(args...)
 
 	log.handler.Handle(ctx, r)
 }
 
-func new(w io.Writer, minLevel Level, serviceName string, traceIDFn TraceIDFn, events Events) *Logger {
+func new(w io.Writer, minLevel Level, serviceName string, traceIDFn TraceIDFn, requestIDFn RequestIDFn, events Events) *Logger {
 
 	// Convert the file name to just the name.ext when this key/value will
 	// be logged.
@@ -136,7 +142,8 @@ func new(w io.Writer, minLevel Level, serviceName string, traceIDFn TraceIDFn, e
 	handler = handler.WithAttrs(attrs)
 
 	return &Logger{
-		handler:   handler,
-		traceIDFn: traceIDFn,
+		handler:     handler,
+		traceIDFn:   traceIDFn,
+		requestIDFn: requestIDFn,
 	}
 }

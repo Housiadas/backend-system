@@ -2,7 +2,6 @@ package mid
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -22,12 +21,8 @@ func (m *Mid) BeginCommitRollback() func(next http.Handler) http.Handler {
 			if err != nil {
 				err := errs.Newf(errs.Internal, "BEGIN TRANSACTION: %s", err)
 				m.Log.Error(ctx, "transaction middleware", err)
-
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusInternalServerError)
-				if err := json.NewEncoder(w).Encode(err); err != nil {
-					return
-				}
+				m.Error(w, err, http.StatusInternalServerError)
+				return
 			}
 
 			defer func() {
@@ -60,12 +55,8 @@ func (m *Mid) BeginCommitRollback() func(next http.Handler) http.Handler {
 			if err := tx.Commit(); err != nil {
 				err := errs.Newf(errs.Internal, "COMMIT TRANSACTION: %s", err)
 				m.Log.Error(ctx, "transaction middleware", err)
-
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusInternalServerError)
-				if err := json.NewEncoder(w).Encode(err); err != nil {
-					return
-				}
+				m.Error(w, err, http.StatusInternalServerError)
+				return
 			}
 
 			hasCommitted = true

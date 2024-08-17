@@ -3,14 +3,25 @@ package mid
 
 import (
 	"bytes"
-	"go.opentelemetry.io/otel/trace"
+	"encoding/json"
+	"errors"
 	"net/http"
+
+	"go.opentelemetry.io/otel/trace"
+	"golang.org/x/sync/singleflight"
 
 	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/foundation/logger"
+)
+
+var (
+	// ErrInvalidID represents a condition where the id is not an uuid.
+	ErrInvalidID = errors.New("ID is not in its proper form")
+
+	group = singleflight.Group{}
 )
 
 type Mid struct {
@@ -33,6 +44,15 @@ func New(b Business, l *logger.Logger, t trace.Tracer, tx *sqldb.DBBeginner) *Mi
 		Tracer: t,
 		Tx:     tx,
 	}
+}
+
+func (m *Mid) Error(w http.ResponseWriter, err error, statusCode int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	if err := json.NewEncoder(w).Encode(err); err != nil {
+		return
+	}
+	return
 }
 
 // ResponseRecorder a custom http.ResponseWriter to capture the response

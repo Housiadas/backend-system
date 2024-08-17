@@ -29,9 +29,13 @@ type Config struct {
 }
 
 func main() {
-	log := logger.New(io.Discard, logger.LevelInfo, "CMD", func(context.Context) string {
+	traceIDFn := func(context.Context) string {
 		return "00000000-0000-0000-0000-000000000000"
-	})
+	}
+	requestIDFn := func(context.Context) string {
+		return "00000000-0000-0000-0000-000000000000"
+	}
+	log := logger.New(io.Discard, logger.LevelInfo, "CMD", traceIDFn, requestIDFn)
 	if err := run(log); err != nil {
 		if !errors.Is(err, commands.ErrHelp) {
 			fmt.Println("msg", err)
