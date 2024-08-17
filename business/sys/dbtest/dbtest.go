@@ -16,6 +16,7 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/productbus/stores/productdb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
+	"github.com/Housiadas/backend-system/business/web"
 	"github.com/Housiadas/backend-system/foundation/docker"
 	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/Housiadas/backend-system/foundation/otel"
@@ -134,7 +135,9 @@ func NewDatabase(t *testing.T, testName string, migrationsPath string) *Database
 	// -------------------------------------------------------------------------
 
 	var buf bytes.Buffer
-	log := logger.New(&buf, logger.LevelInfo, "TEST", func(context.Context) string { return otel.GetTraceID(ctx) })
+	traceIDfn := func(context.Context) string { return otel.GetTraceID(ctx) }
+	requestIDfn := func(context.Context) string { return web.GetRequestID(ctx) }
+	log := logger.New(&buf, logger.LevelInfo, "TEST", traceIDfn, requestIDfn)
 
 	// -------------------------------------------------------------------------
 
