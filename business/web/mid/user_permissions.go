@@ -1,7 +1,6 @@
 package mid
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -29,12 +28,7 @@ func (m *Mid) UserPermissions(rule string) func(next http.Handler) http.Handler 
 				if err != nil {
 					err = errs.New(errs.Unauthenticated, ErrInvalidID)
 					m.Log.Error(ctx, "authorize user mid: authorize", err)
-
-					w.Header().Set("Content-Type", "application/json")
-					w.WriteHeader(http.StatusUnauthorized)
-					if err := json.NewEncoder(w).Encode(err); err != nil {
-						return
-					}
+					m.Error(w, err, http.StatusUnauthorized)
 					return
 				}
 
@@ -50,12 +44,7 @@ func (m *Mid) UserPermissions(rule string) func(next http.Handler) http.Handler 
 						err = errs.Newf(errs.Unauthenticated, "querybyid: userID[%s]: %s", userID, err)
 					}
 					m.Log.Error(ctx, "authorize user mid: authorize", err)
-
-					w.Header().Set("Content-Type", "application/json")
-					w.WriteHeader(http.StatusUnauthorized)
-					if err := json.NewEncoder(w).Encode(err); err != nil {
-						return
-					}
+					m.Error(w, err, http.StatusUnauthorized)
 					return
 				}
 
@@ -63,12 +52,7 @@ func (m *Mid) UserPermissions(rule string) func(next http.Handler) http.Handler 
 				if !ok {
 					err = errs.New(errs.InternalOnlyLog, errors.New("code should be reach here"))
 					m.Log.Error(ctx, "authorize error:", err)
-
-					w.Header().Set("Content-Type", "application/json")
-					w.WriteHeader(http.StatusInternalServerError)
-					if err := json.NewEncoder(w).Encode(err); err != nil {
-						return
-					}
+					m.Error(w, err, http.StatusInternalServerError)
 					return
 				}
 
@@ -83,14 +67,12 @@ func (m *Mid) UserPermissions(rule string) func(next http.Handler) http.Handler 
 			}
 
 			if err := m.Bus.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
-				err = errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", authData.Claims.Roles, authData.Rule, err)
+				err = errs.Newf(errs.Unauthenticated,
+					"authorize: you are not authorized for that action, claims[%v] rule[%v]: %s",
+					authData.Claims.Roles, authData.Rule, err,
+				)
 				m.Log.Error(ctx, "authorize user mid: authorize", err)
-
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusUnauthorized)
-				if err := json.NewEncoder(w).Encode(err); err != nil {
-					return
-				}
+				m.Error(w, err, http.StatusUnauthorized)
 				return
 			}
 

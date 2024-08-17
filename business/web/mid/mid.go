@@ -3,6 +3,7 @@ package mid
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -43,6 +44,15 @@ func New(b Business, l *logger.Logger, t trace.Tracer, tx *sqldb.DBBeginner) *Mi
 		Tracer: t,
 		Tx:     tx,
 	}
+}
+
+func (m *Mid) Error(w http.ResponseWriter, err error, statusCode int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	if err := json.NewEncoder(w).Encode(err); err != nil {
+		return
+	}
+	return
 }
 
 // ResponseRecorder a custom http.ResponseWriter to capture the response
