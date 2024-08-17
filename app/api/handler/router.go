@@ -24,9 +24,9 @@ func (h *Handler) Routes() *chi.Mux {
 
 	// authorization for resource (entity) actions
 	// Check if a user is allowed to modify other user's resources
-	requestUserAuthorizeAdmin := mid.AuthorizeUser(authbus.RuleAdminOnly)
-	requestUserAdminOrSubject := mid.AuthorizeUser(authbus.RuleAdminOrSubject)
-	requestProductAdminOrSubject := mid.AuthorizeProduct(authbus.RuleAdminOrSubject)
+	requestUserAuthorizeAdmin := mid.UserPermissions(authbus.RuleAdminOnly)
+	requestUserAdminOrSubject := mid.UserPermissions(authbus.RuleAdminOrSubject)
+	requestProductAdminOrSubject := mid.ProductPermissions(authbus.RuleAdminOrSubject)
 
 	tran := mid.BeginCommitRollback()
 
@@ -34,16 +34,18 @@ func (h *Handler) Routes() *chi.Mux {
 	apiRouter.Use(
 		mid.Recoverer(),
 		mid.RequestID,
-		mid.Otel(),
 		mid.Logger(),
+		mid.Otel(),
 		middleware.SetHeader("Content-Type", "application/json"),
 		middleware.GetHead,
 	)
 
 	// v1 routes
 	apiRouter.Route("/v1", func(v1 chi.Router) {
-		v1.Use(otelchi.Middleware(h.ServiceName, otelchi.WithChiRoutes(v1)))
-		v1.Use(mid.ApiVersion("v1"))
+		v1.Use(
+			mid.ApiVersion("v1"),
+			otelchi.Middleware(h.ServiceName, otelchi.WithChiRoutes(v1)),
+		)
 		v1.Use(cors.Handler(cors.Options{
 			AllowedOrigins: h.Cors.AllowedOrigins,
 			AllowedMethods: h.Cors.AllowedMethods,

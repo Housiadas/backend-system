@@ -3,14 +3,24 @@ package mid
 
 import (
 	"bytes"
-	"go.opentelemetry.io/otel/trace"
+	"errors"
 	"net/http"
+
+	"go.opentelemetry.io/otel/trace"
+	"golang.org/x/sync/singleflight"
 
 	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/foundation/logger"
+)
+
+var (
+	// ErrInvalidID represents a condition where the id is not an uuid.
+	ErrInvalidID = errors.New("ID is not in its proper form")
+
+	group = singleflight.Group{}
 )
 
 type Mid struct {

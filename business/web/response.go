@@ -103,7 +103,7 @@ func (respond *Respond) errorRecorder(ctx context.Context, statusCode int, err e
 		return appErr
 	}
 
-	_, span := otel.AddSpan(ctx, "app.sdk.mid.error")
+	_, span := otel.AddSpan(ctx, "app.response.error")
 	span.RecordError(err)
 	defer span.End()
 
