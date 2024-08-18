@@ -58,7 +58,7 @@ func run(log *logger.Logger) error {
 		DefaultKID string
 	}{
 		KeysFolder: "/keys",
-		DefaultKID: "54bb2165-71e1-41a6-af3e-7da4a0e1e2c1",
+		DefaultKID: "key",
 	}
 
 	return processCommands(os.Args, log, c)

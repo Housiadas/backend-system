@@ -7,11 +7,10 @@ import (
 )
 
 // GenerateToken generates a signed JWT token string representing the user Claims.
-func (a *Auth) GenerateToken(kid string, claims Claims) (string, error) {
+func (a *Auth) GenerateToken(claims Claims) (string, error) {
 	token := jwt.NewWithClaims(a.method, claims)
-	token.Header["kid"] = kid
 
-	privateKeyPEM, err := a.keyLookup.PrivateKey(kid)
+	privateKeyPEM, err := a.keyLookup.PrivateKey()
 	if err != nil {
 		return "", fmt.Errorf("private key: %w", err)
 	}
