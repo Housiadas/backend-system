@@ -51,7 +51,7 @@ func testAdminAuthorization(ath *authbus.Auth, sd unitest.SeedData) func(t *test
 			Roles: parseRoles([]userbus.Role{userbus.Roles.Admin}),
 		}
 
-		token, err := ath.GenerateToken(kid, claims)
+		token, err := ath.GenerateToken(claims)
 		if err != nil {
 			t.Fatalf("Should be able to generate a JWT : %s", err)
 		}
@@ -94,7 +94,7 @@ func testUserAuthorization(ath *authbus.Auth, sd unitest.SeedData) func(t *testi
 			Roles: parseRoles([]userbus.Role{userbus.Roles.User}),
 		}
 
-		token, err := ath.GenerateToken(kid, claims)
+		token, err := ath.GenerateToken(claims)
 		if err != nil {
 			t.Fatalf("Should be able to generate a JWT : %v", err)
 		}
@@ -142,7 +142,7 @@ func testUserWithDifferentUUID(ath *authbus.Auth, sd unitest.SeedData) func(t *t
 			Roles: parseRoles([]userbus.Role{userbus.Roles.User}),
 		}
 
-		token, err := ath.GenerateToken(kid, claims)
+		token, err := ath.GenerateToken(claims)
 		if err != nil {
 			t.Fatalf("Should be able to generate a JWT : %s", err)
 		}
@@ -176,7 +176,7 @@ func testUserAdminAuthorization(ath *authbus.Auth, sd unitest.SeedData) func(t *
 		}
 		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
 
-		token, err := ath.GenerateToken(kid, claims)
+		token, err := ath.GenerateToken(claims)
 		if err != nil {
 			t.Fatalf("Should be able to generate a JWT : %s", err)
 		}
@@ -208,7 +208,7 @@ func testUserRuleAny(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) 
 		}
 		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
 
-		token, err := ath.GenerateToken(kid, claims)
+		token, err := ath.GenerateToken(claims)
 		if err != nil {
 			t.Fatalf("Should be able to generate a JWT : %s", err)
 		}
@@ -274,11 +274,11 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 
 type keyStore struct{}
 
-func (ks *keyStore) PrivateKey(kid string) (string, error) {
+func (ks *keyStore) PrivateKey() (string, error) {
 	return privateKeyPEM, nil
 }
 
-func (ks *keyStore) PublicKey(kid string) (string, error) {
+func (ks *keyStore) PublicKey() (string, error) {
 	return publicKeyPEM, nil
 }
 
@@ -291,8 +291,6 @@ func parseRoles(roles []userbus.Role) []string {
 }
 
 const (
-	kid = "s4sKIjD9kIRjxs2tulPqGLdxSfgPErRN1Mu3Hd9k9NQ"
-
 	privateKeyPEM = `-----BEGIN PRIVATE KEY-----
 MIIEpQIBAAKCAQEAvMAHb0IoLvoYuW2kA+LTmnk+hfnBq1eYIh4CT/rMPCxgtzjq
 U0guQOMnLg69ydyA5uu37v6rbS1+stuBTEiMQl/bxAhgLkGrUhgpZ10Bt6GzSEgw

@@ -4,18 +4,16 @@ package test
 type KeyStore struct{}
 
 // PrivateKey implements the auth interface.
-func (ks *KeyStore) PrivateKey(kid string) (string, error) {
+func (ks *KeyStore) PrivateKey() (string, error) {
 	return privateKeyPEM, nil
 }
 
 // PublicKey implements the auth interface.
-func (ks *KeyStore) PublicKey(kid string) (string, error) {
+func (ks *KeyStore) PublicKey() (string, error) {
 	return publicKeyPEM, nil
 }
 
 const (
-	kid = "s4sKIjD9kIRjxs2tulPqGLdxSfgPErRN1Mu3Hd9k9NQ"
-
 	privateKeyPEM = `-----BEGIN PRIVATE KEY-----
 MIIEpQIBAAKCAQEAvMAHb0IoLvoYuW2kA+LTmnk+hfnBq1eYIh4CT/rMPCxgtzjq
 U0guQOMnLg69ydyA5uu37v6rbS1+stuBTEiMQl/bxAhgLkGrUhgpZ10Bt6GzSEgw

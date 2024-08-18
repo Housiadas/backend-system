@@ -102,7 +102,7 @@ func Token(userBus *userbus.Business, ath *authbus.Auth, email string) string {
 		Roles: userbus.ParseRolesToString(dbUsr.Roles),
 	}
 
-	token, err := ath.GenerateToken(kid, claims)
+	token, err := ath.GenerateToken(claims)
 	if err != nil {
 		return ""
 	}

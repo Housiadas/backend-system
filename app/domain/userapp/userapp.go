@@ -157,14 +157,14 @@ func (a *App) Authenticate(ctx context.Context, authUser AuthenticateUser) (User
 }
 
 // Token provides an API token for the authenticated user.
-func (a *App) Token(ctx context.Context, kid string) (Token, error) {
+func (a *App) Token(ctx context.Context) (Token, error) {
 	if a.authbus == nil {
 		return Token{}, errs.Newf(errs.Internal, "authapi not configured")
 	}
 
 	claims := web.GetClaims(ctx)
 
-	tkn, err := a.authbus.GenerateToken(kid, claims)
+	tkn, err := a.authbus.GenerateToken(claims)
 	if err != nil {
 		return Token{}, errs.New(errs.Internal, err)
 	}

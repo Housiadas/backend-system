@@ -34,10 +34,7 @@ func New() *KeyStore {
 	}
 }
 
-// LoadRSAKeys loads a set of RSA PEM files rooted inside a directory. The
-// name of each PEM file will be used as the key id.
-// Example: ks.LoadRSAKeys(os.DirFS("/zarf/keys/"))
-// Example: /zarf/keys/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1.pem
+// LoadRSAKeys loads a set of RSA PEM files rooted inside a directory.
 func (ks *KeyStore) LoadRSAKeys(fsys fs.FS) error {
 	fn := func(fileName string, dirEntry fs.DirEntry, err error) error {
 		if err != nil {
@@ -90,20 +87,20 @@ func (ks *KeyStore) LoadRSAKeys(fsys fs.FS) error {
 }
 
 // PrivateKey searches the key store for a given kid and returns the private key.
-func (ks *KeyStore) PrivateKey(kid string) (string, error) {
-	key, found := ks.store[kid]
+func (ks *KeyStore) PrivateKey() (string, error) {
+	key, found := ks.store["key"]
 	if !found {
-		return "", errors.New("kid lookup failed")
+		return "", errors.New("key lookup failed")
 	}
 
 	return key.privatePEM, nil
 }
 
 // PublicKey searches the key store for a given kid and returns the public key.
-func (ks *KeyStore) PublicKey(kid string) (string, error) {
-	key, found := ks.store[kid]
+func (ks *KeyStore) PublicKey() (string, error) {
+	key, found := ks.store["key"]
 	if !found {
-		return "", errors.New("kid lookup failed")
+		return "", errors.New("key lookup failed")
 	}
 
 	return key.publicPEM, nil

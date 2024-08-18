@@ -15,22 +15,12 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, er
 	}
 
 	var claims Claims
-	token, _, err := a.parser.ParseUnverified(parts[1], &claims)
+	_, _, err := a.parser.ParseUnverified(parts[1], &claims)
 	if err != nil {
 		return Claims{}, fmt.Errorf("error parsing token: %w", err)
 	}
 
-	kidRaw, exists := token.Header["kid"]
-	if !exists {
-		return Claims{}, fmt.Errorf("kid missing from header: %w", err)
-	}
-
-	kid, ok := kidRaw.(string)
-	if !ok {
-		return Claims{}, fmt.Errorf("kid malformed: %w", err)
-	}
-
-	pem, err := a.keyLookup.PublicKey(kid)
+	pem, err := a.keyLookup.PublicKey()
 	if err != nil {
 		return Claims{}, fmt.Errorf("failed to fetch public key: %w", err)
 	}

@@ -26,8 +26,8 @@ type Claims struct {
 // private and public keys for JWT use. The return could be a
 // PEM encoded string or a JWS based key.
 type KeyLookup interface {
-	PrivateKey(kid string) (key string, err error)
-	PublicKey(kid string) (key string, err error)
+	PrivateKey() (key string, err error)
+	PublicKey() (key string, err error)
 }
 
 // Config represents information required to initialize auth.
