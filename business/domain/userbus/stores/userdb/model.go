@@ -10,6 +10,8 @@ import (
 
 	"github.com/Housiadas/backend-system/business/data/sqldb/dbarray"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/business/sys/types/name"
+	"github.com/Housiadas/backend-system/business/sys/types/role"
 )
 
 type user struct {
@@ -26,8 +28,8 @@ type user struct {
 
 func toDBUser(bus userbus.User) user {
 	roles := make([]string, len(bus.Roles))
-	for i, role := range bus.Roles {
-		roles[i] = role.String()
+	for i, r := range bus.Roles {
+		roles[i] = r.String()
 	}
 
 	return user{
@@ -51,23 +53,23 @@ func toBusUser(db user) (userbus.User, error) {
 		Address: db.Email,
 	}
 
-	roles := make([]userbus.Role, len(db.Roles))
+	roles := make([]role.Role, len(db.Roles))
 	for i, value := range db.Roles {
 		var err error
-		roles[i], err = userbus.Roles.Parse(value)
+		roles[i], err = role.Parse(value)
 		if err != nil {
 			return userbus.User{}, fmt.Errorf("parse role: %w", err)
 		}
 	}
 
-	name, err := userbus.Names.Parse(db.Name)
+	n, err := name.Parse(db.Name)
 	if err != nil {
 		return userbus.User{}, fmt.Errorf("parse name: %w", err)
 	}
 
 	bus := userbus.User{
 		ID:           db.ID,
-		Name:         name,
+		Name:         n,
 		Email:        addr,
 		Roles:        roles,
 		PasswordHash: db.PasswordHash,

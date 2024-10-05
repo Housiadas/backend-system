@@ -6,6 +6,8 @@ import (
 	"math/rand"
 
 	"github.com/google/uuid"
+
+	"github.com/Housiadas/backend-system/business/sys/types/name"
 )
 
 // TestGenerateNewProducts is a helper method for testing.
@@ -17,7 +19,7 @@ func TestGenerateNewProducts(n int, userID uuid.UUID) []NewProduct {
 		idx++
 
 		np := NewProduct{
-			Name:     Names.MustParse(fmt.Sprintf("Name%d", idx)),
+			Name:     name.MustParse(fmt.Sprintf("Name%d", idx)),
 			Cost:     float64(rand.Intn(500)),
 			Quantity: rand.Intn(50),
 			UserID:   userID,

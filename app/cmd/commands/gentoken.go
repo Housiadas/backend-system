@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"os"
 	"time"
 
@@ -67,7 +68,7 @@ func GenToken(log *logger.Logger, dbConfig sqldb.Config, keyPath string, userID 
 			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(8760 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		},
-		Roles: userbus.ParseRolesToString(usr.Roles),
+		Roles: role.ParseToString(usr.Roles),
 	}
 
 	// This will generate a JWT with the claims embedded in them. The database

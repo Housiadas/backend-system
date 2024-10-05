@@ -8,6 +8,7 @@ import (
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
+	namePck "github.com/Housiadas/backend-system/business/sys/types/name"
 	"github.com/Housiadas/backend-system/business/sys/validation"
 	"github.com/Housiadas/backend-system/business/web"
 )
@@ -92,7 +93,7 @@ func toBusNewProduct(ctx context.Context, app NewProduct) (productbus.NewProduct
 		return productbus.NewProduct{}, fmt.Errorf("getuserid: %w", err)
 	}
 
-	name, err := productbus.Names.Parse(app.Name)
+	name, err := namePck.Parse(app.Name)
 	if err != nil {
 		return productbus.NewProduct{}, fmt.Errorf("parse name: %w", err)
 	}
@@ -131,9 +132,9 @@ func (app *UpdateProduct) Validate() error {
 }
 
 func toBusUpdateProduct(app UpdateProduct) (productbus.UpdateProduct, error) {
-	var name *productbus.Name
+	var name *namePck.Name
 	if app.Name != nil {
-		nm, err := productbus.Names.Parse(*app.Name)
+		nm, err := namePck.Parse(*app.Name)
 		if err != nil {
 			return productbus.UpdateProduct{}, fmt.Errorf("parse: %w", err)
 		}

@@ -14,6 +14,8 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/dbtest"
 	"github.com/Housiadas/backend-system/business/sys/page"
+	"github.com/Housiadas/backend-system/business/sys/types/name"
+	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"github.com/Housiadas/backend-system/business/sys/unitest"
 )
 
@@ -40,7 +42,7 @@ func Test_User(t *testing.T) {
 func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 	ctx := context.Background()
 
-	usrs, err := userbus.TestSeedUsers(ctx, 2, userbus.Roles.Admin, busDomain.User)
+	usrs, err := userbus.TestSeedUsers(ctx, 2, role.Admin, busDomain.User)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -55,7 +57,7 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = userbus.TestSeedUsers(ctx, 2, userbus.Roles.User, busDomain.User)
+	usrs, err = userbus.TestSeedUsers(ctx, 2, role.User, busDomain.User)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -174,17 +176,17 @@ func create(busDomain dbtest.BusDomain) []unitest.Table {
 		{
 			Name: "basic",
 			ExpResp: userbus.User{
-				Name:       userbus.Names.MustParse("Chris Housi"),
+				Name:       name.MustParse("Chris Housi"),
 				Email:      *email,
-				Roles:      []userbus.Role{userbus.Roles.Admin},
+				Roles:      []role.Role{role.Admin},
 				Department: "IT",
 				Enabled:    true,
 			},
 			ExcFunc: func(ctx context.Context) any {
 				nu := userbus.NewUser{
-					Name:       userbus.Names.MustParse("Chris Housi"),
+					Name:       name.MustParse("Chris Housi"),
 					Email:      *email,
-					Roles:      []userbus.Role{userbus.Roles.Admin},
+					Roles:      []role.Role{role.Admin},
 					Department: "IT",
 					Password:   "123",
 				}
@@ -229,9 +231,9 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			Name: "basic",
 			ExpResp: userbus.User{
 				ID:          sd.Users[0].ID,
-				Name:        userbus.Names.MustParse("Chris Housi 2"),
+				Name:        name.MustParse("Chris Housi 2"),
 				Email:       *email,
-				Roles:       []userbus.Role{userbus.Roles.Admin},
+				Roles:       []role.Role{role.Admin},
 				Department:  "IT",
 				Enabled:     true,
 				DateCreated: sd.Users[0].DateCreated,
@@ -240,7 +242,7 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				uu := userbus.UpdateUser{
 					Name:       dbtest.UserNamePointer("Chris Housi 2"),
 					Email:      email,
-					Roles:      []userbus.Role{userbus.Roles.Admin},
+					Roles:      []role.Role{role.Admin},
 					Department: dbtest.StringPointer("IT"),
 					Password:   dbtest.StringPointer("1234"),
 				}

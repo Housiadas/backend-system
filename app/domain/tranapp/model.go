@@ -9,6 +9,8 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/business/sys/types/name"
+	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"github.com/Housiadas/backend-system/business/sys/validation"
 )
 
@@ -86,7 +88,7 @@ func (app NewUser) Validate() error {
 }
 
 func toBusNewUser(app NewUser) (userbus.NewUser, error) {
-	roles, err := userbus.Roles.ParseRoles(app.Roles)
+	roles, err := role.ParseMany(app.Roles)
 	if err != nil {
 		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
@@ -96,13 +98,13 @@ func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
-	name, err := userbus.Names.Parse(app.Name)
+	n, err := name.Parse(app.Name)
 	if err != nil {
 		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
 	bus := userbus.NewUser{
-		Name:       name,
+		Name:       n,
 		Email:      *addr,
 		Roles:      roles,
 		Department: app.Department,
@@ -131,13 +133,13 @@ func (app NewProduct) Validate() error {
 }
 
 func toBusNewProduct(app NewProduct) (productbus.NewProduct, error) {
-	name, err := productbus.ParseName(app.Name)
+	n, err := name.Parse(app.Name)
 	if err != nil {
 		return productbus.NewProduct{}, fmt.Errorf("parse: %w", err)
 	}
 
 	bus := productbus.NewProduct{
-		Name:     name,
+		Name:     n,
 		Cost:     app.Cost,
 		Quantity: app.Quantity,
 	}

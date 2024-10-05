@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
+	"github.com/Housiadas/backend-system/business/sys/types/name"
 )
 
 type product struct {
@@ -34,7 +35,7 @@ func toDBProduct(bus productbus.Product) product {
 }
 
 func toBusProduct(db product) (productbus.Product, error) {
-	name, err := productbus.Names.Parse(db.Name)
+	n, err := name.Parse(db.Name)
 	if err != nil {
 		return productbus.Product{}, fmt.Errorf("parse name: %w", err)
 	}
@@ -42,7 +43,7 @@ func toBusProduct(db product) (productbus.Product, error) {
 	bus := productbus.Product{
 		ID:          db.ID,
 		UserID:      db.UserID,
-		Name:        name,
+		Name:        n,
 		Cost:        db.Cost,
 		Quantity:    db.Quantity,
 		DateCreated: db.DateCreated.In(time.Local),

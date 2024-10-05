@@ -9,6 +9,8 @@ import (
 	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
+	namePck "github.com/Housiadas/backend-system/business/sys/types/name"
+	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
@@ -36,10 +38,10 @@ func UserAdd(log *logger.Logger, cfg sqldb.Config, name, email, password string)
 	}
 
 	nu := userbus.NewUser{
-		Name:     userbus.Names.MustParse(name),
+		Name:     namePck.MustParse(name),
 		Email:    *addr,
 		Password: password,
-		Roles:    []userbus.Role{userbus.Roles.Admin, userbus.Roles.User},
+		Roles:    []role.Role{role.Admin, role.User},
 	}
 
 	usr, err := userBus.Create(ctx, nu)

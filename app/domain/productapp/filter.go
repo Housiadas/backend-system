@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
+	"github.com/Housiadas/backend-system/business/sys/types/name"
 	"github.com/Housiadas/backend-system/business/sys/validation"
 )
 
@@ -21,11 +22,11 @@ func parseFilter(qp QueryParams) (productbus.QueryFilter, error) {
 	}
 
 	if qp.Name != "" {
-		name, err := productbus.Names.Parse(qp.Name)
+		n, err := name.Parse(qp.Name)
 		if err != nil {
 			return productbus.QueryFilter{}, validation.NewFieldsError("name", err)
 		}
-		filter.Name = &name
+		filter.Name = &n
 	}
 
 	if qp.Cost != "" {

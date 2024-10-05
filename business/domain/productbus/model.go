@@ -4,13 +4,15 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/Housiadas/backend-system/business/sys/types/name"
 )
 
 // Product represents an individual product.
 type Product struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID
-	Name        Name
+	Name        name.Name
 	Cost        float64
 	Quantity    int
 	DateCreated time.Time
@@ -20,7 +22,7 @@ type Product struct {
 // NewProduct is what we require from clients when adding a Product.
 type NewProduct struct {
 	UserID   uuid.UUID
-	Name     Name
+	Name     name.Name
 	Cost     float64
 	Quantity int
 }
@@ -32,7 +34,7 @@ type NewProduct struct {
 // explicitly blank. Normally we do not want to use pointers to basic types, but
 // we make exceptions around marshalling/unmarshalling.
 type UpdateProduct struct {
-	Name     *Name
+	Name     *name.Name
 	Cost     *float64
 	Quantity *int
 }

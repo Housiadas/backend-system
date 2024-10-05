@@ -8,6 +8,8 @@ import (
 
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/business/sys/types/name"
+	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"github.com/Housiadas/backend-system/business/sys/validation"
 )
 
@@ -122,13 +124,13 @@ func (app *NewUser) Validate() error {
 }
 
 func toBusNewUser(app NewUser) (userbus.NewUser, error) {
-	roles := make([]userbus.Role, len(app.Roles))
+	roles := make([]role.Role, len(app.Roles))
 	for i, roleStr := range app.Roles {
-		role, err := userbus.Roles.Parse(roleStr)
+		r, err := role.Parse(roleStr)
 		if err != nil {
 			return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 		}
-		roles[i] = role
+		roles[i] = r
 	}
 
 	addr, err := mail.ParseAddress(app.Email)
@@ -136,13 +138,13 @@ func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
-	name, err := userbus.Names.Parse(app.Name)
+	n, err := name.Parse(app.Name)
 	if err != nil {
 		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
 	bus := userbus.NewUser{
-		Name:       name,
+		Name:       n,
 		Email:      *addr,
 		Roles:      roles,
 		Department: app.Department,
@@ -174,15 +176,15 @@ func (app *UpdateUserRole) Validate() error {
 }
 
 func toBusUpdateUserRole(app UpdateUserRole) (userbus.UpdateUser, error) {
-	var roles []userbus.Role
+	var roles []role.Role
 	if app.Roles != nil {
-		roles = make([]userbus.Role, len(app.Roles))
+		roles = make([]role.Role, len(app.Roles))
 		for i, roleStr := range app.Roles {
-			role, err := userbus.Roles.Parse(roleStr)
+			r, err := role.Parse(roleStr)
 			if err != nil {
 				return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
 			}
-			roles[i] = role
+			roles[i] = r
 		}
 	}
 
@@ -229,17 +231,17 @@ func toBusUpdateUser(app UpdateUser) (userbus.UpdateUser, error) {
 		}
 	}
 
-	var name *userbus.Name
+	var n *name.Name
 	if app.Name != nil {
-		nm, err := userbus.Names.Parse(*app.Name)
+		nm, err := name.Parse(*app.Name)
 		if err != nil {
 			return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
 		}
-		name = &nm
+		n = &nm
 	}
 
 	bus := userbus.UpdateUser{
-		Name:       name,
+		Name:       n,
 		Email:      addr,
 		Department: app.Department,
 		Password:   app.Password,

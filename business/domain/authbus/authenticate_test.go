@@ -13,6 +13,7 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/business/sys/dbtest"
+	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"github.com/Housiadas/backend-system/business/sys/unitest"
 )
 
@@ -48,7 +49,7 @@ func testAdminAuthorization(ath *authbus.Auth, sd unitest.SeedData) func(t *test
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: parseRoles([]userbus.Role{userbus.Roles.Admin}),
+			Roles: parseRoles([]role.Role{role.Admin}),
 		}
 
 		token, err := ath.GenerateToken(claims)
@@ -91,7 +92,7 @@ func testUserAuthorization(ath *authbus.Auth, sd unitest.SeedData) func(t *testi
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: parseRoles([]userbus.Role{userbus.Roles.User}),
+			Roles: parseRoles([]role.Role{role.User}),
 		}
 
 		token, err := ath.GenerateToken(claims)
@@ -139,7 +140,7 @@ func testUserWithDifferentUUID(ath *authbus.Auth, sd unitest.SeedData) func(t *t
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: parseRoles([]userbus.Role{userbus.Roles.User}),
+			Roles: parseRoles([]role.Role{role.User}),
 		}
 
 		token, err := ath.GenerateToken(claims)
@@ -172,7 +173,7 @@ func testUserAdminAuthorization(ath *authbus.Auth, sd unitest.SeedData) func(t *
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: parseRoles([]userbus.Role{userbus.Roles.User, userbus.Roles.Admin}),
+			Roles: parseRoles([]role.Role{role.User, role.Admin}),
 		}
 		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
 
@@ -204,7 +205,7 @@ func testUserRuleAny(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) 
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
-			Roles: parseRoles([]userbus.Role{userbus.Roles.User}),
+			Roles: parseRoles([]role.Role{role.User}),
 		}
 		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
 
@@ -232,7 +233,7 @@ func testUserRuleAny(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) 
 func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 	ctx := context.Background()
 
-	usrs, err := userbus.TestSeedUsers(ctx, 2, userbus.Roles.Admin, busDomain.User)
+	usrs, err := userbus.TestSeedUsers(ctx, 2, role.Admin, busDomain.User)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -247,7 +248,7 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = userbus.TestSeedUsers(ctx, 2, userbus.Roles.User, busDomain.User)
+	usrs, err = userbus.TestSeedUsers(ctx, 2, role.User, busDomain.User)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -282,10 +283,10 @@ func (ks *keyStore) PublicKey() (string, error) {
 	return publicKeyPEM, nil
 }
 
-func parseRoles(roles []userbus.Role) []string {
+func parseRoles(roles []role.Role) []string {
 	appRoles := make([]string, len(roles))
-	for i, role := range roles {
-		appRoles[i] = role.String()
+	for i, r := range roles {
+		appRoles[i] = r.String()
 	}
 	return appRoles
 }
