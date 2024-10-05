@@ -71,7 +71,7 @@ func NewDatabase(t *testing.T, testName string, migrationsPath string) *Database
 	}
 	appArgs := []string{"-c", "log_statement=all"}
 
-	c, err := docker.StartContainer(PostgresImage, PostgresContainerName, DBPort, "5432", dockerArgs, appArgs)
+	c, err := docker.StartContainer(PostgresImage, PostgresContainerName, DBPort, dockerArgs, appArgs)
 	if err != nil {
 		t.Fatalf("[TEST]: Starting database: %v", err)
 	}

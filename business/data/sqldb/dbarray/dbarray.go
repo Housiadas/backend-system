@@ -97,7 +97,7 @@ type Delimiter interface {
 	Delimiter() string
 }
 
-// Bool represents a one-dimensional array of the PostgreSQL boolean type.
+// Bool represents a one-dimensional array of the PostgresSQL boolean type.
 type Bool []bool
 
 // Scan implements the sql.Scanner interface.
@@ -171,7 +171,7 @@ func (a Bool) Value() (driver.Value, error) {
 	return "{}", nil
 }
 
-// Bytea represents a one-dimensional array of the PostgreSQL bytea type.
+// Bytea represents a one-dimensional array of the PostgresSQL bytea type.
 type Bytea [][]byte
 
 // Scan implements the sql.Scanner interface.
@@ -210,7 +210,7 @@ func (a *Bytea) scanBytes(src []byte) error {
 }
 
 // Value implements the driver.Valuer interface. It uses the "hex" format which
-// is only supported on PostgreSQL 9.0 or newer.
+// is only supported on PostgresSQL 9.0 or newer.
 func (a Bytea) Value() (driver.Value, error) {
 	if a == nil {
 		return nil, nil
@@ -242,7 +242,7 @@ func (a Bytea) Value() (driver.Value, error) {
 	return "{}", nil
 }
 
-// Float64 represents a one-dimensional array of the PostgreSQL double
+// Float64 represents a one-dimensional array of the PostgresSQL double
 // precision type.
 type Float64 []float64
 
@@ -304,7 +304,7 @@ func (a Float64) Value() (driver.Value, error) {
 	return "{}", nil
 }
 
-// Float32 represents a one-dimensional array of the PostgreSQL double
+// Float32 represents a one-dimensional array of the PostgresSQL double
 // precision type.
 type Float32 []float32
 
@@ -488,6 +488,7 @@ func (a Generic) scanBytes(src []byte, dv reflect.Value) error {
 		for i := 0; i < dims[0]; i++ {
 			dv.Index(i).Set(values.Index(i))
 		}
+	default:
 	}
 
 	return nil
@@ -523,7 +524,7 @@ func (a Generic) Value() (driver.Value, error) {
 	return "{}", nil
 }
 
-// Int64 represents a one-dimensional array of the PostgreSQL integer types.
+// Int64 represents a one-dimensional array of the PostgresSQL integer types.
 type Int64 []int64
 
 // Scan implements the sql.Scanner interface.
@@ -584,7 +585,7 @@ func (a Int64) Value() (driver.Value, error) {
 	return "{}", nil
 }
 
-// Int32 represents a one-dimensional array of the PostgreSQL integer types.
+// Int32 represents a one-dimensional array of the PostgresSQL integer types.
 type Int32 []int32
 
 // Scan implements the sql.Scanner interface.
@@ -647,7 +648,7 @@ func (a Int32) Value() (driver.Value, error) {
 	return "{}", nil
 }
 
-// String represents a one-dimensional array of the PostgreSQL character types.
+// String represents a one-dimensional array of the PostgresSQL character types.
 type String []string
 
 // Scan implements the sql.Scanner interface.

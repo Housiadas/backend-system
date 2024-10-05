@@ -1,4 +1,5 @@
-// Package docker provides support for starting and stopping docker containers for running tests.
+// Package docker provides support for starting and stopping docker containers
+// for running tests.
 package docker
 
 import (
@@ -8,7 +9,6 @@ import (
 	"fmt"
 	"net"
 	"os/exec"
-	"strings"
 	"time"
 )
 
@@ -19,13 +19,13 @@ type Container struct {
 }
 
 // StartContainer starts the specified container for running tests.
-func StartContainer(image string, name string, externalPort string, internalPort string, dockerArgs []string, appArgs []string) (Container, error) {
+func StartContainer(image string, name string, port string, dockerArgs []string, appArgs []string) (Container, error) {
 
-	// When this code is used in tests, each test could be running in its own
+	// When this code is used in tests, each test could be running in it's own
 	// process, so there is no way to serialize the call. The idea is to wait
 	// for the container to exist if the code fails to start it.
-	for i := 1; i <= 2; i++ {
-		c, err := startContainer(image, name, externalPort, internalPort, dockerArgs, appArgs)
+	for i := range 2 {
+		c, err := startContainer(image, name, port, dockerArgs, appArgs)
 		if err != nil {
 			time.Sleep(time.Duration(i+1) * 100 * time.Millisecond)
 			continue
@@ -34,7 +34,7 @@ func StartContainer(image string, name string, externalPort string, internalPort
 		return c, nil
 	}
 
-	return startContainer(image, name, externalPort, internalPort, dockerArgs, appArgs)
+	return startContainer(image, name, port, dockerArgs, appArgs)
 }
 
 // StopContainer stops and removes the specified container.
@@ -62,15 +62,12 @@ func DumpContainerLogs(id string) []byte {
 
 // =============================================================================
 
-func startContainer(image string, name string, externalPort string, internalPort string, dockerArgs []string, appArgs []string) (Container, error) {
-	if c, err := exists(name, externalPort); err == nil {
+func startContainer(image string, name string, port string, dockerArgs []string, appArgs []string) (Container, error) {
+	if c, err := exists(name, port); err == nil {
 		return c, nil
 	}
 
 	arg := []string{"run", "-P", "-d", "--name", name}
-	if externalPort != "" && internalPort != "" {
-		arg = []string{"run", "-d", "-p", externalPort + ":" + internalPort, "--name", name}
-	}
 	arg = append(arg, dockerArgs...)
 	arg = append(arg, image)
 	arg = append(arg, appArgs...)
@@ -83,12 +80,9 @@ func startContainer(image string, name string, externalPort string, internalPort
 	}
 
 	id := out.String()[:12]
-	hostIP, hostPort, err := extractIPPort(id, externalPort)
+	hostIP, hostPort, err := extractIPPort(id, port)
 	if err != nil {
-		err := StopContainer(id)
-		if err != nil {
-			return Container{}, err
-		}
+		StopContainer(id)
 		return Container{}, fmt.Errorf("could not extract ip/port: %w", err)
 	}
 
@@ -115,7 +109,12 @@ func exists(name string, port string) (Container, error) {
 }
 
 func extractIPPort(name string, port string) (hostIP string, hostPort string, err error) {
-	tmpl := fmt.Sprintf("[{{range $k,$v := (index .NetworkSettings.Ports \"%s/tcp\")}}{{json $v}}{{end}}]", port)
+
+	// When IPv6 is turned on with Docker.
+	// Got  [{"HostIp":"0.0.0.0","HostPort":"49190"}{"HostIp":"::","HostPort":"49190"}]
+	// Need [{"HostIp":"0.0.0.0","HostPort":"49190"},{"HostIp":"::","HostPort":"49190"}]
+
+	tmpl := fmt.Sprintf("[{{range $i,$v := (index .NetworkSettings.Ports \"%s/tcp\")}}{{if $i}},{{end}}{{json $v}}{{end}}]", port)
 
 	var out bytes.Buffer
 	cmd := exec.Command("docker", "inspect", "-f", tmpl, name)
@@ -124,22 +123,17 @@ func extractIPPort(name string, port string) (hostIP string, hostPort string, er
 		return "", "", fmt.Errorf("could not inspect container %s: %w", name, err)
 	}
 
-	// When IPv6 is turned on with Docker.
-	// Got  [{"HostIp":"0.0.0.0","HostPort":"49190"}{"HostIp":"::","HostPort":"49190"}]
-	// Need [{"HostIp":"0.0.0.0","HostPort":"49190"},{"HostIp":"::","HostPort":"49190"}]
-	data := strings.ReplaceAll(out.String(), "}{", "},{")
-
 	var docs []struct {
 		HostIP   string `json:"HostIp"`
 		HostPort string `json:"HostPort"`
 	}
-	if err := json.Unmarshal([]byte(data), &docs); err != nil {
+	if err := json.Unmarshal(out.Bytes(), &docs); err != nil {
 		return "", "", fmt.Errorf("could not decode json: %w", err)
 	}
 
 	for _, doc := range docs {
 		if doc.HostIP != "::" {
-			// Pod-man keeps HostIP empty instead of using 0.0.0.0.
+			// Podman keeps HostIP empty instead of using 0.0.0.0.
 			// - https://github.com/containers/podman/issues/17780
 			if doc.HostIP == "" {
 				return "localhost", doc.HostPort, nil
