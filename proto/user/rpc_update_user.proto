@@ -1,0 +1,20 @@
+syntax = "proto3";
+import "user/user.proto";
+
+package user;
+
+
+option go_package = "github.com/Housiadas/backend-system/protogen/user";
+
+message UpdateUserRequest {
+  string name = 1;
+  string email = 2;
+  string department = 3;
+  string password = 4;
+  string password_confirm = 5;
+  string enabled = 6;
+}
+
+message UpdateUserResponse {
+  User user = 1;
+}

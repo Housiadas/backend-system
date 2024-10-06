@@ -198,3 +198,15 @@ grafana:
 .PHONY: statsviz
 statsviz:
 	open http://localhost:4010/debug/statsviz
+
+# =================================================================================== #
+# Protobuf
+# ==================================================================================== #
+
+# proto
+.PHONY: proto
+proto:
+	rm -f protogen/*.go
+	protoc --proto_path=proto --go_out=./protogen --go_opt=paths=source_relative \
+	--go-grpc_out=./protogen --go-grpc_opt=paths=source_relative \
+	proto/**/*.proto
