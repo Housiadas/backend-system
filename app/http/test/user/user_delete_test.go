@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	testPck "github.com/Housiadas/backend-system/app/api/test"
+	testPck "github.com/Housiadas/backend-system/app/http/test"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 )
 

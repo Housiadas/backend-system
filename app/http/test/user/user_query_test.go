@@ -1,4 +1,4 @@
-package product_test
+package user_test
 
 import (
 	"fmt"
@@ -8,13 +8,13 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	testPck "github.com/Housiadas/backend-system/app/api/test"
-	"github.com/Housiadas/backend-system/app/domain/productapp"
-	"github.com/Housiadas/backend-system/business/domain/productbus"
+	"github.com/Housiadas/backend-system/app/domain/userapp"
+	testPck "github.com/Housiadas/backend-system/app/http/test"
+	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/page"
 )
 
-func Test_Product_Query_200(t *testing.T) {
+func Test_API_User_Query_200(t *testing.T) {
 	t.Parallel()
 
 	test, err := testPck.StartTest(t, "Test_API_User")
@@ -27,30 +27,36 @@ func Test_Product_Query_200(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	prds := make([]productbus.Product, 0, len(sd.Admins[0].Products)+len(sd.Users[0].Products))
-	prds = append(prds, sd.Admins[0].Products...)
-	prds = append(prds, sd.Users[0].Products...)
+	usrs := make([]userbus.User, 0, len(sd.Admins)+len(sd.Users))
 
-	sort.Slice(prds, func(i, j int) bool {
-		return prds[i].ID.String() <= prds[j].ID.String()
+	for _, adm := range sd.Admins {
+		usrs = append(usrs, adm.User)
+	}
+
+	for _, usr := range sd.Users {
+		usrs = append(usrs, usr.User)
+	}
+
+	sort.Slice(usrs, func(i, j int) bool {
+		return usrs[i].ID.String() <= usrs[j].ID.String()
 	})
 
 	table := []testPck.Table{
 		{
 			Name:       "basic",
-			URL:        "/api/v1/products?page=1&rows=10&orderBy=product_id,ASC",
+			URL:        "/api/v1/users?page=1&rows=10&orderBy=user_id,ASC&name=Name",
 			Token:      sd.Admins[0].Token,
 			StatusCode: http.StatusOK,
 			Method:     http.MethodGet,
-			GotResp:    &page.Result[productapp.Product]{},
-			ExpResp: &page.Result[productapp.Product]{
-				Data: toAppProducts(prds),
+			GotResp:    &page.Result[userapp.User]{},
+			ExpResp: &page.Result[userapp.User]{
+				Data: toAppUsers(usrs),
 				Metadata: page.Metadata{
 					FirstPage:   1,
 					CurrentPage: 1,
 					LastPage:    1,
 					RowsPerPage: 10,
-					Total:       len(prds),
+					Total:       len(usrs),
 				},
 			},
 			CmpFunc: func(got any, exp any) string {
@@ -59,13 +65,13 @@ func Test_Product_Query_200(t *testing.T) {
 		},
 	}
 
-	test.Run(t, table, "query-200")
+	test.Run(t, table, "user-query-200")
 }
 
-func Test_Product_Query_By_ID_200(t *testing.T) {
+func Test_API_User_Query_BY_ID_200(t *testing.T) {
 	t.Parallel()
 
-	test, err := testPck.StartTest(t, "Test_API_Product")
+	test, err := testPck.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -78,17 +84,17 @@ func Test_Product_Query_By_ID_200(t *testing.T) {
 	table := []testPck.Table{
 		{
 			Name:       "basic",
-			URL:        fmt.Sprintf("/api/v1/products/%s", sd.Users[0].Products[0].ID),
+			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),
 			Token:      sd.Users[0].Token,
 			StatusCode: http.StatusOK,
 			Method:     http.MethodGet,
-			GotResp:    &productapp.Product{},
-			ExpResp:    toAppProductPtr(sd.Users[0].Products[0]),
+			GotResp:    &userapp.User{},
+			ExpResp:    toAppUserPtr(sd.Users[0].User),
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},
 		},
 	}
 
-	test.Run(t, table, "query-by-id-200")
+	test.Run(t, table, "user-query-by-id-200")
 }

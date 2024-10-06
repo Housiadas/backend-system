@@ -1,4 +1,4 @@
-// Package tranapp maintains the app layer api for the tran domain.
+// Package tranapp maintains the app layer http for the tran domain.
 package tranapp
 
 import (
@@ -11,7 +11,7 @@ import (
 	"github.com/Housiadas/backend-system/business/sys/errs"
 )
 
-// App manages the set of app layer api functions for the tran domain.
+// App manages the set of app layer http functions for the tran domain.
 type App struct {
 	userBus    *userbus.Business
 	productBus *productbus.Business
