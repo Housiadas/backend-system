@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// Money represents a money in the system.
+// Money represents money in the system.
 type Money struct {
 	value float64
 }
@@ -38,7 +38,7 @@ func Parse(value float64) (Money, error) {
 }
 
 // MustParse parses the string value and returns a money if the value
-// complies with the rules for a money. If an error occurs the function panics.
+// complies with the rules for money. If an error occurs the function panics.
 func MustParse(value float64) Money {
 	money, err := Parse(value)
 	if err != nil {

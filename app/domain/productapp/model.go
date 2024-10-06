@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/Housiadas/backend-system/business/sys/types/money"
+	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"time"
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
@@ -48,8 +50,8 @@ func toAppProduct(prd productbus.Product) Product {
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
 		Name:        prd.Name.String(),
-		Cost:        prd.Cost,
-		Quantity:    prd.Quantity,
+		Cost:        prd.Cost.Value(),
+		Quantity:    prd.Quantity.Value(),
 		DateCreated: prd.DateCreated.Format(time.RFC3339),
 		DateUpdated: prd.DateUpdated.Format(time.RFC3339),
 	}
@@ -93,16 +95,26 @@ func toBusNewProduct(ctx context.Context, app NewProduct) (productbus.NewProduct
 		return productbus.NewProduct{}, fmt.Errorf("getuserid: %w", err)
 	}
 
-	name, err := namePck.Parse(app.Name)
+	n, err := namePck.Parse(app.Name)
 	if err != nil {
 		return productbus.NewProduct{}, fmt.Errorf("parse name: %w", err)
 	}
 
+	cost, err := money.Parse(app.Cost)
+	if err != nil {
+		return productbus.NewProduct{}, fmt.Errorf("parse cost: %w", err)
+	}
+
+	q, err := quantity.Parse(app.Quantity)
+	if err != nil {
+		return productbus.NewProduct{}, fmt.Errorf("parse quantity: %w", err)
+	}
+
 	bus := productbus.NewProduct{
 		UserID:   userID,
-		Name:     name,
-		Cost:     app.Cost,
-		Quantity: app.Quantity,
+		Name:     n,
+		Cost:     cost,
+		Quantity: q,
 	}
 
 	return bus, nil
@@ -132,19 +144,37 @@ func (app *UpdateProduct) Validate() error {
 }
 
 func toBusUpdateProduct(app UpdateProduct) (productbus.UpdateProduct, error) {
-	var name *namePck.Name
+	var nme *namePck.Name
 	if app.Name != nil {
 		nm, err := namePck.Parse(*app.Name)
 		if err != nil {
 			return productbus.UpdateProduct{}, fmt.Errorf("parse: %w", err)
 		}
-		name = &nm
+		nme = &nm
+	}
+
+	var cost *money.Money
+	if app.Cost != nil {
+		cst, err := money.Parse(*app.Cost)
+		if err != nil {
+			return productbus.UpdateProduct{}, fmt.Errorf("parse: %w", err)
+		}
+		cost = &cst
+	}
+
+	var qnt *quantity.Quantity
+	if app.Cost != nil {
+		qn, err := quantity.Parse(*app.Quantity)
+		if err != nil {
+			return productbus.UpdateProduct{}, fmt.Errorf("parse: %w", err)
+		}
+		qnt = &qn
 	}
 
 	bus := productbus.UpdateProduct{
-		Name:     name,
-		Cost:     app.Cost,
-		Quantity: app.Quantity,
+		Name:     nme,
+		Cost:     cost,
+		Quantity: qnt,
 	}
 
 	return bus, nil

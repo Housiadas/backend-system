@@ -2,6 +2,8 @@ package productdb
 
 import (
 	"fmt"
+	"github.com/Housiadas/backend-system/business/sys/types/money"
+	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"time"
 
 	"github.com/google/uuid"
@@ -25,8 +27,8 @@ func toDBProduct(bus productbus.Product) product {
 		ID:          bus.ID,
 		UserID:      bus.UserID,
 		Name:        bus.Name.String(),
-		Cost:        bus.Cost,
-		Quantity:    bus.Quantity,
+		Cost:        bus.Cost.Value(),
+		Quantity:    bus.Quantity.Value(),
 		DateCreated: bus.DateCreated.UTC(),
 		DateUpdated: bus.DateUpdated.UTC(),
 	}
@@ -44,8 +46,8 @@ func toBusProduct(db product) (productbus.Product, error) {
 		ID:          db.ID,
 		UserID:      db.UserID,
 		Name:        n,
-		Cost:        db.Cost,
-		Quantity:    db.Quantity,
+		Cost:        money.MustParse(db.Cost),
+		Quantity:    quantity.MustParse(db.Quantity),
 		DateCreated: db.DateCreated.In(time.Local),
 		DateUpdated: db.DateUpdated.In(time.Local),
 	}

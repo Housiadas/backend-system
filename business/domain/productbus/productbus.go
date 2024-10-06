@@ -14,6 +14,7 @@ import (
 	"github.com/Housiadas/backend-system/business/sys/order"
 	"github.com/Housiadas/backend-system/business/sys/page"
 	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/foundation/otel"
 )
 
 // Set of error variables for CRUD operations.
@@ -78,13 +79,12 @@ func (b *Business) NewWithTx(tx sqldb.CommitRollbacker) (*Business, error) {
 
 // Create adds a new product to the system.
 func (b *Business) Create(ctx context.Context, np NewProduct) (Product, error) {
+	ctx, span := otel.AddSpan(ctx, "business.productbus.create")
+	defer span.End()
+
 	usr, err := b.userBus.QueryByID(ctx, np.UserID)
 	if err != nil {
 		return Product{}, fmt.Errorf("user.querybyid: %s: %w", np.UserID, err)
-	}
-
-	if np.Cost < 0 {
-		return Product{}, ErrInvalidCost
 	}
 
 	if !usr.Enabled {

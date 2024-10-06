@@ -103,7 +103,7 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			ExpResp: usrs,
 			ExcFunc: func(ctx context.Context) any {
 				filter := userbus.QueryFilter{
-					Name: dbtest.UserNamePointer("Name"),
+					Name: dbtest.NamePointer("Name"),
 				}
 
 				resp, err := busDomain.User.Query(ctx, filter, userbus.DefaultOrderBy, page.MustParse("1", "10"))
@@ -179,7 +179,7 @@ func create(busDomain dbtest.BusDomain) []unitest.Table {
 				Name:       name.MustParse("Chris Housi"),
 				Email:      *email,
 				Roles:      []role.Role{role.Admin},
-				Department: "IT",
+				Department: name.MustParseNull("IT0"),
 				Enabled:    true,
 			},
 			ExcFunc: func(ctx context.Context) any {
@@ -187,7 +187,7 @@ func create(busDomain dbtest.BusDomain) []unitest.Table {
 					Name:       name.MustParse("Chris Housi"),
 					Email:      *email,
 					Roles:      []role.Role{role.Admin},
-					Department: "IT",
+					Department: name.MustParseNull("IT0"),
 					Password:   "123",
 				}
 
@@ -234,16 +234,16 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				Name:        name.MustParse("Chris Housi 2"),
 				Email:       *email,
 				Roles:       []role.Role{role.Admin},
-				Department:  "IT",
+				Department:  name.MustParseNull("IT0"),
 				Enabled:     true,
 				DateCreated: sd.Users[0].DateCreated,
 			},
 			ExcFunc: func(ctx context.Context) any {
 				uu := userbus.UpdateUser{
-					Name:       dbtest.UserNamePointer("Chris Housi 2"),
+					Name:       dbtest.NamePointer("Chris Housi 2"),
 					Email:      email,
 					Roles:      []role.Role{role.Admin},
-					Department: dbtest.StringPointer("IT"),
+					Department: dbtest.NameNullPointer("IT0"),
 					Password:   dbtest.StringPointer("1234"),
 				}
 

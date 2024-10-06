@@ -3,10 +3,12 @@ package productbus
 import (
 	"context"
 	"fmt"
+	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"math/rand"
 
 	"github.com/google/uuid"
 
+	"github.com/Housiadas/backend-system/business/sys/types/money"
 	"github.com/Housiadas/backend-system/business/sys/types/name"
 )
 
@@ -20,8 +22,8 @@ func TestGenerateNewProducts(n int, userID uuid.UUID) []NewProduct {
 
 		np := NewProduct{
 			Name:     name.MustParse(fmt.Sprintf("Name%d", idx)),
-			Cost:     float64(rand.Intn(500)),
-			Quantity: rand.Intn(50),
+			Cost:     money.MustParse(float64(rand.Intn(500))),
+			Quantity: quantity.MustParse(rand.Intn(50)),
 			UserID:   userID,
 		}
 

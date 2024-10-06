@@ -5,7 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/Housiadas/backend-system/business/sys/types/money"
 	"github.com/Housiadas/backend-system/business/sys/types/name"
+	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 )
 
 // Product represents an individual product.
@@ -13,8 +15,8 @@ type Product struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID
 	Name        name.Name
-	Cost        float64
-	Quantity    int
+	Cost        money.Money
+	Quantity    quantity.Quantity
 	DateCreated time.Time
 	DateUpdated time.Time
 }
@@ -23,8 +25,8 @@ type Product struct {
 type NewProduct struct {
 	UserID   uuid.UUID
 	Name     name.Name
-	Cost     float64
-	Quantity int
+	Cost     money.Money
+	Quantity quantity.Quantity
 }
 
 // UpdateProduct defines what information may be provided to modify an
@@ -35,6 +37,6 @@ type NewProduct struct {
 // we make exceptions around marshalling/unmarshalling.
 type UpdateProduct struct {
 	Name     *name.Name
-	Cost     *float64
-	Quantity *int
+	Cost     *money.Money
+	Quantity *quantity.Quantity
 }

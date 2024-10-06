@@ -71,8 +71,8 @@ func (app User) Encode() ([]byte, string, error) {
 
 func toAppUser(bus userbus.User) User {
 	roles := make([]string, len(bus.Roles))
-	for i, role := range bus.Roles {
-		roles[i] = role.String()
+	for i, r := range bus.Roles {
+		roles[i] = r.String()
 	}
 
 	return User{
@@ -81,7 +81,7 @@ func toAppUser(bus userbus.User) User {
 		Email:        bus.Email.Address,
 		Roles:        roles,
 		PasswordHash: bus.PasswordHash,
-		Department:   bus.Department,
+		Department:   bus.Department.String(),
 		Enabled:      bus.Enabled,
 		DateCreated:  bus.DateCreated.Format(time.RFC3339),
 		DateUpdated:  bus.DateUpdated.Format(time.RFC3339),
@@ -124,13 +124,9 @@ func (app *NewUser) Validate() error {
 }
 
 func toBusNewUser(app NewUser) (userbus.NewUser, error) {
-	roles := make([]role.Role, len(app.Roles))
-	for i, roleStr := range app.Roles {
-		r, err := role.Parse(roleStr)
-		if err != nil {
-			return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
-		}
-		roles[i] = r
+	roles, err := role.ParseMany(app.Roles)
+	if err != nil {
+		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
 	addr, err := mail.ParseAddress(app.Email)
@@ -138,16 +134,21 @@ func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
-	n, err := name.Parse(app.Name)
+	nme, err := name.Parse(app.Name)
+	if err != nil {
+		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
+	}
+
+	department, err := name.ParseNull(app.Department)
 	if err != nil {
 		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
 	bus := userbus.NewUser{
-		Name:       n,
+		Name:       nme,
 		Email:      *addr,
 		Roles:      roles,
-		Department: app.Department,
+		Department: department,
 		Password:   app.Password,
 	}
 
@@ -231,19 +232,28 @@ func toBusUpdateUser(app UpdateUser) (userbus.UpdateUser, error) {
 		}
 	}
 
-	var n *name.Name
+	var nme *name.Name
 	if app.Name != nil {
 		nm, err := name.Parse(*app.Name)
 		if err != nil {
 			return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
 		}
-		n = &nm
+		nme = &nm
+	}
+
+	var department *name.Null
+	if app.Department != nil {
+		dep, err := name.ParseNull(*app.Department)
+		if err != nil {
+			return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
+		}
+		department = &dep
 	}
 
 	bus := userbus.UpdateUser{
-		Name:       n,
+		Name:       nme,
 		Email:      addr,
-		Department: app.Department,
+		Department: department,
 		Password:   app.Password,
 		Enabled:    app.Enabled,
 	}
