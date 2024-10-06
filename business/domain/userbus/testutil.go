@@ -5,21 +5,24 @@ import (
 	"fmt"
 	"math/rand"
 	"net/mail"
+
+	"github.com/Housiadas/backend-system/business/sys/types/name"
+	rolePck "github.com/Housiadas/backend-system/business/sys/types/role"
 )
 
 // TestNewUsers is a helper method for testing.
-func TestNewUsers(n int, role Role) []NewUser {
+func TestNewUsers(n int, role rolePck.Role) []NewUser {
 	newUsrs := make([]NewUser, n)
 
-	idx := rand.Intn(1000)
+	idx := rand.Intn(10000)
 	for i := 0; i < n; i++ {
 		idx++
 
 		nu := NewUser{
-			Name:       Names.MustParse(fmt.Sprintf("Name%d", idx)),
-			Email:      mail.Address{Address: fmt.Sprintf("Email%d@example.com", idx)},
-			Roles:      []Role{role},
-			Department: fmt.Sprintf("Department%d", idx),
+			Name:       name.MustParse(fmt.Sprintf("Name%d", idx)),
+			Email:      mail.Address{Address: fmt.Sprintf("Email%d@gmail.com", idx)},
+			Roles:      []rolePck.Role{role},
+			Department: name.MustParseNull(fmt.Sprintf("Department%d", idx)),
 			Password:   fmt.Sprintf("Password%d", idx),
 		}
 
@@ -30,7 +33,7 @@ func TestNewUsers(n int, role Role) []NewUser {
 }
 
 // TestSeedUsers is a helper method for testing.
-func TestSeedUsers(ctx context.Context, n int, role Role, api *Business) ([]User, error) {
+func TestSeedUsers(ctx context.Context, n int, role rolePck.Role, api *Business) ([]User, error) {
 	newUsrs := TestNewUsers(n, role)
 
 	usrs := make([]User, len(newUsrs))

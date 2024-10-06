@@ -5,6 +5,7 @@ import (
 
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/business/sys/types/role"
 )
 
 func toAppUser(bus userbus.User) userapp.User {
@@ -12,9 +13,9 @@ func toAppUser(bus userbus.User) userapp.User {
 		ID:           bus.ID.String(),
 		Name:         bus.Name.String(),
 		Email:        bus.Email.Address,
-		Roles:        userbus.ParseRolesToString(bus.Roles),
+		Roles:        role.ParseToString(bus.Roles),
 		PasswordHash: nil, // This field is not marshalled.
-		Department:   bus.Department,
+		Department:   bus.Department.String(),
 		Enabled:      bus.Enabled,
 		DateCreated:  bus.DateCreated.Format(time.RFC3339),
 		DateUpdated:  bus.DateUpdated.Format(time.RFC3339),

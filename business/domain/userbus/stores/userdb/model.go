@@ -10,6 +10,8 @@ import (
 
 	"github.com/Housiadas/backend-system/business/data/sqldb/dbarray"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/business/sys/types/name"
+	"github.com/Housiadas/backend-system/business/sys/types/role"
 )
 
 type user struct {
@@ -25,20 +27,15 @@ type user struct {
 }
 
 func toDBUser(bus userbus.User) user {
-	roles := make([]string, len(bus.Roles))
-	for i, role := range bus.Roles {
-		roles[i] = role.String()
-	}
-
 	return user{
 		ID:           bus.ID,
 		Name:         bus.Name.String(),
 		Email:        bus.Email.Address,
-		Roles:        roles,
+		Roles:        role.ParseToString(bus.Roles),
 		PasswordHash: bus.PasswordHash,
 		Department: sql.NullString{
-			String: bus.Department,
-			Valid:  bus.Department != "",
+			String: bus.Department.String(),
+			Valid:  bus.Department.Valid(),
 		},
 		Enabled:     bus.Enabled,
 		DateCreated: bus.DateCreated.UTC(),
@@ -51,28 +48,29 @@ func toBusUser(db user) (userbus.User, error) {
 		Address: db.Email,
 	}
 
-	roles := make([]userbus.Role, len(db.Roles))
-	for i, value := range db.Roles {
-		var err error
-		roles[i], err = userbus.Roles.Parse(value)
-		if err != nil {
-			return userbus.User{}, fmt.Errorf("parse role: %w", err)
-		}
+	roles, err := role.ParseMany(db.Roles)
+	if err != nil {
+		return userbus.User{}, fmt.Errorf("parse: %w", err)
 	}
 
-	name, err := userbus.Names.Parse(db.Name)
+	nme, err := name.Parse(db.Name)
 	if err != nil {
 		return userbus.User{}, fmt.Errorf("parse name: %w", err)
 	}
 
+	department, err := name.ParseNull(db.Department.String)
+	if err != nil {
+		return userbus.User{}, fmt.Errorf("parse department: %w", err)
+	}
+
 	bus := userbus.User{
 		ID:           db.ID,
-		Name:         name,
+		Name:         nme,
 		Email:        addr,
 		Roles:        roles,
 		PasswordHash: db.PasswordHash,
 		Enabled:      db.Enabled,
-		Department:   db.Department.String,
+		Department:   department,
 		DateCreated:  db.DateCreated.In(time.Local),
 		DateUpdated:  db.DateUpdated.In(time.Local),
 	}

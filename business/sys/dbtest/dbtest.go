@@ -71,7 +71,7 @@ func NewDatabase(t *testing.T, testName string, migrationsPath string) *Database
 	}
 	appArgs := []string{"-c", "log_statement=all"}
 
-	c, err := docker.StartContainer(PostgresImage, PostgresContainerName, DBPort, "5432", dockerArgs, appArgs)
+	c, err := docker.StartContainer(PostgresImage, PostgresContainerName, DBPort, dockerArgs, appArgs)
 	if err != nil {
 		t.Fatalf("[TEST]: Starting database: %v", err)
 	}
@@ -163,50 +163,4 @@ func NewDatabase(t *testing.T, testName string, migrationsPath string) *Database
 		Log:       log,
 		BusDomain: newBusDomains(log, db),
 	}
-}
-
-// =============================================================================
-
-// StringPointer is a helper to get a *string from a string. It is in the tests
-// package because we normally don't want to deal with pointers to basic types,
-// but it's useful in some tests.
-func StringPointer(s string) *string {
-	return &s
-}
-
-// IntPointer is a helper to get a *int from an int. It is in the tests package
-// because we normally don't want to deal with pointers to basic types, but it's
-// useful in some tests.
-func IntPointer(i int) *int {
-	return &i
-}
-
-// FloatPointer is a helper to get a *float64 from a float64. It is in the tests
-// package because we normally don't want to deal with pointers to basic types,
-// but it's useful in some tests.
-func FloatPointer(f float64) *float64 {
-	return &f
-}
-
-// BoolPointer is a helper to get a *bool from a bool. It is in the tests package
-// because we normally don't want to deal with pointers to basic types, but it's
-// useful in some tests.
-func BoolPointer(b bool) *bool {
-	return &b
-}
-
-// UserNamePointer is a helper to get a *Name from a string. It's in the tests
-// package because we normally don't want to deal with pointers to basic types,
-// but it's useful in some tests.
-func UserNamePointer(value string) *userbus.Name {
-	name := userbus.Names.MustParse(value)
-	return &name
-}
-
-// ProductNamePointer is a helper to get a *Name from a string. It's in the tests
-// package because we normally don't want to deal with pointers to basic types,
-// but it's useful in some tests.
-func ProductNamePointer(value string) *productbus.Name {
-	name := productbus.Names.MustParse(value)
-	return &name
 }

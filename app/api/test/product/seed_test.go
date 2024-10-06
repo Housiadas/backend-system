@@ -9,13 +9,14 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/dbtest"
+	"github.com/Housiadas/backend-system/business/sys/types/role"
 )
 
 func insertSeedData(db *dbtest.Database, ath *authbus.Auth) (test.SeedData, error) {
 	ctx := context.Background()
 	busDomain := db.BusDomain
 
-	usrs, err := userbus.TestSeedUsers(ctx, 1, userbus.Roles.User, busDomain.User)
+	usrs, err := userbus.TestSeedUsers(ctx, 1, role.User, busDomain.User)
 	if err != nil {
 		return test.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -34,7 +35,7 @@ func insertSeedData(db *dbtest.Database, ath *authbus.Auth) (test.SeedData, erro
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = userbus.TestSeedUsers(ctx, 1, userbus.Roles.Admin, busDomain.User)
+	usrs, err = userbus.TestSeedUsers(ctx, 1, role.Admin, busDomain.User)
 	if err != nil {
 		return test.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}

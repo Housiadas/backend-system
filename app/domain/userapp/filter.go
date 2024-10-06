@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/business/sys/types/name"
 	"github.com/Housiadas/backend-system/business/sys/validation"
 )
 
@@ -22,11 +23,11 @@ func parseFilter(qp QueryParams) (userbus.QueryFilter, error) {
 	}
 
 	if qp.Name != "" {
-		name, err := userbus.Names.Parse(qp.Name)
+		n, err := name.Parse(qp.Name)
 		if err != nil {
 			return userbus.QueryFilter{}, validation.NewFieldsError("name", err)
 		}
-		filter.Name = &name
+		filter.Name = &n
 	}
 
 	if qp.Email != "" {

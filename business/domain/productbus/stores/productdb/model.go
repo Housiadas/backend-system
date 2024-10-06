@@ -2,11 +2,14 @@ package productdb
 
 import (
 	"fmt"
+	"github.com/Housiadas/backend-system/business/sys/types/money"
+	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
+	"github.com/Housiadas/backend-system/business/sys/types/name"
 )
 
 type product struct {
@@ -24,8 +27,8 @@ func toDBProduct(bus productbus.Product) product {
 		ID:          bus.ID,
 		UserID:      bus.UserID,
 		Name:        bus.Name.String(),
-		Cost:        bus.Cost,
-		Quantity:    bus.Quantity,
+		Cost:        bus.Cost.Value(),
+		Quantity:    bus.Quantity.Value(),
 		DateCreated: bus.DateCreated.UTC(),
 		DateUpdated: bus.DateUpdated.UTC(),
 	}
@@ -34,7 +37,7 @@ func toDBProduct(bus productbus.Product) product {
 }
 
 func toBusProduct(db product) (productbus.Product, error) {
-	name, err := productbus.Names.Parse(db.Name)
+	n, err := name.Parse(db.Name)
 	if err != nil {
 		return productbus.Product{}, fmt.Errorf("parse name: %w", err)
 	}
@@ -42,9 +45,9 @@ func toBusProduct(db product) (productbus.Product, error) {
 	bus := productbus.Product{
 		ID:          db.ID,
 		UserID:      db.UserID,
-		Name:        name,
-		Cost:        db.Cost,
-		Quantity:    db.Quantity,
+		Name:        n,
+		Cost:        money.MustParse(db.Cost),
+		Quantity:    quantity.MustParse(db.Quantity),
 		DateCreated: db.DateCreated.In(time.Local),
 		DateUpdated: db.DateUpdated.In(time.Local),
 	}

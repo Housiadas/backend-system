@@ -16,6 +16,7 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/dbtest"
+	"github.com/Housiadas/backend-system/business/sys/types/role"
 )
 
 // Test contains functions for executing an api test.
@@ -99,7 +100,7 @@ func Token(userBus *userbus.Business, ath *authbus.Auth, email string) string {
 			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		},
-		Roles: userbus.ParseRolesToString(dbUsr.Roles),
+		Roles: role.ParseToString(dbUsr.Roles),
 	}
 
 	token, err := ath.GenerateToken(claims)

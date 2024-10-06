@@ -5,16 +5,19 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/Housiadas/backend-system/business/sys/types/name"
+	"github.com/Housiadas/backend-system/business/sys/types/role"
 )
 
 // User represents information about an individual user.
 type User struct {
 	ID           uuid.UUID
-	Name         Name
+	Name         name.Name
 	Email        mail.Address
-	Roles        []Role
+	Roles        []role.Role
 	PasswordHash []byte
-	Department   string
+	Department   name.Null
 	Enabled      bool
 	DateCreated  time.Time
 	DateUpdated  time.Time
@@ -22,19 +25,19 @@ type User struct {
 
 // NewUser contains information needed to create a new user.
 type NewUser struct {
-	Name       Name
+	Name       name.Name
 	Email      mail.Address
-	Roles      []Role
-	Department string
+	Roles      []role.Role
+	Department name.Null
 	Password   string
 }
 
 // UpdateUser contains information needed to update a user.
 type UpdateUser struct {
-	Name       *Name
+	Name       *name.Name
 	Email      *mail.Address
-	Roles      []Role
-	Department *string
+	Roles      []role.Role
+	Department *name.Null
 	Password   *string
 	Enabled    *bool
 }
