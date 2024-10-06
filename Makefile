@@ -69,12 +69,12 @@ go/mock/store:
 # API Application
 # ==================================================================================== #
 
-## go/api/run: Run main.go locally
+## go/http/run: Run main.go locally
 .PHONY: go/api/run
 go/api/run:
 	go run app/api/main.go
 
-## go/api/build: build the api application
+## go/http/build: build the http application
 .PHONY: go/api/build
 go/api/build:
 	cd app & \

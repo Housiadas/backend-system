@@ -1,4 +1,4 @@
-// Package test provides support for integration api tests.
+// Package test provides support for integration http tests.
 package test
 
 import (

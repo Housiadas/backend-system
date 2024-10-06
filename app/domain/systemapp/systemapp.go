@@ -1,4 +1,4 @@
-// Package systemapp maintains the app layer api for the check domain.
+// Package systemapp maintains the app layer http for the check domain.
 package systemapp
 
 import (
