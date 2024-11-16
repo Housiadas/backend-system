@@ -53,6 +53,8 @@ func (ao AdminOptionOperationTimeout) supportsCreatePartitions() {
 }
 func (ao AdminOptionOperationTimeout) supportsDeleteRecords() {
 }
+func (ao AdminOptionOperationTimeout) supportsElectLeaders() {
+}
 
 func (ao AdminOptionOperationTimeout) apply(cOptions *C.rd_kafka_AdminOptions_t) error {
 	if !ao.isSet {
@@ -146,6 +148,8 @@ func (ao AdminOptionRequestTimeout) supportsDescribeUserScramCredentials() {
 func (ao AdminOptionRequestTimeout) supportsAlterUserScramCredentials() {
 }
 func (ao AdminOptionRequestTimeout) supportsDeleteRecords() {
+}
+func (ao AdminOptionRequestTimeout) supportsElectLeaders() {
 }
 func (ao AdminOptionRequestTimeout) apply(cOptions *C.rd_kafka_AdminOptions_t) error {
 	if !ao.isSet {
@@ -366,6 +370,68 @@ func (ao AdminOptionMatchConsumerGroupStates) apply(cOptions *C.rd_kafka_AdminOp
 	return nil
 }
 
+// SetAdminMatchConsumerGroupStates sets the state(s) that must be
+// listed.
+//
+// Default: nil (lists groups in all states).
+//
+// Valid for ListConsumerGroups.
+func SetAdminMatchConsumerGroupStates(val []ConsumerGroupState) (ao AdminOptionMatchConsumerGroupStates) {
+	ao.isSet = true
+	ao.val = val
+	return ao
+}
+
+// AdminOptionMatchConsumerGroupTypes decides the type(s) that must be
+// listed.
+//
+// Default: nil (lists groups of all types).
+//
+// Valid for ListConsumerGroups.
+type AdminOptionMatchConsumerGroupTypes struct {
+	isSet bool
+	val   []ConsumerGroupType
+}
+
+func (ao AdminOptionMatchConsumerGroupTypes) supportsListConsumerGroups() {
+}
+
+func (ao AdminOptionMatchConsumerGroupTypes) apply(cOptions *C.rd_kafka_AdminOptions_t) error {
+	if !ao.isSet || ao.val == nil {
+		return nil
+	}
+
+	// Convert types from Go slice to C pointer.
+	cTypes := make([]C.rd_kafka_consumer_group_type_t, len(ao.val))
+	cTypesCount := C.size_t(len(ao.val))
+
+	for idx, groupType := range ao.val {
+		cTypes[idx] = C.rd_kafka_consumer_group_type_t(groupType)
+	}
+
+	cTypesPtr := ((*C.rd_kafka_consumer_group_type_t)(&cTypes[0]))
+	cError := C.rd_kafka_AdminOptions_set_match_consumer_group_types(
+		cOptions, cTypesPtr, cTypesCount)
+	if cError != nil {
+		C.rd_kafka_AdminOptions_destroy(cOptions)
+		return newErrorFromCErrorDestroy(cError)
+	}
+
+	return nil
+}
+
+// SetAdminMatchConsumerGroupTypes set the type(s) that must be
+// listed.
+//
+// Default: nil (lists groups of all types).
+//
+// Valid for ListConsumerGroups.
+func SetAdminMatchConsumerGroupTypes(val []ConsumerGroupType) (ao AdminOptionMatchConsumerGroupTypes) {
+	ao.isSet = true
+	ao.val = val
+	return ao
+}
+
 // AdminOptionIncludeAuthorizedOperations decides if the broker should return
 // authorized operations.
 //
@@ -406,18 +472,6 @@ func (ao AdminOptionIncludeAuthorizedOperations) apply(cOptions *C.rd_kafka_Admi
 //
 // Valid for DescribeConsumerGroups, DescribeTopics, DescribeCluster.
 func SetAdminOptionIncludeAuthorizedOperations(val bool) (ao AdminOptionIncludeAuthorizedOperations) {
-	ao.isSet = true
-	ao.val = val
-	return ao
-}
-
-// SetAdminMatchConsumerGroupStates decides groups in which state(s) should be
-// listed.
-//
-// Default: nil (lists groups in all states).
-//
-// Valid for ListConsumerGroups.
-func SetAdminMatchConsumerGroupStates(val []ConsumerGroupState) (ao AdminOptionMatchConsumerGroupStates) {
 	ao.isSet = true
 	ao.val = val
 	return ao
@@ -489,7 +543,7 @@ type DeleteACLsAdminOption interface {
 
 // ListConsumerGroupsAdminOption - see setter.
 //
-// See SetAdminRequestTimeout, SetAdminMatchConsumerGroupStates.
+// See SetAdminRequestTimeout, SetAdminMatchConsumerGroupStates, SetAdminMatchConsumerGroupTypes.
 type ListConsumerGroupsAdminOption interface {
 	supportsListConsumerGroups()
 	apply(cOptions *C.rd_kafka_AdminOptions_t) error
@@ -572,6 +626,14 @@ type ListOffsetsAdminOption interface {
 // See SetAdminRequestTimeout, SetAdminOperationTimeout.
 type DeleteRecordsAdminOption interface {
 	supportsDeleteRecords()
+	apply(cOptions *C.rd_kafka_AdminOptions_t) error
+}
+
+// ElectLeadersAdminOption - see setter.
+//
+// See SetAdminRequestTimeout, SetAdminOperationTimeout.
+type ElectLeadersAdminOption interface {
+	supportsElectLeaders()
 	apply(cOptions *C.rd_kafka_AdminOptions_t) error
 }
 

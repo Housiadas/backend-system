@@ -145,6 +145,13 @@ error_by_idx(const rd_kafka_error_t **errors, size_t cnt, size_t idx) {
 		return NULL;
 	return errors[idx];
 }
+
+static const rd_kafka_topic_partition_result_t *
+TopicPartitionResult_by_idx(const rd_kafka_topic_partition_result_t **results, size_t cnt, size_t idx) {
+	if (idx >= cnt)
+		return NULL;
+	return results[idx];
+}
 */
 import "C"
 
@@ -231,12 +238,39 @@ func (t ConsumerGroupState) String() string {
 }
 
 // ConsumerGroupStateFromString translates a consumer group state name/string to
-// a ConsumerGroupStateFromString value.
+// a ConsumerGroupState value.
 func ConsumerGroupStateFromString(stateString string) (ConsumerGroupState, error) {
 	cStr := C.CString(stateString)
 	defer C.free(unsafe.Pointer(cStr))
 	state := ConsumerGroupState(C.rd_kafka_consumer_group_state_code(cStr))
 	return state, nil
+}
+
+// ConsumerGroupType represents a consumer group type
+type ConsumerGroupType int
+
+const (
+	// ConsumerGroupTypeUnknown - Unknown ConsumerGroupType
+	ConsumerGroupTypeUnknown ConsumerGroupType = C.RD_KAFKA_CONSUMER_GROUP_TYPE_UNKNOWN
+	// ConsumerGroupTypeConsumer - Consumer ConsumerGroupType
+	ConsumerGroupTypeConsumer ConsumerGroupType = C.RD_KAFKA_CONSUMER_GROUP_TYPE_CONSUMER
+	// ConsumerGroupTypeClassic - Classic ConsumerGroupType
+	ConsumerGroupTypeClassic ConsumerGroupType = C.RD_KAFKA_CONSUMER_GROUP_TYPE_CLASSIC
+)
+
+// String returns the human-readable representation of a ConsumerGroupType
+func (t ConsumerGroupType) String() string {
+	return C.GoString(C.rd_kafka_consumer_group_type_name(
+		C.rd_kafka_consumer_group_type_t(t)))
+}
+
+// ConsumerGroupTypeFromString translates a consumer group type name/string to
+// a ConsumerGroupType value.
+func ConsumerGroupTypeFromString(typeString string) ConsumerGroupType {
+	cStr := C.CString(typeString)
+	defer C.free(unsafe.Pointer(cStr))
+	groupType := ConsumerGroupType(C.rd_kafka_consumer_group_type_code(cStr))
+	return groupType
 }
 
 // ConsumerGroupListing represents the result of ListConsumerGroups for a single
@@ -248,6 +282,8 @@ type ConsumerGroupListing struct {
 	IsSimpleConsumerGroup bool
 	// Group state.
 	State ConsumerGroupState
+	// Group type.
+	Type ConsumerGroupType
 }
 
 // ListConsumerGroupsResult represents ListConsumerGroups results and errors.
@@ -1048,6 +1084,54 @@ type ListOffsetsResult struct {
 	ResultInfos map[TopicPartition]ListOffsetsResultInfo
 }
 
+// ElectionType represents the type of election to be performed
+type ElectionType int
+
+const (
+	// ElectionTypePreferred - Preferred election type
+	ElectionTypePreferred ElectionType = C.RD_KAFKA_ELECTION_TYPE_PREFERRED
+	// ElectionTypeUnclean - Unclean election type
+	ElectionTypeUnclean ElectionType = C.RD_KAFKA_ELECTION_TYPE_UNCLEAN
+)
+
+// ElectionTypeFromString translates an election type name to
+// an ElectionType value.
+func ElectionTypeFromString(electionTypeString string) (ElectionType, error) {
+	switch strings.ToUpper(electionTypeString) {
+	case "PREFERRED":
+		return ElectionTypePreferred, nil
+	case "UNCLEAN":
+		return ElectionTypeUnclean, nil
+	default:
+		return ElectionTypePreferred, NewError(ErrInvalidArg, "Unknown election type", false)
+	}
+}
+
+// ElectLeadersRequest holds parameters for the type of election to be performed and
+// the topic partitions for which election has to be performed
+type ElectLeadersRequest struct {
+	// Election type to be performed
+	electionType ElectionType
+	// TopicPartitions for which election has to be performed
+	partitions []TopicPartition
+}
+
+// NewElectLeadersRequest creates a new ElectLeadersRequest with the given election type
+// and topic partitions
+func NewElectLeadersRequest(electionType ElectionType, partitions []TopicPartition) ElectLeadersRequest {
+	return ElectLeadersRequest{
+		electionType: electionType,
+		partitions:   partitions,
+	}
+}
+
+// ElectLeadersResult holds the result of the election performed
+type ElectLeadersResult struct {
+	// TopicPartitions for which election has been performed and the per-partition error, if any
+	// that occurred while running the election for the specific TopicPartition.
+	TopicPartitions []TopicPartition
+}
+
 // waitResult waits for a result event on cQueue or the ctx to be cancelled, whichever happens
 // first.
 // The returned result event is checked for errors its error is returned if set.
@@ -1476,16 +1560,16 @@ func (a *AdminClient) cToConsumerGroupListings(
 			C.ConsumerGroupListing_by_idx(cGroups, cGroupCount, C.size_t(idx))
 		state := ConsumerGroupState(
 			C.rd_kafka_ConsumerGroupListing_state(cGroup))
-
+		groupType := ConsumerGroupType(C.rd_kafka_ConsumerGroupListing_type(cGroup))
 		result[idx] = ConsumerGroupListing{
 			GroupID: C.GoString(
 				C.rd_kafka_ConsumerGroupListing_group_id(cGroup)),
-			State: state,
 			IsSimpleConsumerGroup: cint2bool(
 				C.rd_kafka_ConsumerGroupListing_is_simple_consumer_group(cGroup)),
+			State: state,
+			Type:  groupType,
 		}
 	}
-
 	return result
 }
 
@@ -1526,6 +1610,27 @@ func (a *AdminClient) cConfigResourceToResult(cRes **C.rd_kafka_ConfigResource_t
 	}
 
 	return result, nil
+}
+
+// setupTopicPartitionFromCtopicPartitionResult sets up a Go TopicPartition from a C rd_kafka_topic_partition_t & C.rd_kafka_error_t.
+func setupTopicPartitionFromCtopicPartitionResult(partition *TopicPartition, ctopicPartRes *C.rd_kafka_topic_partition_result_t) {
+
+	setupTopicPartitionFromCrktpar(partition, C.rd_kafka_topic_partition_result_partition(ctopicPartRes))
+	partition.Error = newErrorFromCError(C.rd_kafka_topic_partition_result_error(ctopicPartRes))
+}
+
+// Convert a C rd_kafka_topic_partition_result_t array to a Go TopicPartition list.
+func newTopicPartitionsFromCTopicPartitionResult(cResponse **C.rd_kafka_topic_partition_result_t, size C.size_t) (partitions []TopicPartition) {
+
+	partCnt := int(size)
+
+	partitions = make([]TopicPartition, partCnt)
+
+	for i := 0; i < partCnt; i++ {
+		setupTopicPartitionFromCtopicPartitionResult(&partitions[i], C.TopicPartitionResult_by_idx(cResponse, C.size_t(partCnt), C.size_t(i)))
+	}
+
+	return partitions
 }
 
 // cToDeletedRecordResult converts a C topic partitions list to a Go DeleteRecordsResult slice.
@@ -3512,6 +3617,77 @@ func (a *AdminClient) DeleteRecords(ctx context.Context,
 	// Convert result from C to Go.
 	result.DeleteRecordsResults =
 		cToDeletedRecordResult(cDeleteRecordsResultList)
+
+	return result, nil
+}
+
+// ElectLeaders performs Preferred or Unclean Elections for the specified topic Partitions or for all of them.
+//
+// Parameters:
+//   - `ctx` - context with the maximum amount of time to block, or nil for
+//     indefinite.
+//   - `electLeaderRequest` - ElectLeadersRequest containing the election type
+//     and the partitions to elect leaders for or nil for election in all the
+//     partitions.
+//   - `options` - ElectLeadersAdminOption options.
+//
+// Returns ElectLeadersResult, which contains a slice of TopicPartitions containing the partitions for which the leader election was performed.
+// If we are passing partitions as nil, the broker will perform leader elections for all partitions,
+// but the results will only contain partitions for which there was an election or resulted in an error.
+// Individual TopicPartitions inside the ElectLeadersResult should be checked for errors.
+// Additionally, an error that is not nil for client-level errors is returned.
+func (a *AdminClient) ElectLeaders(ctx context.Context, electLeaderRequest ElectLeadersRequest, options ...ElectLeadersAdminOption) (result ElectLeadersResult, err error) {
+
+	err = a.verifyClient()
+	if err != nil {
+		return result, err
+	}
+
+	var cTopicPartitions *C.rd_kafka_topic_partition_list_t
+	if electLeaderRequest.partitions != nil {
+		cTopicPartitions = newCPartsFromTopicPartitions(electLeaderRequest.partitions)
+		defer C.rd_kafka_topic_partition_list_destroy(cTopicPartitions)
+	}
+
+	cElectLeadersRequest := C.rd_kafka_ElectLeaders_new(C.rd_kafka_ElectionType_t(electLeaderRequest.electionType), cTopicPartitions)
+	defer C.rd_kafka_ElectLeaders_destroy(cElectLeadersRequest)
+
+	// Convert Go AdminOptions (if any) to C AdminOptions.
+	genericOptions := make([]AdminOption, len(options))
+	for i := range options {
+		genericOptions[i] = options[i]
+	}
+	cOptions, err := adminOptionsSetup(
+		a.handle, C.RD_KAFKA_ADMIN_OP_ELECTLEADERS, genericOptions)
+	if err != nil {
+		return result, err
+	}
+	defer C.rd_kafka_AdminOptions_destroy(cOptions)
+
+	// Create temporary queue for async operation.
+	cQueue := C.rd_kafka_queue_new(a.handle.rk)
+	defer C.rd_kafka_queue_destroy(cQueue)
+
+	// Call rd_kafka_ElectLeader (asynchronous).
+	C.rd_kafka_ElectLeaders(
+		a.handle.rk,
+		cElectLeadersRequest,
+		cOptions,
+		cQueue)
+
+	// Wait for result, error or context timeout.
+	rkev, err := a.waitResult(
+		ctx, cQueue, C.RD_KAFKA_EVENT_ELECTLEADERS_RESULT)
+	if err != nil {
+		return result, err
+	}
+	defer C.rd_kafka_event_destroy(rkev)
+
+	cRes := C.rd_kafka_event_ElectLeaders_result(rkev)
+	var cResponseSize C.size_t
+
+	cResultPartitions := C.rd_kafka_ElectLeaders_result_partitions(cRes, &cResponseSize)
+	result.TopicPartitions = newTopicPartitionsFromCTopicPartitionResult(cResultPartitions, cResponseSize)
 
 	return result, nil
 }
