@@ -1,6 +1,10 @@
 package systemapp
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/Housiadas/backend-system/business/web"
+)
 
 type Status struct {
 	Status string `json:"status"`
@@ -27,5 +31,5 @@ type Info struct {
 // Encode implements the encoder interface.
 func (info Info) Encode() ([]byte, string, error) {
 	data, err := json.Marshal(info)
-	return data, "application/json", err
+	return data, web.ContentTypeJSON, err
 }

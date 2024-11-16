@@ -77,7 +77,7 @@ func (h *Handler) authorize(ctx context.Context, _ http.ResponseWriter, r *http.
 	return nil
 }
 
-func (h *Handler) token(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
+func (h *Handler) token(ctx context.Context, _ http.ResponseWriter, _ *http.Request) web.Encoder {
 
 	token, err := h.App.User.Token(ctx)
 	if err != nil {

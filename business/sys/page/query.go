@@ -2,6 +2,8 @@ package page
 
 import (
 	"encoding/json"
+
+	"github.com/Housiadas/backend-system/business/web"
 )
 
 // Result is the data model used when returning a query result.
@@ -22,5 +24,5 @@ func NewResult[T any](data []T, total int, page Page) Result[T] {
 // Encode implements the encoder interface.
 func (r Result[T]) Encode() ([]byte, string, error) {
 	data, err := json.Marshal(r)
-	return data, "application/json", err
+	return data, web.ContentTypeJSON, err
 }

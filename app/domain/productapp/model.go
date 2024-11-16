@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Housiadas/backend-system/business/sys/types/money"
-	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"time"
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/business/sys/types/money"
 	namePck "github.com/Housiadas/backend-system/business/sys/types/name"
+	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"github.com/Housiadas/backend-system/business/sys/validation"
 	"github.com/Housiadas/backend-system/business/web"
 )
@@ -42,7 +42,7 @@ type Product struct {
 // Encode implements the encoder interface.
 func (app Product) Encode() ([]byte, string, error) {
 	data, err := json.Marshal(app)
-	return data, "application/json", err
+	return data, web.ContentTypeJSON, err
 }
 
 func toAppProduct(prd productbus.Product) Product {

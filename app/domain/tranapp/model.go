@@ -3,17 +3,18 @@ package tranapp
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Housiadas/backend-system/business/sys/types/money"
-	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"net/mail"
 	"time"
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/business/sys/types/money"
 	"github.com/Housiadas/backend-system/business/sys/types/name"
+	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"github.com/Housiadas/backend-system/business/sys/validation"
+	"github.com/Housiadas/backend-system/business/web"
 )
 
 // Product represents an individual product.
@@ -30,7 +31,7 @@ type Product struct {
 // Encode implements the encoder interface.
 func (app Product) Encode() ([]byte, string, error) {
 	data, err := json.Marshal(app)
-	return data, "application/json", err
+	return data, web.ContentTypeJSON, err
 }
 
 func toAppProduct(prd productbus.Product) Product {
@@ -55,7 +56,7 @@ type NewTran struct {
 }
 
 // Validate checks the data in the model is considered clean.
-func (app NewTran) Validate() error {
+func (app *NewTran) Validate() error {
 	if err := validation.Check(app); err != nil {
 		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
 	}

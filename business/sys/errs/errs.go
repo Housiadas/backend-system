@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Housiadas/backend-system/business/web"
 	"runtime"
 )
 
@@ -100,7 +101,7 @@ func (e *Error) Error() string {
 // Encode implements the encoder interface.
 func (e *Error) Encode() ([]byte, string, error) {
 	data, err := json.Marshal(e)
-	return data, "application/json", err
+	return data, web.ContentTypeJSON, err
 }
 
 // HTTPStatus implements the web package httpStatus interface so the

@@ -11,6 +11,7 @@ import (
 	"github.com/Housiadas/backend-system/business/sys/types/name"
 	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"github.com/Housiadas/backend-system/business/sys/validation"
+	"github.com/Housiadas/backend-system/business/web"
 )
 
 // QueryParams represents the set of possible query strings.
@@ -36,7 +37,7 @@ type AuthenticateUser struct {
 // Encode implements the encoder interface.
 func (app *AuthenticateUser) Encode() ([]byte, string, error) {
 	data, err := json.Marshal(app)
-	return data, "application/json", err
+	return data, web.ContentTypeJSON, err
 }
 
 // Validate checks the data in the model is considered clean.
@@ -66,7 +67,7 @@ type User struct {
 // Encode implements the encoder interface.
 func (app User) Encode() ([]byte, string, error) {
 	data, err := json.Marshal(app)
-	return data, "application/json", err
+	return data, web.ContentTypeJSON, err
 }
 
 func toAppUser(bus userbus.User) User {

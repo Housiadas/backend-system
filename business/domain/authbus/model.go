@@ -3,6 +3,7 @@ package authbus
 import (
 	"encoding/json"
 
+	"github.com/Housiadas/backend-system/business/web"
 	"github.com/google/uuid"
 )
 
@@ -13,7 +14,7 @@ type AuthenticateResp struct {
 // Encode implements the encoder interface.
 func (a AuthenticateResp) Encode() ([]byte, string, error) {
 	data, err := json.Marshal(a)
-	return data, "application/json", err
+	return data, web.ContentTypeJSON, err
 }
 
 // Authorize defines the information required to perform an authorization.
