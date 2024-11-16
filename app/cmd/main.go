@@ -1,4 +1,3 @@
-// This program performs background tasks
 package main
 
 import (
