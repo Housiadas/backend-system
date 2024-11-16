@@ -1,13 +1,13 @@
 syntax = "proto3";
 
-package backendsystem;
+package mygrpc;
 
-import "user/rpc_create_user.proto";
-import "user/rpc_update_user.proto";
+import "rpc_create_user.proto";
+import "rpc_update_user.proto";
 
-option go_package = "github.com/Housiadas/backend-system/protogen/backendsystem";
+option go_package = "github.com/Housiadas/backend-system/protogen";
 
 service BackendSystem {
-    rpc CreateUser (user.CreateUserRequest) returns (user.CreateUserResponse) {};
-    rpc UpdateUser (user.UpdateUserRequest) returns (user.UpdateUserResponse) {};
+    rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {};
+    rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse) {};
 }
