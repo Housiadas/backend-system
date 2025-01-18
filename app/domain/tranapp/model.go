@@ -3,15 +3,15 @@ package tranapp
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Housiadas/backend-system/business/sys/types/money"
-	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"net/mail"
 	"time"
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/business/sys/types/money"
 	"github.com/Housiadas/backend-system/business/sys/types/name"
+	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"github.com/Housiadas/backend-system/business/sys/validation"
 )
@@ -57,7 +57,7 @@ type NewTran struct {
 // Validate checks the data in the model is considered clean.
 func (app NewTran) Validate() error {
 	if err := validation.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+		return errs.Newf(errs.InvalidArgument, "validation: %s", err)
 	}
 
 	return nil
@@ -83,7 +83,7 @@ type NewUser struct {
 // Validate checks the data in the model is considered clean.
 func (app NewUser) Validate() error {
 	if err := validation.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+		return fmt.Errorf("validation: %w", err)
 	}
 
 	return nil
@@ -133,7 +133,7 @@ type NewProduct struct {
 // Validate checks the data in the model is considered clean.
 func (app NewProduct) Validate() error {
 	if err := validation.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
+		return fmt.Errorf("validation: %w", err)
 	}
 
 	return nil

@@ -117,7 +117,8 @@ func (app *NewUser) Decode(data []byte) error {
 // Validate checks the data in the model is considered clean.
 func (app *NewUser) Validate() error {
 	if err := validation.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validation: %s", err)
+		return fmt.Errorf("validation: %w", err)
+
 	}
 
 	return nil
