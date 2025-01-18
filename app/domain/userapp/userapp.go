@@ -105,7 +105,7 @@ func (a *App) Delete(ctx context.Context) error {
 func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[User], error) {
 	p, err := page.Parse(qp.Page, qp.Rows)
 	if err != nil {
-		return page.Result[User]{}, validation.NewFieldsError("page", err)
+		return page.Result[User]{}, validation.NewFieldErrors("page", err)
 	}
 
 	filter, err := parseFilter(qp)
@@ -115,7 +115,7 @@ func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[User], err
 
 	orderBy, err := order.Parse(orderByFields, qp.OrderBy, defaultOrderBy)
 	if err != nil {
-		return page.Result[User]{}, validation.NewFieldsError("order", err)
+		return page.Result[User]{}, validation.NewFieldErrors("order", err)
 	}
 
 	usrs, err := a.userBus.Query(ctx, filter, orderBy, p)
@@ -145,7 +145,7 @@ func (a *App) QueryByID(ctx context.Context) (User, error) {
 func (a *App) Authenticate(ctx context.Context, authUser AuthenticateUser) (User, error) {
 	addr, err := mail.ParseAddress(authUser.Email)
 	if err != nil {
-		return User{}, validation.NewFieldsError("email", err)
+		return User{}, validation.NewFieldErrors("email", err)
 	}
 
 	usr, err := a.userBus.Authenticate(ctx, *addr, authUser.Password)

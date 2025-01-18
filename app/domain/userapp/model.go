@@ -13,18 +13,6 @@ import (
 	"github.com/Housiadas/backend-system/business/sys/validation"
 )
 
-// QueryParams represents the set of possible query strings.
-type QueryParams struct {
-	Page             string
-	Rows             string
-	OrderBy          string
-	ID               string
-	Name             string
-	Email            string
-	StartCreatedDate string
-	EndCreatedDate   string
-}
-
 // =============================================================================
 
 // AuthenticateUser defines the data needed to authenticate a user.

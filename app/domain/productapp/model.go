@@ -14,19 +14,6 @@ import (
 	"github.com/Housiadas/backend-system/business/web"
 )
 
-// QueryParams represents the set of possible query strings.
-type QueryParams struct {
-	Page     string
-	Rows     string
-	OrderBy  string
-	ID       string
-	Name     string
-	Cost     string
-	Quantity string
-}
-
-// =============================================================================
-
 // Product represents information about an individual product.
 type Product struct {
 	ID          string  `json:"id"`

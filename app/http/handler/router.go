@@ -85,10 +85,10 @@ func (h *Handler) Routes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Get("/readiness", h.Web.Res.Respond(h.readiness))
 	router.Get("/liveness", h.Web.Res.Respond(h.liveness))
+	router.Get("/swagger/doc.json", h.Swagger)
 	router.Handle("/swagger/*", httpSwagger.Handler(
 		httpSwagger.URL("./doc.json"),
 	))
-	router.Get("/swagger/doc.json", h.Swagger)
 
 	router.Mount("/api", apiRouter)
 	return router
