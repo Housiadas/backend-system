@@ -6,8 +6,8 @@ import (
 	"net/mail"
 	"time"
 
-	"github.com/creativecreature/sturdyc"
 	"github.com/google/uuid"
+	"github.com/viccon/sturdyc"
 
 	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
