@@ -4,29 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Housiadas/backend-system/business/sys/types/money"
-	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"time"
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
-	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/business/sys/types/money"
 	namePck "github.com/Housiadas/backend-system/business/sys/types/name"
+	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"github.com/Housiadas/backend-system/business/sys/validation"
 	"github.com/Housiadas/backend-system/business/web"
 )
-
-// QueryParams represents the set of possible query strings.
-type QueryParams struct {
-	Page     string
-	Rows     string
-	OrderBy  string
-	ID       string
-	Name     string
-	Cost     string
-	Quantity string
-}
-
-// =============================================================================
 
 // Product represents information about an individual product.
 type Product struct {
@@ -77,13 +63,13 @@ type NewProduct struct {
 
 // Decode implements the decoder interface.
 func (app *NewProduct) Decode(data []byte) error {
-	return json.Unmarshal(data, &app)
+	return json.Unmarshal(data, app)
 }
 
 // Validate checks the data in the model is considered clean.
 func (app *NewProduct) Validate() error {
 	if err := validation.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validation: %s", err)
+		return fmt.Errorf("validation: %w", err)
 	}
 
 	return nil
@@ -131,13 +117,13 @@ type UpdateProduct struct {
 
 // Decode implements the decoder interface.
 func (app *UpdateProduct) Decode(data []byte) error {
-	return json.Unmarshal(data, &app)
+	return json.Unmarshal(data, app)
 }
 
 // Validate checks the data in the model is considered clean.
 func (app *UpdateProduct) Validate() error {
 	if err := validation.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validation: %s", err)
+		return fmt.Errorf("validation: %w", err)
 	}
 
 	return nil

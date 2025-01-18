@@ -13,18 +13,6 @@ import (
 	"github.com/Housiadas/backend-system/business/sys/validation"
 )
 
-// QueryParams represents the set of possible query strings.
-type QueryParams struct {
-	Page             string
-	Rows             string
-	OrderBy          string
-	ID               string
-	Name             string
-	Email            string
-	StartCreatedDate string
-	EndCreatedDate   string
-}
-
 // =============================================================================
 
 // AuthenticateUser defines the data needed to authenticate a user.
@@ -111,13 +99,14 @@ type NewUser struct {
 
 // Decode implements the decoder interface.
 func (app *NewUser) Decode(data []byte) error {
-	return json.Unmarshal(data, &app)
+	return json.Unmarshal(data, app)
 }
 
 // Validate checks the data in the model is considered clean.
 func (app *NewUser) Validate() error {
 	if err := validation.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validation: %s", err)
+		return fmt.Errorf("validation: %w", err)
+
 	}
 
 	return nil
@@ -164,7 +153,7 @@ type UpdateUserRole struct {
 
 // Decode implements the decoder interface.
 func (app *UpdateUserRole) Decode(data []byte) error {
-	return json.Unmarshal(data, &app)
+	return json.Unmarshal(data, app)
 }
 
 // Validate checks the data in the model is considered clean.
@@ -210,7 +199,7 @@ type UpdateUser struct {
 
 // Decode implements the decoder interface.
 func (app *UpdateUser) Decode(data []byte) error {
-	return json.Unmarshal(data, &app)
+	return json.Unmarshal(data, app)
 }
 
 // Validate checks the data in the model is considered clean.

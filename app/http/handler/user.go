@@ -60,10 +60,7 @@ func (h *Handler) userDelete(ctx context.Context, _ http.ResponseWriter, _ *http
 }
 
 func (h *Handler) userQuery(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
-	qp, err := userParseQueryParams(r)
-	if err != nil {
-		return errs.New(errs.FailedPrecondition, err)
-	}
+	qp := userapp.ParseQueryParams(r)
 
 	usr, err := h.App.User.Query(ctx, qp)
 	if err != nil {

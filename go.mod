@@ -5,7 +5,6 @@ go 1.23
 require (
 	github.com/arl/statsviz v0.6.0
 	github.com/confluentinc/confluent-kafka-go/v2 v2.6.1
-	github.com/creativecreature/sturdyc v1.0.7
 	github.com/go-chi/chi/v5 v5.2.0
 	github.com/go-chi/cors v1.2.1
 	github.com/go-playground/locales v0.14.1
@@ -22,6 +21,7 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.4
+	github.com/viccon/sturdyc v1.1.1
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.58.0
 	go.opentelemetry.io/otel v1.33.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.33.0

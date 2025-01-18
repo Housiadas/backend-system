@@ -46,10 +46,7 @@ func (h *Handler) productDelete(ctx context.Context, _ http.ResponseWriter, _ *h
 }
 
 func (h *Handler) productQuery(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
-	qp, err := productParseQueryParams(r)
-	if err != nil {
-		return errs.New(errs.InvalidArgument, err)
-	}
+	qp := productapp.ParseQueryParams(r)
 
 	prd, err := h.App.Product.Query(ctx, qp)
 	if err != nil {

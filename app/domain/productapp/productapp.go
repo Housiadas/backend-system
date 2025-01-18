@@ -77,7 +77,7 @@ func (a *App) Delete(ctx context.Context) error {
 func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[Product], error) {
 	p, err := page.Parse(qp.Page, qp.Rows)
 	if err != nil {
-		return page.Result[Product]{}, validation.NewFieldsError("page", err)
+		return page.Result[Product]{}, validation.NewFieldErrors("page", err)
 	}
 
 	filter, err := parseFilter(qp)
@@ -87,7 +87,7 @@ func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[Product], 
 
 	orderBy, err := order.Parse(orderByFields, qp.OrderBy, defaultOrderBy)
 	if err != nil {
-		return page.Result[Product]{}, validation.NewFieldsError("order", err)
+		return page.Result[Product]{}, validation.NewFieldErrors("order", err)
 	}
 
 	products, err := a.productBus.Query(ctx, filter, orderBy, p)

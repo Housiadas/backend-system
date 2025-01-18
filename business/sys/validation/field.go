@@ -3,6 +3,8 @@ package validation
 import (
 	"encoding/json"
 	"errors"
+
+	"github.com/Housiadas/backend-system/business/sys/errs"
 )
 
 // FieldError is used to indicate an error with a specific request field.
@@ -14,23 +16,16 @@ type FieldError struct {
 // FieldErrors represents a collection of field errors.
 type FieldErrors []FieldError
 
-// NewFieldsError creates a fields' error.
-func NewFieldsError(field string, err error) error {
-	return FieldErrors{
+// NewFieldErrors creates a field error.
+func NewFieldErrors(field string, err error) *errs.Error {
+	fe := FieldErrors{
 		{
 			Field: field,
 			Err:   err.Error(),
 		},
 	}
-}
 
-// Error implements the error interface.
-func (fe FieldErrors) Error() string {
-	d, err := json.Marshal(fe)
-	if err != nil {
-		return err.Error()
-	}
-	return string(d)
+	return fe.ToError()
 }
 
 // Fields returns the fields that failed validation
@@ -55,4 +50,27 @@ func GetFieldErrors(err error) FieldErrors {
 		return nil
 	}
 	return fe
+}
+
+// Add adds a field error to the collection.
+func (fe *FieldErrors) Add(field string, err error) {
+	*fe = append(*fe, FieldError{
+		Field: field,
+		Err:   err.Error(),
+	})
+}
+
+// ToError converts the field errors to an Error.
+func (fe FieldErrors) ToError() *errs.Error {
+	return errs.New(errs.InvalidArgument, fe)
+}
+
+// Error implements the error interface.
+func (fe FieldErrors) Error() string {
+	d, err := json.Marshal(fe)
+	if err != nil {
+		return err.Error()
+	}
+
+	return string(d)
 }

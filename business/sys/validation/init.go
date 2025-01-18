@@ -1,8 +1,6 @@
-// Package validation contains the support for validating models.
 package validation
 
 import (
-	"errors"
 	"reflect"
 	"strings"
 
@@ -12,14 +10,7 @@ import (
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 )
 
-// validate holds the settings and caches for validating request struct values.
-var validate *validator.Validate
-
-// translator is a cache of locale and translation information.
-var translator ut.Translator
-
 func init() {
-
 	// Instantiate a validator.
 	validate = validator.New(validator.WithRequiredStructEnabled())
 
@@ -36,29 +27,7 @@ func init() {
 		if name == "-" {
 			return ""
 		}
+
 		return name
 	})
-}
-
-// Check validates the provided model against it's declared tags.
-func Check(val any) error {
-	if err := validate.Struct(val); err != nil {
-		var verrors validator.ValidationErrors
-		ok := errors.As(err, &verrors)
-		if !ok {
-			return err
-		}
-
-		var fields FieldErrors
-		for _, verror := range verrors {
-			fields = append(fields, FieldError{
-				Field: verror.Field(),
-				Err:   verror.Translate(translator),
-			})
-		}
-
-		return fields
-	}
-
-	return nil
 }
