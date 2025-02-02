@@ -17,16 +17,6 @@ MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm migrate
 MIGRATION_DB_DSN := "postgres://housi:secret123@db:5432/housi_db?sslmode=disable"
 
 # ==================================================================================== #
-# HELPERS
-# ==================================================================================== #
-
-## help: print this help message
-.PHONY: help
-help:
-	@echo 'Usage:'
-	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'
-
-# ==================================================================================== #
 # DEVELOPMENT
 # ==================================================================================== #
 
@@ -171,18 +161,14 @@ coverage:
 	go tool cover -html cover.out -o cover.html
 	open cover.html
 
-# ==================================================================================== #
-# SWAGGER
+# =================================================================================== #
+# Utillity
 # ==================================================================================== #
 
 # swagger: Generate swagger docs
 .PHONY: swagger
 swagger:
 	docker run --rm -v $(PWD):/code --user $(UID) ghcr.io/swaggo/swag:v1.16.3 init --g app/api/main.go
-
-# =================================================================================== #
-# Metrics and Tracing
-# ==================================================================================== #
 
 # metrics: see metrics from cli
 .PHONY: metrics
@@ -198,3 +184,13 @@ grafana:
 .PHONY: statsviz
 statsviz:
 	open http://localhost:4010/debug/statsviz
+
+# ==================================================================================== #
+# HELPERS
+# ==================================================================================== #
+
+## help: print this help message
+.PHONY: help
+help:
+	@echo 'Usage:'
+	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'

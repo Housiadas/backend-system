@@ -32,4 +32,5 @@ make help
 
 ## Database Schema
 We used https://dbdiagram.io to define our database structure.
+
 ### Needs update!
