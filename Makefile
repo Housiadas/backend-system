@@ -180,10 +180,15 @@ metrics:
 grafana:
 	open http://localhost:3000/
 
-# grafana: open statsviz
+# statsviz: open statsviz
 .PHONY: statsviz
 statsviz:
 	open http://localhost:4010/debug/statsviz
+
+# kafka/ui: open kafka ui
+.PHONY: kafka/ui
+kafka/ui:
+	open http://localhost:8080
 
 # ==================================================================================== #
 # HELPERS
