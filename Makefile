@@ -16,9 +16,9 @@ DOCKER_COMPOSE_LOCAL := docker compose -f ./docker-compose.yml
 MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm migrate
 MIGRATION_DB_DSN := "postgres://housi:secret123@db:5432/housi_db?sslmode=disable"
 
-# ==================================================================================== #
-# DEVELOPMENT
-# ==================================================================================== #
+## ========
+## Docker
+## ========
 
 ## docker/build: Build the application
 .PHONY: docker/build
@@ -50,29 +50,24 @@ docker/clean:
     docker image prune -f && \
     docker volume prune -f
 
-## go/mock/store: Go mock Store interface
-.PHONY: go/mock/store
-go/mock/store:
-	mockgen -package mockdb -destination business/db/mock/store.go $(APP_MODULE)/business/db Store
-
-# ==================================================================================== #
-# API Application
-# ==================================================================================== #
+## ==================
+## HTTP Application
+## ==================
 
 ## go/http/run: Run main.go locally
 .PHONY: go/api/run
-go/api/run:
+go/http/run:
 	go run app/api/main.go
 
 ## go/http/build: build the http application
 .PHONY: go/api/build
-go/api/build:
+go/http/build:
 	cd app & \
 	go build -ldflags=${LINKER_FLAGS} -o=./banking-api
 
-# ==================================================================================== #
-# CMD Application
-# ==================================================================================== #
+## ==================
+## CMD Application
+## ==================
 
 ## go/cmd/build: Build cmd application
 .PHONY: go/cmd/build
@@ -85,61 +80,48 @@ go/cmd/seed:
 	make go/cmd/build
 	app/cmd/cmd seed
 
-## go/cmd/useradd: Add user
-.PHONY: go/cmd/useradd
-go/cmd/useradd:
-	make go/cmd/build
-	app/cmd/cmd useradd "chris housi" "example@example.com" "1232455477"
-
 ## go/cmd/genkey: Generate key
 .PHONY: go/cmd/genkey
 go/cmd/genkey:
 	make go/cmd/build
 	app/cmd/cmd genkey
 
-## go/cmd/userevents: User events
+## go/cmd/useradd: Add user
+.PHONY: go/cmd/useradd
+go/cmd/user/add:
+	make go/cmd/build
+	app/cmd/cmd useradd "chris housi" "example@example.com" "1232455477"
+
+## go/cmd/user/events: User events
 .PHONY: go/cmd/userevents
-go/cmd/userevents:
+go/cmd/user/events:
 	make go/cmd/build
 	app/cmd/cmd userevents
 
-# ==================================================================================== #
-# DATABASE
-# ==================================================================================== #
+## ==================
+## Database
+## ==================
 
-## db/migrations/create name=$1: create new migration files
+## db/migrations/create name=$1: Create new migration files
 .PHONY: db/migrate/create
 db/migrate/create:
 	$(MIGRATE) create -seq -ext=.sql -dir=./business/data/migrations $(INPUT)
 
-## db/migrations/up: apply all up database migrations
+## db/migrations/up: Apply all up database migrations
 .PHONY: db/migrate/up
 db/migrate/up:
 	$(MIGRATE) -path=./business/data/migrations -database=${MIGRATION_DB_DSN} up
 
-## db/migrations/down: apply all down database migrations (DROP Database)
+## db/migrations/down: Apply all down database migrations (DROP Database)
 .PHONY: db/migrate/down
 db/migrate/down:
 	$(MIGRATE) -path=./business/data/migrations -database=${MIGRATION_DB_DSN} down
 
-# ==================================================================================== #
-# QUALITY CONTROL
-# ==================================================================================== #
+## ==================
+## Quality Control
+## ==================
 
-# vendor: vendor dependencies
-.PHONY: vendor
-vendor:
-	go mod tidy
-	go mod vendor
-	go mod verify
-
-# update: update dependencies
-.PHONY: update
-update:
-	go get -u ./...
-	go mod verify
-
-## lint: Go linter
+## lint: Run linter
 .PHONY: lint
 lint:
 	go mod tidy
@@ -148,54 +130,94 @@ lint:
 	go vet ./...
 	staticcheck ./...
 
-# tests: run tests
+## tests: Run tests
 .PHONY: tests
 tests:
 	go install github.com/mfridman/tparse@latest
 	CGO_ENABLED=1 go test -v --cover --short --race -json ./... | tparse --all
 
-# coverage: Inspect coverage
+## coverage: Inspect coverage
 .PHONY: coverage
 coverage:
 	go test -v -coverprofile cover.out ./...
 	go tool cover -html cover.out -o cover.html
 	open cover.html
 
-# ==================================================================================== #
-# Utillity
-# ==================================================================================== #
+## ==================
+## Modules support
+## ==================
+
+## deps/vendor: Vendor dependencies
+.PHONY: vendor
+deps/vendor:
+	go mod tidy
+	go mod vendor
+	go mod verify
+
+## deps/update: Update dependencies
+.PHONY: deps/update
+deps/update:
+	go get -u -v ./...
+	go mod tidy
+	go mod vendor
+
+## deps/list: List dependencies
+.PHONY: deps/list
+deps/list:
+	go list -m -u -mod=readonly all
+
+## deps/cache/clean: Clean cache dependencies
+.PHONY: deps/cache/clean
+deps/cache/clean:
+	go clean -modcache
+
+## deps/reset: Reset dependencies
+.PHONY: deps/reset
+deps/reset:
+	git checkout -- go.mod
+	go mod tidy
+	go mod vendor
+
+## list: List modules
+.PHONY: list
+list:
+	go list -mod=mod all
+
+## ==================
+## Utils
+## ==================
+
+## go/mock/store: Go mock Store interface
+.PHONY: go/mock/store
+go/mock/store:
+	mockgen -package mockdb -destination business/db/mock/store.go $(APP_MODULE)/business/db Store
 
 # swagger: Generate swagger docs
 .PHONY: swagger
 swagger:
 	docker run --rm -v $(PWD):/code --user $(UID) ghcr.io/swaggo/swag:v1.16.3 init --g app/api/main.go
 
-# metrics: see metrics from cli
+## metrics: See metrics
 .PHONY: metrics
 metrics:
-	expvarmon -ports="localhost:4010" -vars="build,requests,goroutines,errors,panics,mem:memstats.HeapAlloc,mem:memstats.HeapSys,mem:memstats.Sys"
+	expvarmon -ports="localhost:4010" \
+	-vars="build,requests,goroutines,errors,panics,mem:memstats.HeapAlloc,mem:memstats.HeapSys,mem:memstats.Sys"
 
-# grafana: open grafana
+## grafana: Open grafana
 .PHONY: grafana
 grafana:
 	open http://localhost:3000/
 
-# statsviz: open statsviz
+## statsviz: Open statsviz
 .PHONY: statsviz
 statsviz:
 	open http://localhost:4010/debug/statsviz
 
-# kafka/ui: open kafka ui
+## kafka/ui: Open kafka ui
 .PHONY: kafka/ui
 kafka/ui:
 	open http://localhost:8080
 
-# ==================================================================================== #
-# HELPERS
-# ==================================================================================== #
-
-## help: print this help message
-.PHONY: help
 help:
-	@echo 'Usage:'
+	@echo Usage:
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'
