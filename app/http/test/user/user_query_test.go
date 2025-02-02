@@ -11,6 +11,7 @@ import (
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	testPck "github.com/Housiadas/backend-system/app/http/test"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/business/sys/page"
 )
 
@@ -97,4 +98,47 @@ func Test_API_User_Query_BY_ID_200(t *testing.T) {
 	}
 
 	test.Run(t, table, "user-query-by-id-200")
+}
+
+func Test_API_User_Query_400(t *testing.T) {
+	t.Parallel()
+
+	test, err := testPck.StartTest(t, "Test_API_User")
+	if err != nil {
+		t.Fatalf("Start error: %s", err)
+	}
+
+	sd, err := insertSeedData(test.DB, test.Auth)
+	if err != nil {
+		t.Fatalf("Seeding error: %s", err)
+	}
+
+	table := []testPck.Table{
+		{
+			Name:       "bad-query-filter",
+			URL:        "/api/v1/users?page=1&rows=10&email=a.com",
+			Token:      sd.Admins[0].Token,
+			StatusCode: http.StatusBadRequest,
+			Method:     http.MethodGet,
+			GotResp:    &errs.Error{},
+			ExpResp:    errs.Newf(errs.InvalidArgument, "[{\"field\":\"email\",\"error\":\"mail: missing '@' or angle-addr\"}]"),
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name:       "bad-order-by-value",
+			URL:        "/api/v1/users?page=1&rows=10&orderBy=ser_id,ASC",
+			Token:      sd.Admins[0].Token,
+			StatusCode: http.StatusBadRequest,
+			Method:     http.MethodGet,
+			GotResp:    &errs.Error{},
+			ExpResp:    errs.Newf(errs.InvalidArgument, "[{\"field\":\"order\",\"error\":\"unknown order: ser_id\"}]"),
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		},
+	}
+
+	test.Run(t, table, "user-query-400")
 }
