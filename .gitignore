@@ -10,4 +10,5 @@ app.env
 config.yaml
 
 cover.out
+coverage.out
 cover.html

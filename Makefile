@@ -139,8 +139,9 @@ tests:
 ## coverage: Inspect coverage
 .PHONY: coverage
 coverage:
-	go test -v -coverprofile cover.out ./...
-	go tool cover -html cover.out -o cover.html
+	go test -cover -v -coverpkg=./... ./...
+	go test -coverprofile=coverage.out -coverpkg=./... ./...
+	go tool cover -html=coverage.out
 	open cover.html
 
 ## ==================
