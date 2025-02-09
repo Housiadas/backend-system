@@ -12,7 +12,7 @@ CURRENT_TIME := $(shell date --iso-8601=seconds)
 GIT_VERSION := $(shell git describe --always --dirty --tags --long)
 LINKER_FLAGS := "-s -X main.buildTime=${CURRENT_TIME} -X main.version=${GIT_VERSION}"
 
-DOCKER_COMPOSE_LOCAL := docker compose -f ./docker-compose.yml
+DOCKER_COMPOSE_LOCAL := docker compose -f ./compose.yml
 MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm migrate
 MIGRATION_DB_DSN := "postgres://housi:secret123@db:5432/housi_db?sslmode=disable"
 
@@ -55,15 +55,40 @@ docker/clean:
 ## ==================
 
 ## go/http/run: Run main.go locally
-.PHONY: go/api/run
+.PHONY: go/http/run
 go/http/run:
-	go run app/api/main.go
+	go run app/http/main.go
 
 ## go/http/build: build the http application
-.PHONY: go/api/build
+.PHONY: go/http/build
 go/http/build:
-	cd app & \
+	cd app/http & \
+	go build -ldflags=${LINKER_FLAGS} -o=./http-api
+
+## ==================
+## gRPC Application
+## ==================
+
+## go/grpc/run: Run gRPC locally
+.PHONY: go/grpc/run
+go/grpc/run:
+	go run app/grpc/main.go
+
+## go/grpc/build: build the gRPC application
+.PHONY: go/grpc/build
+go/grpc/build:
+	cd app/grpc & \
 	go build -ldflags=${LINKER_FLAGS} -o=./banking-api
+
+## go/grpc/curl: curl the gRPC application
+.PHONY: go/grpc/curl
+go/grpc/curl:
+	grpcurl -plaintext -format json -d '{"id": "45b5fb22-755f-aa79-8a07-a58d42a1fa2f"}' localhost:9090 user.v1.UserService/GetUserById
+
+## go/grpc/curl/list: List all endpoints for gRPC application
+.PHONY: go/grpc/curl/list
+go/grpc/curl/list:
+	grpcurl -plaintext localhost:9090 list
 
 ## ==================
 ## CMD Application

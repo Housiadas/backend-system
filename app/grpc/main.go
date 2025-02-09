@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"expvar"
 	"fmt"
 	"net"
@@ -10,7 +9,6 @@ import (
 	"runtime"
 	"time"
 
-	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
@@ -46,7 +44,7 @@ func main() {
 	}
 	cfg.Version = config.Version{
 		Build: build,
-		Desc:  "API",
+		Desc:  "gRPC",
 	}
 
 	// -------------------------------------------------------------------------
@@ -65,7 +63,7 @@ func main() {
 	requestIDFn := func(ctx context.Context) string {
 		return web.GetRequestID(ctx)
 	}
-	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "API", traceIDFn, requestIDFn, events)
+	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "gRPC", traceIDFn, requestIDFn, events)
 
 	// -------------------------------------------------------------------------
 	// Run the application
@@ -182,7 +180,9 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	// Register gRPC services
 	// -------------------------------------------------------------------------
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(s.GrpcInterceptor),
+	)
 	userV1.RegisterUserServiceServer(grpcServer, &s)
 	healthpb.RegisterHealthServer(grpcServer, healthServer)
 	reflection.Register(grpcServer)
@@ -195,31 +195,8 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 		log.Error(ctx, "failed to listen", "msg", err)
 	}
 
-	waitGroup, ctx := errgroup.WithContext(ctx)
-	waitGroup.Go(func() error {
-		log.Info(ctx, "start gRPC server", "address", listener.Addr().String())
+	log.Info(ctx, "start gRPC server", "address", listener.Addr().String())
 
-		err = grpcServer.Serve(listener)
-		if err != nil {
-			if errors.Is(err, grpc.ErrServerStopped) {
-				return nil
-			}
-			log.Error(ctx, "gRPC server failed to serve", err)
-			return err
-		}
-
-		return nil
-	})
-
-	waitGroup.Go(func() error {
-		<-ctx.Done()
-		log.Info(ctx, "graceful shutdown gRPC server")
-
-		grpcServer.GracefulStop()
-		log.Info(ctx, "gRPC server is stopped")
-
-		return nil
-	})
-
-	return nil
+	// todo add graceful shutdown
+	return grpcServer.Serve(listener)
 }

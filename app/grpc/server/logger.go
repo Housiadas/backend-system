@@ -18,7 +18,7 @@ func (s *Server) GrpcInterceptor(
 
 	startTime := time.Now()
 	result, err := handler(ctx, req)
-	duration := time.Since(startTime)
+	duration := time.Since(startTime).String()
 
 	statusCode := codes.Unknown
 	if st, ok := status.FromError(err); ok {
