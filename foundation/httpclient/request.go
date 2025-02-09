@@ -15,7 +15,14 @@ import (
 	"github.com/Housiadas/backend-system/foundation/otel"
 )
 
-func (cln *Client) Request(ctx context.Context, method string, endpoint string, headers map[string]string, r io.Reader, v any) error {
+func (cln *Client) Request(
+	ctx context.Context,
+	method string,
+	endpoint string,
+	headers map[string]string,
+	r io.Reader,
+	v any,
+) error {
 	var statusCode int
 
 	u, err := url.Parse(endpoint)

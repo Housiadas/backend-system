@@ -1,4 +1,4 @@
-// Package money represents a money in the system.
+// Package money represents money in the system.
 package money
 
 import (
