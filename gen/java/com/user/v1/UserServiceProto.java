@@ -25,16 +25,6 @@ public final class UserServiceProto {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_user_v1_GetUserByIdRequest_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_user_v1_GetUserByIdRequest_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_user_v1_GetUserByIdResponse_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_user_v1_GetUserByIdResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -45,33 +35,19 @@ public final class UserServiceProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\032user/v1/user_service.proto\022\007user.v1\032\022u" +
-      "ser/v1/user.proto\"$\n\022GetUserByIdRequest\022" +
-      "\016\n\002id\030\001 \001(\tR\002id\"8\n\023GetUserByIdResponse\022!" +
-      "\n\004user\030\001 \001(\0132\r.user.v1.UserR\004user2Y\n\013Use" +
-      "rService\022J\n\013GetUserById\022\033.user.v1.GetUse" +
-      "rByIdRequest\032\034.user.v1.GetUserByIdRespon" +
-      "se\"\000B\215\001\n\013com.user.v1B\020UserServiceProtoP\001" +
-      "Z/github.com/Housiadas/backend-system/ge" +
-      "n/user/v1\242\002\003UXX\252\002\007User.V1\312\002\007User\\V1\342\002\023Us" +
-      "er\\V1\\GPBMetadata\352\002\010User::V1b\006proto3"
+      "ser/v1/user.proto2Y\n\013UserService\022J\n\013GetU" +
+      "serById\022\033.user.v1.GetUserByIdRequest\032\034.u" +
+      "ser.v1.GetUserByIdResponse\"\000B\215\001\n\013com.use" +
+      "r.v1B\020UserServiceProtoP\001Z/github.com/Hou" +
+      "siadas/backend-system/gen/user/v1\242\002\003UXX\252" +
+      "\002\007User.V1\312\002\007User\\V1\342\002\023User\\V1\\GPBMetadat" +
+      "a\352\002\010User::V1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           com.user.v1.UserProto.getDescriptor(),
         });
-    internal_static_user_v1_GetUserByIdRequest_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_user_v1_GetUserByIdRequest_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_user_v1_GetUserByIdRequest_descriptor,
-        new java.lang.String[] { "Id", });
-    internal_static_user_v1_GetUserByIdResponse_descriptor =
-      getDescriptor().getMessageTypes().get(1);
-    internal_static_user_v1_GetUserByIdResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_user_v1_GetUserByIdResponse_descriptor,
-        new java.lang.String[] { "User", });
     descriptor.resolveAllFeaturesImmutable();
     com.user.v1.UserProto.getDescriptor();
   }

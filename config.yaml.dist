@@ -1,12 +1,14 @@
 app:
   name: "backend-system"
-server:
+http:
   api: "localhost:4000"
   debug: "localhost:4010"
   readTimeout: "5s"
   writeTimeout: "10s"
   idleTimeout: "120s"
   shutdownTimeout: "20s"
+grpc:
+  api: "localhost:9090"
 db:
   name: "housi_db"
   user: "housi"

@@ -5,5 +5,7 @@ managed:
 plugins:
   - remote: buf.build/protocolbuffers/go
     out: gen/go
+  - local: protoc-gen-go-grpc
+    out: gen/go
   - remote: buf.build/protocolbuffers/java
     out: gen/java

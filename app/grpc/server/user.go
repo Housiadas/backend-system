@@ -8,14 +8,14 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/Housiadas/backend-system/app/domain/userapp"
-	userv1 "github.com/Housiadas/backend-system/gen/go/github.com/Housiadas/backend-system/gen/user/v1"
+	userV1 "github.com/Housiadas/backend-system/gen/go/github.com/Housiadas/backend-system/gen/user/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (s *Server) GetUserById(
 	ctx context.Context,
-	req *userv1.GetUserRequest,
-) (*userv1.GetUserResponse, error) {
+	req *userV1.GetUserByIdRequest,
+) (*userV1.GetUserByIdResponse, error) {
 
 	appUsr, err := s.App.User.Query(ctx, toUserQueryParams(req))
 	if err != nil {
@@ -27,29 +27,29 @@ func (s *Server) GetUserById(
 		return nil, status.Errorf(codes.Internal, "Error creating user: %s", err)
 	}
 
-	return &userv1.GetUserResponse{
+	return &userV1.GetUserByIdResponse{
 		User: protoUsr,
 	}, nil
 }
 
-func toUserQueryParams(req *userv1.GetUserRequest) userapp.QueryParams {
+func toUserQueryParams(req *userV1.GetUserByIdRequest) userapp.QueryParams {
 	return userapp.QueryParams{
 		ID: req.Id,
 	}
 }
 
-func toProtoUser(user userapp.User) (*userv1.User, error) {
+func toProtoUser(user userapp.User) (*userV1.User, error) {
 	dateCreated, err := time.Parse(time.RFC3339, user.DateCreated)
 	if err != nil {
-		return &userv1.User{}, err
+		return &userV1.User{}, err
 	}
 
 	dateUpdated, err := time.Parse(time.RFC3339, user.DateUpdated)
 	if err != nil {
-		return &userv1.User{}, err
+		return &userV1.User{}, err
 	}
 
-	return &userv1.User{
+	return &userV1.User{
 		Id:           user.ID,
 		Name:         user.Name,
 		Email:        user.Email,

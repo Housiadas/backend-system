@@ -9,11 +9,3 @@ option go_package = "github.com/Housiadas/backend-system/gen/user/v1";
 service UserService {
   rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse) {};
 }
-
-message GetUserByIdRequest {
-  string id = 1;
-}
-
-message GetUserByIdResponse {
-  User user = 1;
-}

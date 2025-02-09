@@ -17,3 +17,11 @@ message User {
   google.protobuf.Timestamp date_created = 8;
   google.protobuf.Timestamp date_updated = 9;
 }
+
+message GetUserByIdRequest {
+  string id = 1;
+}
+
+message GetUserByIdResponse {
+  User user = 1;
+}

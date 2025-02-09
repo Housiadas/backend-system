@@ -187,18 +187,18 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	})
 
 	// -------------------------------------------------------------------------
-	// Start Debug Service
+	// Start Debug Http Service
 	// -------------------------------------------------------------------------
 	go func() {
-		log.Info(ctx, "startup", "status", "Debug server starting", "host", cfg.Server.Debug)
+		log.Info(ctx, "startup", "status", "Debug server starting", "host", cfg.Http.Debug)
 
-		if err := http.ListenAndServe(cfg.Server.Debug, debug.Mux()); err != nil {
-			log.Error(ctx, "shutdown", "status", "debug v1 router closed", "host", cfg.Server.Debug, "msg", err)
+		if err := http.ListenAndServe(cfg.Http.Debug, debug.Mux()); err != nil {
+			log.Error(ctx, "shutdown", "status", "debug v1 router closed", "host", cfg.Http.Debug, "msg", err)
 		}
 	}()
 
 	// -------------------------------------------------------------------------
-	// Start API Server
+	// Start API Http Server
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "API server starting")
 
@@ -224,7 +224,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 			Res: web.NewRespond(log),
 		},
 		App: handler.App{
-			User:    userapp.NewApp(userBus, authBus),
+			User:    userapp.NewAppWithAuth(userBus, authBus),
 			Product: productapp.NewApp(productBus),
 			System:  systemapp.NewApp(cfg.Version.Build, log, db),
 			Tx:      tranapp.NewApp(userBus, productBus),
@@ -237,11 +237,11 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	}
 
 	api := http.Server{
-		Addr:         cfg.Server.Api,
+		Addr:         cfg.Http.Api,
 		Handler:      h.Routes(),
-		ReadTimeout:  cfg.Server.ReadTimeout,
-		WriteTimeout: cfg.Server.WriteTimeout,
-		IdleTimeout:  cfg.Server.IdleTimeout,
+		ReadTimeout:  cfg.Http.ReadTimeout,
+		WriteTimeout: cfg.Http.WriteTimeout,
+		IdleTimeout:  cfg.Http.IdleTimeout,
 		ErrorLog:     logger.NewStdLogger(log, logger.LevelError),
 	}
 
@@ -263,7 +263,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 		log.Info(ctx, "shutdown", "status", "shutdown started", "signal", sig)
 		defer log.Info(ctx, "shutdown", "status", "shutdown complete", "signal", sig)
 
-		ctx, cancel := context.WithTimeout(ctx, cfg.Server.ShutdownTimeout)
+		ctx, cancel := context.WithTimeout(ctx, cfg.Http.ShutdownTimeout)
 		defer cancel()
 
 		if err := api.Shutdown(ctx); err != nil {

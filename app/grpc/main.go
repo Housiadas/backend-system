@@ -5,11 +5,16 @@ import (
 	"errors"
 	"expvar"
 	"fmt"
-	userv1 "github.com/Housiadas/backend-system/gen/go/github.com/Housiadas/backend-system/gen/user/v1"
-	"google.golang.org/grpc"
 	"net"
 	"os"
 	"runtime"
+	"time"
+
+	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
 
 	"github.com/Housiadas/backend-system/app/domain/productapp"
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
@@ -18,16 +23,14 @@ import (
 	"github.com/Housiadas/backend-system/app/grpc/server"
 	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/data/sqldb"
-	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus/stores/productdb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/business/web"
-	_ "github.com/Housiadas/backend-system/docs"
-	"github.com/Housiadas/backend-system/foundation/keystore"
 	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/Housiadas/backend-system/foundation/otel"
+	userV1 "github.com/Housiadas/backend-system/gen/go/github.com/Housiadas/backend-system/gen/user/v1"
 )
 
 var build = "develop"
@@ -138,25 +141,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db))
 	productBus := productbus.NewBusiness(log, userBus, productdb.NewStore(log, db))
 
-	// Load the private keys files from disk. We can assume some system api like
-	// Vault has created these files already. How that happens is not our concern.
-	ks := keystore.New()
-	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
-		return fmt.Errorf("reading keys: %w", err)
-	}
-	authBus := authbus.New(authbus.Config{
-		Log:       log,
-		DB:        db,
-		KeyLookup: ks,
-		Userbus:   userBus,
-	})
-
-	// -------------------------------------------------------------------------
-	// Start API Server
-	// -------------------------------------------------------------------------
-	log.Info(ctx, "startup", "status", "API server starting")
-
-	// Initialize handler
+	// Initialize Server Struct
 	s := server.Server{
 		ServiceName: cfg.App.Name,
 		Build:       build,
@@ -164,37 +149,62 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 		Log:         log,
 		Tracer:      tracer,
 		App: server.App{
-			User:    userapp.NewApp(userBus, authBus),
+			User:    userapp.NewApp(userBus),
 			Product: productapp.NewApp(productBus),
 			System:  systemapp.NewApp(cfg.Version.Build, log, db),
 			Tx:      tranapp.NewApp(userBus, productBus),
 		},
 		Business: server.Business{
-			Auth:    authBus,
 			User:    userBus,
 			Product: productBus,
 		},
 	}
 
-	gprcLogger := grpc.UnaryInterceptor(gapi.GrpcLogger)
-	grpcServer := grpc.NewServer(gprcLogger)
-	userv1.File_user_v1_user_service_proto(grpcServer, s)
+	// -------------------------------------------------------------------------
+	// Health Server
+	// -------------------------------------------------------------------------
+	healthServer := health.NewServer()
+	go func() {
+		for {
+			status := healthpb.HealthCheckResponse_SERVING
+			// Check if user Service is valid
+			if time.Now().Second()%2 == 0 {
+				status = healthpb.HealthCheckResponse_NOT_SERVING
+			}
+
+			healthServer.SetServingStatus(userV1.UserService_ServiceDesc.ServiceName, status)
+			healthServer.SetServingStatus("", status)
+
+			time.Sleep(1 * time.Second)
+		}
+	}()
+
+	// -------------------------------------------------------------------------
+	// Register gRPC services
+	// -------------------------------------------------------------------------
+	grpcServer := grpc.NewServer()
+	userV1.RegisterUserServiceServer(grpcServer, &s)
+	healthpb.RegisterHealthServer(grpcServer, healthServer)
 	reflection.Register(grpcServer)
 
-	listener, err := net.Listen("tcp", config.GRPCServerAddress)
+	// -------------------------------------------------------------------------
+	// Start Grpc Server
+	// -------------------------------------------------------------------------
+	listener, err := net.Listen("tcp", cfg.Grpc.Api)
 	if err != nil {
-		log.Fatal().Err(err).Msg("cannot create listener")
+		log.Error(ctx, "failed to listen", "msg", err)
 	}
 
+	waitGroup, ctx := errgroup.WithContext(ctx)
 	waitGroup.Go(func() error {
-		log.Info().Msgf("start gRPC server at %s", listener.Addr().String())
+		log.Info(ctx, "start gRPC server", "address", listener.Addr().String())
 
 		err = grpcServer.Serve(listener)
 		if err != nil {
 			if errors.Is(err, grpc.ErrServerStopped) {
 				return nil
 			}
-			log.Error().Err(err).Msg("gRPC server failed to serve")
+			log.Error(ctx, "gRPC server failed to serve", err)
 			return err
 		}
 
@@ -203,10 +213,10 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 
 	waitGroup.Go(func() error {
 		<-ctx.Done()
-		log.Info().Msg("graceful shutdown gRPC server")
+		log.Info(ctx, "graceful shutdown gRPC server")
 
 		grpcServer.GracefulStop()
-		log.Info().Msg("gRPC server is stopped")
+		log.Info(ctx, "gRPC server is stopped")
 
 		return nil
 	})

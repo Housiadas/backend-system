@@ -10,7 +10,8 @@ type Config struct {
 	App     App
 	Version Version
 	DB      DB
-	Server  Server
+	Http    Http
+	Grpc    Grpc
 	Auth    Auth
 	Kafka   Kafka
 	Tempo   Tempo

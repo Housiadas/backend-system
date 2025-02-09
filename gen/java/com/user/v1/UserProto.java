@@ -30,6 +30,16 @@ public final class UserProto {
   static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_user_v1_User_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_user_v1_GetUserByIdRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_user_v1_GetUserByIdRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_user_v1_GetUserByIdResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_user_v1_GetUserByIdResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -48,10 +58,13 @@ public final class UserProto {
       "nabled\022=\n\014date_created\030\010 \001(\0132\032.google.pr" +
       "otobuf.TimestampR\013dateCreated\022=\n\014date_up" +
       "dated\030\t \001(\0132\032.google.protobuf.TimestampR" +
-      "\013dateUpdatedB\206\001\n\013com.user.v1B\tUserProtoP" +
-      "\001Z/github.com/Housiadas/backend-system/g" +
-      "en/user/v1\242\002\003UXX\252\002\007User.V1\312\002\007User\\V1\342\002\023U" +
-      "ser\\V1\\GPBMetadata\352\002\010User::V1b\006proto3"
+      "\013dateUpdated\"$\n\022GetUserByIdRequest\022\016\n\002id" +
+      "\030\001 \001(\tR\002id\"8\n\023GetUserByIdResponse\022!\n\004use" +
+      "r\030\001 \001(\0132\r.user.v1.UserR\004userB\206\001\n\013com.use" +
+      "r.v1B\tUserProtoP\001Z/github.com/Housiadas/" +
+      "backend-system/gen/user/v1\242\002\003UXX\252\002\007User." +
+      "V1\312\002\007User\\V1\342\002\023User\\V1\\GPBMetadata\352\002\010Use" +
+      "r::V1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -64,6 +77,18 @@ public final class UserProto {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_user_v1_User_descriptor,
         new java.lang.String[] { "Id", "Name", "Email", "Roles", "PasswordHash", "Department", "Enabled", "DateCreated", "DateUpdated", });
+    internal_static_user_v1_GetUserByIdRequest_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_user_v1_GetUserByIdRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_user_v1_GetUserByIdRequest_descriptor,
+        new java.lang.String[] { "Id", });
+    internal_static_user_v1_GetUserByIdResponse_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_user_v1_GetUserByIdResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_user_v1_GetUserByIdResponse_descriptor,
+        new java.lang.String[] { "User", });
     descriptor.resolveAllFeaturesImmutable();
     com.google.protobuf.TimestampProto.getDescriptor();
   }

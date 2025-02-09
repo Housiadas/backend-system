@@ -8,13 +8,14 @@ import (
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
 	"github.com/Housiadas/backend-system/app/domain/tranapp"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
-	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/foundation/logger"
+	userV1 "github.com/Housiadas/backend-system/gen/go/github.com/Housiadas/backend-system/gen/user/v1"
 )
 
 type Server struct {
+	userV1.UnimplementedUserServiceServer
 	ServiceName string
 	Build       string
 	DB          *sqlx.DB
@@ -34,7 +35,6 @@ type App struct {
 
 // Business represents the core business layer.
 type Business struct {
-	Auth    *authbus.Auth
 	User    *userbus.Business
 	Product *productbus.Business
 }
