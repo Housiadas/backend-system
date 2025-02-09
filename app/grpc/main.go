@@ -2,19 +2,20 @@ package main
 
 import (
 	"context"
+	"errors"
 	"expvar"
 	"fmt"
-	"net/http"
+	userv1 "github.com/Housiadas/backend-system/gen/go/github.com/Housiadas/backend-system/gen/user/v1"
+	"google.golang.org/grpc"
+	"net"
 	"os"
-	"os/signal"
 	"runtime"
-	"syscall"
 
 	"github.com/Housiadas/backend-system/app/domain/productapp"
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
 	"github.com/Housiadas/backend-system/app/domain/tranapp"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
-	"github.com/Housiadas/backend-system/app/http/handler"
+	"github.com/Housiadas/backend-system/app/grpc/server"
 	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/domain/authbus"
@@ -23,7 +24,6 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/business/web"
-	"github.com/Housiadas/backend-system/business/web/mid"
 	_ "github.com/Housiadas/backend-system/docs"
 	"github.com/Housiadas/backend-system/foundation/keystore"
 	"github.com/Housiadas/backend-system/foundation/logger"
@@ -157,74 +157,59 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	log.Info(ctx, "startup", "status", "API server starting")
 
 	// Initialize handler
-	h := handler.Handler{
+	s := server.Server{
 		ServiceName: cfg.App.Name,
 		Build:       build,
-		Cors:        cfg.Cors,
 		DB:          db,
 		Log:         log,
 		Tracer:      tracer,
-		Web: handler.Web{
-			Mid: mid.New(
-				mid.Business{
-					Auth:    authBus,
-					User:    userBus,
-					Product: productBus,
-				},
-				log,
-				tracer,
-				sqldb.NewBeginner(db),
-			),
-			Res: web.NewRespond(log),
-		},
-		App: handler.App{
+		App: server.App{
 			User:    userapp.NewApp(userBus, authBus),
 			Product: productapp.NewApp(productBus),
 			System:  systemapp.NewApp(cfg.Version.Build, log, db),
 			Tx:      tranapp.NewApp(userBus, productBus),
 		},
-		Business: handler.Business{
+		Business: server.Business{
 			Auth:    authBus,
 			User:    userBus,
 			Product: productBus,
 		},
 	}
 
-	api := http.Server{
-		Addr:         cfg.Server.Api,
-		Handler:      h.Routes(),
-		ReadTimeout:  cfg.Server.ReadTimeout,
-		WriteTimeout: cfg.Server.WriteTimeout,
-		IdleTimeout:  cfg.Server.IdleTimeout,
-		ErrorLog:     logger.NewStdLogger(log, logger.LevelError),
+	gprcLogger := grpc.UnaryInterceptor(gapi.GrpcLogger)
+	grpcServer := grpc.NewServer(gprcLogger)
+	userv1.File_user_v1_user_service_proto(grpcServer, s)
+	reflection.Register(grpcServer)
+
+	listener, err := net.Listen("tcp", config.GRPCServerAddress)
+	if err != nil {
+		log.Fatal().Err(err).Msg("cannot create listener")
 	}
 
-	serverErrors := make(chan error, 1)
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
+	waitGroup.Go(func() error {
+		log.Info().Msgf("start gRPC server at %s", listener.Addr().String())
 
-	go func() {
-		log.Info(ctx, "startup", "status", "API server started", "host", api.Addr)
-		serverErrors <- api.ListenAndServe()
-	}()
-
-	// Shutdown
-	select {
-	case err := <-serverErrors:
-		return fmt.Errorf("server error: %w", err)
-
-	case sig := <-shutdown:
-		log.Info(ctx, "shutdown", "status", "shutdown started", "signal", sig)
-		defer log.Info(ctx, "shutdown", "status", "shutdown complete", "signal", sig)
-
-		ctx, cancel := context.WithTimeout(ctx, cfg.Server.ShutdownTimeout)
-		defer cancel()
-
-		if err := api.Shutdown(ctx); err != nil {
-			api.Close()
-			return fmt.Errorf("could not stop server gracefully: %w", err)
+		err = grpcServer.Serve(listener)
+		if err != nil {
+			if errors.Is(err, grpc.ErrServerStopped) {
+				return nil
+			}
+			log.Error().Err(err).Msg("gRPC server failed to serve")
+			return err
 		}
-	}
+
+		return nil
+	})
+
+	waitGroup.Go(func() error {
+		<-ctx.Done()
+		log.Info().Msg("graceful shutdown gRPC server")
+
+		grpcServer.GracefulStop()
+		log.Info().Msg("gRPC server is stopped")
+
+		return nil
+	})
 
 	return nil
 }

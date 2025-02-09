@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package mygrpc;
+package user.v1;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/Housiadas/backend-system/protogen";
+option go_package = "github.com/Housiadas/backend-system/gen/user/v1";
 
 message User {
   string id = 1;

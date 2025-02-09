@@ -185,6 +185,30 @@ list:
 	go list -mod=mod all
 
 ## ==================
+## Buf
+## ==================
+
+## buf/init: Buf initialize configuration
+.PHONY: buf/init
+buf/init:
+	buf config init
+
+## buf/lint: Buf linter
+.PHONY: buf/lint
+buf/lint:
+	buf lint .
+
+## buf/format: Format protobuf
+.PHONY: buf/generate
+buf/format:
+	buf format .
+
+## buf/generate: Generate protobuf
+.PHONY: buf/generate
+buf/generate:
+	buf generate .
+
+## ==================
 ## Utils
 ## ==================
 
@@ -192,14 +216,6 @@ list:
 .PHONY: go/mock/store
 go/mock/store:
 	mockgen -package mockdb -destination business/db/mock/store.go $(APP_MODULE)/business/db Store
-
-## proto: Compile protobuf files
-.PHONY: proto
-proto:
-	rm -f protogen/*.go
-	protoc --proto_path=proto --go_out=./protogen --go_opt=paths=source_relative \
-	--go-grpc_out=./protogen --go-grpc_opt=paths=source_relative \
-	proto/*.proto
 
 # swagger: Generate swagger docs
 .PHONY: swagger

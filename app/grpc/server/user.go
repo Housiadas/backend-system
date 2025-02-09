@@ -8,51 +8,48 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/Housiadas/backend-system/app/domain/userapp"
-	"github.com/Housiadas/backend-system/protogen"
+	userv1 "github.com/Housiadas/backend-system/gen/go/github.com/Housiadas/backend-system/gen/user/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (s *Server) CreateUser(ctx context.Context, req *protogen.CreateUserRequest) (*protogen.CreateUserResponse, error) {
-	usr, err := s.App.User.Create(ctx, toAppNewUser(req))
+func (s *Server) GetUserById(
+	ctx context.Context,
+	req *userv1.GetUserRequest,
+) (*userv1.GetUserResponse, error) {
+
+	appUsr, err := s.App.User.Query(ctx, toUserQueryParams(req))
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "User not found")
+	}
+
+	protoUsr, err := toProtoUser(appUsr.Data[0])
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error creating user: %s", err)
 	}
 
-	protogenUser, err := toProtogenUser(usr)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Error creating user: %s", err)
-	}
-
-	res := &protogen.CreateUserResponse{
-		User: protogenUser,
-	}
-
-	return res, nil
+	return &userv1.GetUserResponse{
+		User: protoUsr,
+	}, nil
 }
 
-func toAppNewUser(req *protogen.CreateUserRequest) userapp.NewUser {
-	return userapp.NewUser{
-		Name:            req.GetName(),
-		Email:           req.GetEmail(),
-		Roles:           req.GetRoles(),
-		Department:      req.GetDepartment(),
-		Password:        req.GetPassword(),
-		PasswordConfirm: req.GetPasswordConfirm(),
+func toUserQueryParams(req *userv1.GetUserRequest) userapp.QueryParams {
+	return userapp.QueryParams{
+		ID: req.Id,
 	}
 }
 
-func toProtogenUser(user userapp.User) (*protogen.User, error) {
+func toProtoUser(user userapp.User) (*userv1.User, error) {
 	dateCreated, err := time.Parse(time.RFC3339, user.DateCreated)
 	if err != nil {
-		return &protogen.User{}, err
+		return &userv1.User{}, err
 	}
 
 	dateUpdated, err := time.Parse(time.RFC3339, user.DateUpdated)
 	if err != nil {
-		return &protogen.User{}, err
+		return &userv1.User{}, err
 	}
 
-	return &protogen.User{
+	return &userv1.User{
 		Id:           user.ID,
 		Name:         user.Name,
 		Email:        user.Email,

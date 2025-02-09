@@ -8,7 +8,6 @@ import (
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
 	"github.com/Housiadas/backend-system/app/domain/tranapp"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
-	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
@@ -18,7 +17,6 @@ import (
 type Server struct {
 	ServiceName string
 	Build       string
-	Cors        config.CorsSettings
 	DB          *sqlx.DB
 	Log         *logger.Logger
 	Tracer      trace.Tracer
