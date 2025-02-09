@@ -16,9 +16,9 @@ DOCKER_COMPOSE_LOCAL := docker compose -f ./docker-compose.yml
 MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm migrate
 MIGRATION_DB_DSN := "postgres://housi:secret123@db:5432/housi_db?sslmode=disable"
 
-## ========
+## ==================
 ## Docker
-## ========
+## ==================
 
 ## docker/build: Build the application
 .PHONY: docker/build
@@ -192,6 +192,14 @@ list:
 .PHONY: go/mock/store
 go/mock/store:
 	mockgen -package mockdb -destination business/db/mock/store.go $(APP_MODULE)/business/db Store
+
+## proto: Compile protobuf files
+.PHONY: proto
+proto:
+	rm -f protogen/*.go
+	protoc --proto_path=proto --go_out=./protogen --go_opt=paths=source_relative \
+	--go-grpc_out=./protogen --go-grpc_opt=paths=source_relative \
+	proto/*.proto
 
 # swagger: Generate swagger docs
 .PHONY: swagger
