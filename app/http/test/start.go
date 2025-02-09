@@ -74,7 +74,7 @@ func StartTest(t *testing.T, testName string) (*Test, error) {
 			Res: web.NewRespond(db.Log),
 		},
 		App: handler.App{
-			User:    userapp.NewApp(db.BusDomain.User, auth),
+			User:    userapp.NewAppWithAuth(db.BusDomain.User, auth),
 			Product: productapp.NewApp(db.BusDomain.Product),
 			System:  systemapp.NewApp("Test version", db.Log, db.DB),
 			Tx:      tranapp.NewApp(db.BusDomain.User, db.BusDomain.Product),

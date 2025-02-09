@@ -4,52 +4,35 @@ import (
 	"context"
 	"expvar"
 	"fmt"
-	"net/http"
+	"net"
 	"os"
-	"os/signal"
 	"runtime"
-	"syscall"
+	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
 
 	"github.com/Housiadas/backend-system/app/domain/productapp"
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
 	"github.com/Housiadas/backend-system/app/domain/tranapp"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
-	"github.com/Housiadas/backend-system/app/http/handler"
+	"github.com/Housiadas/backend-system/app/grpc/server"
 	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/data/sqldb"
-	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus/stores/productdb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/business/web"
-	"github.com/Housiadas/backend-system/business/web/mid"
-	_ "github.com/Housiadas/backend-system/docs"
-	"github.com/Housiadas/backend-system/foundation/debug"
-	"github.com/Housiadas/backend-system/foundation/kafka"
-	"github.com/Housiadas/backend-system/foundation/keystore"
 	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/Housiadas/backend-system/foundation/otel"
+	userV1 "github.com/Housiadas/backend-system/gen/go/github.com/Housiadas/backend-system/gen/user/v1"
 )
 
 var build = "develop"
 
-// @title           Backend System
-// @description     This is a backend system with various technologies.
-//
-// @contact.name	API Support
-// @contact.url		http://www.swagger.io/support
-// @contact.email	support@swagger.io
-//
-// @license.name	Apache 2.0
-// @license.url		http://www.apache.org/licenses/LICENSE-2.0.html
-//
-//	@query.collection.format multi
-//
-// @externalDocs.description  OpenAPI
-//
-// @externalDocs.url	https://swagger.io/resources/open-api/
-// @host				localhost:4000
 func main() {
 	// -------------------------------------------------------------------------
 	// Initialize Configuration
@@ -61,7 +44,7 @@ func main() {
 	}
 	cfg.Version = config.Version{
 		Build: build,
-		Desc:  "API",
+		Desc:  "gRPC",
 	}
 
 	// -------------------------------------------------------------------------
@@ -80,7 +63,7 @@ func main() {
 	requestIDFn := func(ctx context.Context) string {
 		return web.GetRequestID(ctx)
 	}
-	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "API", traceIDFn, requestIDFn, events)
+	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "gRPC", traceIDFn, requestIDFn, events)
 
 	// -------------------------------------------------------------------------
 	// Run the application
@@ -126,23 +109,6 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	defer db.Close()
 
 	// -------------------------------------------------------------------------
-	// Initialize Kafka Producer
-	// -------------------------------------------------------------------------
-	log.Info(ctx, "startup", "status", "initializing kafka support")
-
-	producer, err := kafka.NewProducer(kafka.ProducerConfig{
-		Brokers:          cfg.Kafka.Brokers,
-		LogLevel:         cfg.Kafka.LogLevel,
-		AddressFamily:    cfg.Kafka.AddressFamily,
-		MaxMessageBytes:  cfg.Kafka.MaxMessageBytes,
-		SecurityProtocol: cfg.Kafka.SecurityProtocol,
-	})
-	if err != nil {
-		return fmt.Errorf("creating kafka producer: %w", err)
-	}
-	defer producer.Close()
-
-	// -------------------------------------------------------------------------
 	// Start Tracing Support
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing tracing support")
@@ -173,104 +139,64 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db))
 	productBus := productbus.NewBusiness(log, userBus, productdb.NewStore(log, db))
 
-	// Load the private keys files from disk. We can assume some system api like
-	// Vault has created these files already. How that happens is not our concern.
-	ks := keystore.New()
-	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
-		return fmt.Errorf("reading keys: %w", err)
-	}
-	authBus := authbus.New(authbus.Config{
-		Log:       log,
-		DB:        db,
-		KeyLookup: ks,
-		Userbus:   userBus,
-	})
-
-	// -------------------------------------------------------------------------
-	// Start Debug Http Service
-	// -------------------------------------------------------------------------
-	go func() {
-		log.Info(ctx, "startup", "status", "Debug server starting", "host", cfg.Http.Debug)
-
-		if err := http.ListenAndServe(cfg.Http.Debug, debug.Mux()); err != nil {
-			log.Error(ctx, "shutdown", "status", "debug v1 router closed", "host", cfg.Http.Debug, "msg", err)
-		}
-	}()
-
-	// -------------------------------------------------------------------------
-	// Start API Http Server
-	// -------------------------------------------------------------------------
-	log.Info(ctx, "startup", "status", "API server starting")
-
-	// Initialize handler
-	h := handler.Handler{
+	// Initialize Server Struct
+	s := server.Server{
 		ServiceName: cfg.App.Name,
 		Build:       build,
-		Cors:        cfg.Cors,
 		DB:          db,
 		Log:         log,
 		Tracer:      tracer,
-		Web: handler.Web{
-			Mid: mid.New(
-				mid.Business{
-					Auth:    authBus,
-					User:    userBus,
-					Product: productBus,
-				},
-				log,
-				tracer,
-				sqldb.NewBeginner(db),
-			),
-			Res: web.NewRespond(log),
-		},
-		App: handler.App{
-			User:    userapp.NewAppWithAuth(userBus, authBus),
+		App: server.App{
+			User:    userapp.NewApp(userBus),
 			Product: productapp.NewApp(productBus),
 			System:  systemapp.NewApp(cfg.Version.Build, log, db),
 			Tx:      tranapp.NewApp(userBus, productBus),
 		},
-		Business: handler.Business{
-			Auth:    authBus,
+		Business: server.Business{
 			User:    userBus,
 			Product: productBus,
 		},
 	}
 
-	api := http.Server{
-		Addr:         cfg.Http.Api,
-		Handler:      h.Routes(),
-		ReadTimeout:  cfg.Http.ReadTimeout,
-		WriteTimeout: cfg.Http.WriteTimeout,
-		IdleTimeout:  cfg.Http.IdleTimeout,
-		ErrorLog:     logger.NewStdLogger(log, logger.LevelError),
-	}
-
-	serverErrors := make(chan error, 1)
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
-
+	// -------------------------------------------------------------------------
+	// Health Server
+	// -------------------------------------------------------------------------
+	healthServer := health.NewServer()
 	go func() {
-		log.Info(ctx, "startup", "status", "API server started", "host", api.Addr)
-		serverErrors <- api.ListenAndServe()
+		for {
+			status := healthpb.HealthCheckResponse_SERVING
+			// Check if user Service is valid
+			if time.Now().Second()%2 == 0 {
+				status = healthpb.HealthCheckResponse_NOT_SERVING
+			}
+
+			healthServer.SetServingStatus(userV1.UserService_ServiceDesc.ServiceName, status)
+			healthServer.SetServingStatus("", status)
+
+			time.Sleep(1 * time.Second)
+		}
 	}()
 
-	// Shutdown
-	select {
-	case err := <-serverErrors:
-		return fmt.Errorf("server error: %w", err)
+	// -------------------------------------------------------------------------
+	// Register gRPC services
+	// -------------------------------------------------------------------------
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(s.GrpcInterceptor),
+	)
+	userV1.RegisterUserServiceServer(grpcServer, &s)
+	healthpb.RegisterHealthServer(grpcServer, healthServer)
+	reflection.Register(grpcServer)
 
-	case sig := <-shutdown:
-		log.Info(ctx, "shutdown", "status", "shutdown started", "signal", sig)
-		defer log.Info(ctx, "shutdown", "status", "shutdown complete", "signal", sig)
-
-		ctx, cancel := context.WithTimeout(ctx, cfg.Http.ShutdownTimeout)
-		defer cancel()
-
-		if err := api.Shutdown(ctx); err != nil {
-			api.Close()
-			return fmt.Errorf("could not stop server gracefully: %w", err)
-		}
+	// -------------------------------------------------------------------------
+	// Start Grpc Server
+	// -------------------------------------------------------------------------
+	listener, err := net.Listen("tcp", cfg.Grpc.Api)
+	if err != nil {
+		log.Error(ctx, "failed to listen", "msg", err)
 	}
 
-	return nil
+	log.Info(ctx, "start gRPC server", "address", listener.Addr().String())
+
+	// todo add graceful shutdown
+	return grpcServer.Serve(listener)
 }

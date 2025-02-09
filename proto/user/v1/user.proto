@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package user.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/Housiadas/backend-system/gen/user/v1";
+
+message User {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  repeated string roles = 4;
+  bytes password_hash = 5;
+  string department = 6;
+  bool enabled = 7;
+  google.protobuf.Timestamp date_created = 8;
+  google.protobuf.Timestamp date_updated = 9;
+}
+
+message GetUserByIdRequest {
+  string id = 1;
+}
+
+message GetUserByIdResponse {
+  User user = 1;
+}

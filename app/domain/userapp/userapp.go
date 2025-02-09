@@ -22,7 +22,14 @@ type App struct {
 }
 
 // NewApp constructs a user app API for use.
-func NewApp(userBus *userbus.Business, authbus *authbus.Auth) *App {
+func NewApp(userBus *userbus.Business) *App {
+	return &App{
+		userBus: userBus,
+	}
+}
+
+// NewAppWithAuth constructs a user app API for use.
+func NewAppWithAuth(userBus *userbus.Business, authbus *authbus.Auth) *App {
 	return &App{
 		authbus: authbus,
 		userBus: userBus,
