@@ -10,10 +10,6 @@ import (
 	"runtime"
 	"syscall"
 
-	"github.com/Housiadas/backend-system/app/domain/productapp"
-	"github.com/Housiadas/backend-system/app/domain/systemapp"
-	"github.com/Housiadas/backend-system/app/domain/tranapp"
-	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/app/http/handler"
 	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/data/sqldb"
@@ -23,7 +19,6 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/business/web"
-	"github.com/Housiadas/backend-system/business/web/mid"
 	_ "github.com/Housiadas/backend-system/docs"
 	"github.com/Housiadas/backend-system/foundation/debug"
 	"github.com/Housiadas/backend-system/foundation/kafka"
@@ -203,38 +198,17 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	log.Info(ctx, "startup", "status", "API server starting")
 
 	// Initialize handler
-	h := handler.Handler{
+	h := handler.New(handler.Config{
 		ServiceName: cfg.App.Name,
 		Build:       build,
 		Cors:        cfg.Cors,
 		DB:          db,
 		Log:         log,
 		Tracer:      tracer,
-		Web: handler.Web{
-			Mid: mid.New(
-				mid.Business{
-					Auth:    authBus,
-					User:    userBus,
-					Product: productBus,
-				},
-				log,
-				tracer,
-				sqldb.NewBeginner(db),
-			),
-			Res: web.NewRespond(log),
-		},
-		App: handler.App{
-			User:    userapp.NewAppWithAuth(userBus, authBus),
-			Product: productapp.NewApp(productBus),
-			System:  systemapp.NewApp(cfg.Version.Build, log, db),
-			Tx:      tranapp.NewApp(userBus, productBus),
-		},
-		Business: handler.Business{
-			Auth:    authBus,
-			User:    userBus,
-			Product: productBus,
-		},
-	}
+		AuthBus:     authBus,
+		UserBus:     userBus,
+		ProductBus:  productBus,
+	})
 
 	api := http.Server{
 		Addr:         cfg.Http.Api,

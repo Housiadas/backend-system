@@ -37,12 +37,25 @@ type Business struct {
 	Product *productbus.Business
 }
 
-func New(b Business, l *logger.Logger, t trace.Tracer, tx *sqldb.DBBeginner) *Mid {
+type Config struct {
+	Log     *logger.Logger
+	Tracer  trace.Tracer
+	Tx      *sqldb.DBBeginner
+	Auth    *authbus.Auth
+	User    *userbus.Business
+	Product *productbus.Business
+}
+
+func New(cfg Config) *Mid {
 	return &Mid{
-		Bus:    b,
-		Log:    l,
-		Tracer: t,
-		Tx:     tx,
+		Bus: Business{
+			Auth:    cfg.Auth,
+			User:    cfg.User,
+			Product: cfg.Product,
+		},
+		Log:    cfg.Log,
+		Tracer: cfg.Tracer,
+		Tx:     cfg.Tx,
 	}
 }
 

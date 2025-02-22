@@ -10,8 +10,8 @@ import (
 )
 
 // Seed loads test data into the database.
-func Seed(cfg sqldb.Config) error {
-	db, err := sqldb.Open(cfg)
+func (cmd *Command) Seed() error {
+	db, err := sqldb.Open(cmd.DB)
 	if err != nil {
 		return fmt.Errorf("connect database: %w", err)
 	}

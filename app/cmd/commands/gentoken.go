@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"os"
 	"time"
 
@@ -14,13 +13,13 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
+	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"github.com/Housiadas/backend-system/foundation/keystore"
-	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
 // GenToken generates a JWT for the specified user.
-func GenToken(log *logger.Logger, dbConfig sqldb.Config, keyPath string, userID uuid.UUID) error {
-	db, err := sqldb.Open(dbConfig)
+func (cmd *Command) GenToken(userID uuid.UUID) error {
+	db, err := sqldb.Open(cmd.DB)
 	if err != nil {
 		return fmt.Errorf("connect database: %w", err)
 	}
@@ -29,7 +28,7 @@ func GenToken(log *logger.Logger, dbConfig sqldb.Config, keyPath string, userID 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db))
+	userBus := userbus.NewBusiness(cmd.Log, userdb.NewStore(cmd.Log, db))
 
 	usr, err := userBus.QueryByID(ctx, userID)
 	if err != nil {
@@ -37,12 +36,12 @@ func GenToken(log *logger.Logger, dbConfig sqldb.Config, keyPath string, userID 
 	}
 
 	ks := keystore.New()
-	if err := ks.LoadRSAKeys(os.DirFS(keyPath)); err != nil {
+	if err := ks.LoadRSAKeys(os.DirFS(cmd.Auth.KeysFolder)); err != nil {
 		return fmt.Errorf("reading keys: %w", err)
 	}
 
 	authCfg := authbus.Config{
-		Log:       log,
+		Log:       cmd.Log,
 		DB:        db,
 		KeyLookup: ks,
 		Userbus:   userBus,

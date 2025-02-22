@@ -10,7 +10,7 @@ import (
 )
 
 // GenKey creates a x509 private/public key for authapi tokens.
-func GenKey() error {
+func (cmd *Command) GenKey() error {
 
 	// Generate a new private key.
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
