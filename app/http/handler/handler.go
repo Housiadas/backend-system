@@ -9,6 +9,7 @@ import (
 	"github.com/Housiadas/backend-system/app/domain/tranapp"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/business/config"
+	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
@@ -49,4 +50,50 @@ type Business struct {
 	Auth    *authbus.Auth
 	User    *userbus.Business
 	Product *productbus.Business
+}
+
+// Config represents the configuration for the handler.
+type Config struct {
+	ServiceName string
+	Build       string
+	Cors        config.CorsSettings
+	DB          *sqlx.DB
+	Log         *logger.Logger
+	Tracer      trace.Tracer
+	AuthBus     *authbus.Auth
+	UserBus     *userbus.Business
+	ProductBus  *productbus.Business
+}
+
+func New(cfg Config) *Handler {
+	return &Handler{
+		ServiceName: cfg.ServiceName,
+		Build:       cfg.Build,
+		Cors:        cfg.Cors,
+		DB:          cfg.DB,
+		Log:         cfg.Log,
+		Tracer:      cfg.Tracer,
+		Web: Web{
+			Mid: mid.New(mid.Config{
+				Log:     cfg.Log,
+				Tracer:  cfg.Tracer,
+				Tx:      sqldb.NewBeginner(cfg.DB),
+				Auth:    cfg.AuthBus,
+				User:    cfg.UserBus,
+				Product: cfg.ProductBus,
+			}),
+			Res: web.NewRespond(cfg.Log),
+		},
+		App: App{
+			User:    userapp.NewAppWithAuth(cfg.UserBus, cfg.AuthBus),
+			Product: productapp.NewApp(cfg.ProductBus),
+			System:  systemapp.NewApp(cfg.Build, cfg.Log, cfg.DB),
+			Tx:      tranapp.NewApp(cfg.UserBus, cfg.ProductBus),
+		},
+		Business: Business{
+			Auth:    cfg.AuthBus,
+			User:    cfg.UserBus,
+			Product: cfg.ProductBus,
+		},
+	}
 }

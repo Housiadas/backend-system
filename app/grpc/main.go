@@ -14,10 +14,6 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/Housiadas/backend-system/app/domain/productapp"
-	"github.com/Housiadas/backend-system/app/domain/systemapp"
-	"github.com/Housiadas/backend-system/app/domain/tranapp"
-	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/app/grpc/server"
 	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/data/sqldb"
@@ -140,23 +136,15 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	productBus := productbus.NewBusiness(log, userBus, productdb.NewStore(log, db))
 
 	// Initialize Server Struct
-	s := server.Server{
+	s := server.New(server.Config{
 		ServiceName: cfg.App.Name,
 		Build:       build,
 		DB:          db,
 		Log:         log,
 		Tracer:      tracer,
-		App: server.App{
-			User:    userapp.NewApp(userBus),
-			Product: productapp.NewApp(productBus),
-			System:  systemapp.NewApp(cfg.Version.Build, log, db),
-			Tx:      tranapp.NewApp(userBus, productBus),
-		},
-		Business: server.Business{
-			User:    userBus,
-			Product: productBus,
-		},
-	}
+		UserBus:     userBus,
+		ProductBus:  productBus,
+	})
 
 	// -------------------------------------------------------------------------
 	// Health Server
@@ -183,7 +171,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(s.GrpcInterceptor),
 	)
-	userV1.RegisterUserServiceServer(grpcServer, &s)
+	userV1.RegisterUserServiceServer(grpcServer, s)
 	healthpb.RegisterHealthServer(grpcServer, healthServer)
 	reflection.Register(grpcServer)
 

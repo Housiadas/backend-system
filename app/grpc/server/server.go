@@ -38,3 +38,33 @@ type Business struct {
 	User    *userbus.Business
 	Product *productbus.Business
 }
+
+type Config struct {
+	ServiceName string
+	Build       string
+	DB          *sqlx.DB
+	Log         *logger.Logger
+	Tracer      trace.Tracer
+	UserBus     *userbus.Business
+	ProductBus  *productbus.Business
+}
+
+func New(cfg Config) *Server {
+	return &Server{
+		ServiceName: cfg.ServiceName,
+		Build:       cfg.Build,
+		DB:          cfg.DB,
+		Log:         cfg.Log,
+		Tracer:      cfg.Tracer,
+		App: App{
+			User:    userapp.NewApp(cfg.UserBus),
+			Product: productapp.NewApp(cfg.ProductBus),
+			System:  systemapp.NewApp(cfg.Build, cfg.Log, cfg.DB),
+			Tx:      tranapp.NewApp(cfg.UserBus, cfg.ProductBus),
+		},
+		Business: Business{
+			User:    cfg.UserBus,
+			Product: cfg.ProductBus,
+		},
+	}
+}

@@ -5,19 +5,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Housiadas/backend-system/app/domain/productapp"
-	"github.com/Housiadas/backend-system/app/domain/systemapp"
-	"github.com/Housiadas/backend-system/app/domain/tranapp"
-	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/app/http/handler"
 	cfg "github.com/Housiadas/backend-system/business/config"
-	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/business/sys/dbtest"
-	"github.com/Housiadas/backend-system/business/web"
-	"github.com/Housiadas/backend-system/business/web/mid"
 	"github.com/Housiadas/backend-system/foundation/otel"
 )
 
@@ -53,38 +46,17 @@ func StartTest(t *testing.T, testName string) (*Test, error) {
 	tracer := traceProvider.Tracer("Service Name")
 
 	// Initialize handler
-	h := handler.Handler{
+	h := handler.New(handler.Config{
 		ServiceName: "Test Service Name",
 		Build:       "Test",
 		Cors:        cfg.CorsSettings{},
 		DB:          db.DB,
 		Log:         db.Log,
 		Tracer:      tracer,
-		Web: handler.Web{
-			Mid: mid.New(
-				mid.Business{
-					Auth:    auth,
-					User:    db.BusDomain.User,
-					Product: db.BusDomain.Product,
-				},
-				db.Log,
-				tracer,
-				sqldb.NewBeginner(db.DB),
-			),
-			Res: web.NewRespond(db.Log),
-		},
-		App: handler.App{
-			User:    userapp.NewAppWithAuth(db.BusDomain.User, auth),
-			Product: productapp.NewApp(db.BusDomain.Product),
-			System:  systemapp.NewApp("Test version", db.Log, db.DB),
-			Tx:      tranapp.NewApp(db.BusDomain.User, db.BusDomain.Product),
-		},
-		Business: handler.Business{
-			Auth:    auth,
-			User:    db.BusDomain.User,
-			Product: db.BusDomain.Product,
-		},
-	}
+		AuthBus:     auth,
+		UserBus:     db.BusDomain.User,
+		ProductBus:  db.BusDomain.Product,
+	})
 
 	return New(db, auth, h.Routes()), nil
 }
