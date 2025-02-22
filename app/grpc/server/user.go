@@ -22,6 +22,10 @@ func (s *Server) GetUserById(
 		return nil, status.Errorf(codes.NotFound, "User not found")
 	}
 
+	if len(appUsr.Data) == 0 {
+		return nil, status.Errorf(codes.NotFound, "User not found")
+	}
+
 	protoUsr, err := toProtoUser(appUsr.Data[0])
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error creating user: %s", err)
