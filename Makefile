@@ -16,6 +16,23 @@ DOCKER_COMPOSE_LOCAL := docker compose -f ./compose.yml
 MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm migrate
 MIGRATION_DB_DSN := "postgres://housi:secret123@db:5432/housi_db?sslmode=disable"
 
+# Tooling
+TOOLS_DIR := ./tools
+TPARSE_BINARY=bin/tparse
+TPARSE = $(TOOLS_DIR)/$(TPARSE_BINARY)
+
+## ==================
+## Tooling
+## ==================
+
+## tools/tidy: Tools tidy
+.PHONY: tools/tidy
+tools/tidy:
+	cd $(TOOLS_DIR) && go mod tidy
+
+$(TPARSE):
+	cd $(TOOLS_DIR) && go build -o $(TPARSE_BINARY) github.com/mfridman/tparse
+
 ## ==================
 ## Docker
 ## ==================
@@ -157,9 +174,8 @@ lint:
 
 ## tests: Run tests
 .PHONY: tests
-tests:
-	go install github.com/mfridman/tparse@latest
-	CGO_ENABLED=1 go test -v --cover --short --race -json ./... | tparse --all
+tests:	$(TPARSE)
+	CGO_ENABLED=1 go test -v --cover --short --race -json ./... | $(TPARSE) --all
 
 ## coverage: Inspect coverage
 .PHONY: coverage
