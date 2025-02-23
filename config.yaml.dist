@@ -9,6 +9,7 @@ http:
   shutdownTimeout: "20s"
 grpc:
   api: "localhost:9090"
+  shutdownTimeout: "20s"
 db:
   name: "housi_db"
   user: "housi"

@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/signal"
 	"runtime"
+	"syscall"
 
 	"github.com/Housiadas/backend-system/app/grpc/server"
 	"github.com/Housiadas/backend-system/business/config"
@@ -128,7 +130,9 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db))
 	productBus := productbus.NewBusiness(log, userBus, productdb.NewStore(log, db))
 
-	// Initialize Server Struct
+	// -------------------------------------------------------------------------
+	// Start Grpc Server
+	// -------------------------------------------------------------------------
 	s := server.New(server.Config{
 		ServiceName: cfg.App.Name,
 		Build:       build,
@@ -139,17 +143,25 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 		ProductBus:  productBus,
 	})
 
-	// -------------------------------------------------------------------------
-	// Start Grpc Server
-	// -------------------------------------------------------------------------
+	// Register gRPC services
+	grpcServer := s.Registrar()
+
 	listener, err := net.Listen("tcp", cfg.Grpc.Api)
 	if err != nil {
 		log.Error(ctx, "failed to listen", "msg", err)
 	}
 
-	log.Info(ctx, "start gRPC server", "address", listener.Addr().String())
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGKILL)
+	defer cancel()
 
-	// todo add graceful shutdown
-	grpcServer := s.Registrar()
-	return grpcServer.Serve(listener)
+	go func() {
+		log.Info(ctx, "start gRPC server", "address", listener.Addr().String())
+		if err := grpcServer.Serve(listener); err != nil {
+			log.Error(ctx, "Failed to serve gRPC server", err)
+		}
+	}()
+
+	<-ctx.Done()
+	grpcServer.GracefulStop()
+	return nil
 }
