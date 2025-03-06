@@ -6,7 +6,6 @@ GO_VERSION := 1.24
 UID := $(shell id -u)
 GID := $(shell id -g)
 
-APP_MODULE := github.com/Housiadas/backend-system
 INPUT ?= $(shell bash -c 'read -p "Insert name: " name; echo $$name')
 CURRENT_TIME := $(shell date --iso-8601=seconds)
 GIT_VERSION := $(shell git describe --always --dirty --tags --long)
@@ -15,23 +14,6 @@ LINKER_FLAGS := "-s -X main.buildTime=${CURRENT_TIME} -X main.version=${GIT_VERS
 DOCKER_COMPOSE_LOCAL := docker compose -f ./compose.yml
 MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm migrate
 MIGRATION_DB_DSN := "postgres://housi:secret123@db:5432/housi_db?sslmode=disable"
-
-# Tooling
-TOOLS_DIR := ./tools
-TPARSE_BINARY=bin/tparse
-TPARSE = $(TOOLS_DIR)/$(TPARSE_BINARY)
-
-## ==================
-## Tooling
-## ==================
-
-## tools/tidy: Tools tidy
-.PHONY: tools/tidy
-tools/tidy:
-	cd $(TOOLS_DIR) && go mod tidy
-
-$(TPARSE):
-	cd $(TOOLS_DIR) && go build -o $(TPARSE_BINARY) github.com/mfridman/tparse
 
 ## ==================
 ## Docker
@@ -174,8 +156,8 @@ lint:
 
 ## tests: Run tests
 .PHONY: tests
-tests:	$(TPARSE)
-	CGO_ENABLED=1 go test -v -cover -short -race -json -p 4 ./... | $(TPARSE) --all
+tests:
+	CGO_ENABLED=1 go test -v -cover -short -race -json -p 4 ./... | go tool tparse --all
 
 ## coverage: Inspect coverage
 .PHONY: coverage
@@ -232,31 +214,39 @@ list:
 ## buf/init: Buf initialize configuration
 .PHONY: buf/init
 buf/init:
-	buf config init
+	go tool buf config init
 
 ## buf/lint: Buf linter
 .PHONY: buf/lint
 buf/lint:
-	buf lint .
+	go tool buf lint .
 
 ## buf/format: Format protobuf
 .PHONY: buf/generate
 buf/format:
-	buf format .
+	go tool buf format .
 
 ## buf/generate: Generate protobuf
 .PHONY: buf/generate
 buf/generate:
-	buf generate .
+	go tool buf generate .
+
+## ==================
+## Tooling
+## ==================
+
+tools/install:
+	go install tool
+
+tools/list:
+	go tool
+
+tools/update:
+	go get -u tool
 
 ## ==================
 ## Utils
 ## ==================
-
-## go/mock/store: Go mock Store interface
-.PHONY: go/mock/store
-go/mock/store:
-	mockgen -package mockdb -destination business/db/mock/store.go $(APP_MODULE)/business/db Store
 
 # swagger: Generate swagger docs
 .PHONY: swagger
