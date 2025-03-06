@@ -114,6 +114,7 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jdx/go-netrc v1.0.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
+	github.com/kisielk/errcheck v1.9.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
@@ -207,5 +208,6 @@ require (
 
 tool (
 	github.com/bufbuild/buf/cmd/buf
+	github.com/kisielk/errcheck
 	github.com/mfridman/tparse
 )

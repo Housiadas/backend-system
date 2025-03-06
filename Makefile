@@ -154,6 +154,11 @@ lint:
 	go vet ./...
 	staticcheck ./...
 
+## errcheck: Check for unhandled errors
+.PHONY: errcheck
+errcheck:
+	go tool errcheck ./...
+
 ## tests: Run tests
 .PHONY: tests
 tests:
