@@ -1,5 +1,8 @@
 package config
 
+import "time"
+
 type Grpc struct {
-	Api string
+	Api             string
+	ShutdownTimeout time.Duration
 }
