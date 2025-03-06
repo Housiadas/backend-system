@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"google.golang.org/protobuf/testing/protocmp"
 
 	testPck "github.com/Housiadas/backend-system/app/grpc/test"
 	userV1 "github.com/Housiadas/backend-system/gen/go/github.com/Housiadas/backend-system/gen/user/v1"
@@ -32,7 +33,7 @@ func Test_GRPC_User_Query_BY_ID(t *testing.T) {
 			GotResp: &userV1.User{},
 			ExpResp: toProtoUser(sd.Users[0].User),
 			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
+				return cmp.Diff(got, exp, protocmp.Transform())
 			},
 		},
 	}

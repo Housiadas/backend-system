@@ -175,7 +175,7 @@ lint:
 ## tests: Run tests
 .PHONY: tests
 tests:	$(TPARSE)
-	CGO_ENABLED=1 go test -v --cover --short --race -json ./... | $(TPARSE) --all
+	CGO_ENABLED=1 go test -v -cover -short -race -json -p 4 ./... | $(TPARSE) --all
 
 ## coverage: Inspect coverage
 .PHONY: coverage
