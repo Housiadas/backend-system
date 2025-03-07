@@ -8,6 +8,19 @@ definitions:
       message:
         type: string
     type: object
+  page.Metadata:
+    properties:
+      currentPage:
+        type: integer
+      firstPage:
+        type: integer
+      lastPage:
+        type: integer
+      rowsPerPage:
+        type: integer
+      total:
+        type: integer
+    type: object
   systemapp.Info:
     properties:
       GOMAXPROCS:
@@ -32,6 +45,82 @@ definitions:
       status:
         type: string
     type: object
+  userapp.NewUser:
+    properties:
+      department:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      passwordConfirm:
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+    required:
+    - email
+    - name
+    - password
+    - roles
+    type: object
+  userapp.UpdateUser:
+    properties:
+      department:
+        type: string
+      email:
+        type: string
+      enabled:
+        type: boolean
+      name:
+        type: string
+      password:
+        type: string
+      passwordConfirm:
+        type: string
+    type: object
+  userapp.UpdateUserRole:
+    properties:
+      roles:
+        items:
+          type: string
+        type: array
+    required:
+    - roles
+    type: object
+  userapp.User:
+    properties:
+      dateCreated:
+        type: string
+      dateUpdated:
+        type: string
+      department:
+        type: string
+      email:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        type: string
+      name:
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+    type: object
+  userapp.UserPageResult:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/userapp.User'
+        type: array
+      metadata:
+        $ref: '#/definitions/page.Metadata'
+    type: object
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -41,7 +130,7 @@ info:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: This is a backend system with various technologies.
+  description: This is a backend system.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -60,6 +149,8 @@ paths:
           schema:
             $ref: '#/definitions/systemapp.Info'
       summary: App Liveness
+      tags:
+      - System
   /readiness:
     get:
       consumes:
@@ -77,4 +168,136 @@ paths:
           schema:
             $ref: '#/definitions/errs.Error'
       summary: App Readiness
+      tags:
+      - System
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: Search users in database based on criteria
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userapp.UserPageResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      summary: Query Users
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      description: Create a new user
+      parameters:
+      - description: User data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/userapp.NewUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userapp.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      summary: Crete User
+      tags:
+      - User
+  /user/{user_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      summary: Delete a user
+      tags:
+      - User
+    get:
+      consumes:
+      - application/json
+      description: Search user in database by id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userapp.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      summary: Find User by id
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update an existing user
+      parameters:
+      - description: User data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/userapp.UpdateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userapp.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      summary: Update User
+      tags:
+      - User
+  /user/role/{user_id}:
+    put:
+      consumes:
+      - application/json
+      description: Update user's role
+      parameters:
+      - description: User data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/userapp.UpdateUserRole'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userapp.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      summary: Update User's role
+      tags:
+      - User
 swagger: "2.0"

@@ -30,7 +30,7 @@ import (
 var build = "develop"
 
 // @title           Backend System
-// @description     This is a backend system with various technologies.
+// @description     This is a backend system.
 //
 // @contact.name	API Support
 // @contact.url		http://www.swagger.io/support

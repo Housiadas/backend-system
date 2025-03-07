@@ -8,6 +8,7 @@ import (
 
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/business/sys/page"
 	"github.com/Housiadas/backend-system/business/sys/types/name"
 	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"github.com/Housiadas/backend-system/business/sys/validation"
@@ -83,6 +84,13 @@ func toAppUsers(users []userbus.User) []User {
 	}
 
 	return app
+}
+
+// =============================================================================
+
+type UserPageResult struct {
+	Data     []User        `json:"data"`
+	Metadata page.Metadata `json:"metadata"`
 }
 
 // =============================================================================

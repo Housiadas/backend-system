@@ -16,6 +16,7 @@ import (
 // Readiness godoc
 // @Summary      App Readiness
 // @Description  Check application's readiness
+// @Tags		 System
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  systemapp.Status
@@ -41,6 +42,7 @@ func (h *Handler) readiness(ctx context.Context, _ http.ResponseWriter, _ *http.
 // Liveness godoc
 // @Summary      App Liveness
 // @Description  Returns application's status info if the service is alive
+// @Tags		 System
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  systemapp.Info

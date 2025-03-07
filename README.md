@@ -1,24 +1,24 @@
 # Backend System
-A backend system built with Go `v1.23`.
+A backend system built with Go `v1.24`.
 
-## Setup
+## Introduction
+
+## Docker
 
 ```
-make docker/build
 make docker/up
+make docker/down
+```
+
+## Migrations
+
+```
 make db/migrate/up
+make db/migrate/down
 make go/cmd/seed
 ```
 
-## Migration
-
-```
-make db/migrate/create
-make db/migrate/up
-make db/migrate/down
-```
-
-## Testing
+## Run tests
 
 ```
 make tests
@@ -32,5 +32,3 @@ make help
 
 ## Database Schema
 We used https://dbdiagram.io to define our database structure.
-
-### Needs update!
