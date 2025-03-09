@@ -2,6 +2,16 @@
 A backend system built with Go `v1.24`.
 
 ## Introduction
+The system is separated in three main layers
+- `app` layer, represents the entry point of our application (request/response)
+- `business` layer, represents the business logic, like communication with database
+- `foundation` layer, represents core modules of the application, like logger
+
+## App Layer
+- `http`, REST API implementation
+- `gRPC` implementation
+- `cmd` commands implementation
+- `domain` contains the entry point for our business logic
 
 ## Docker
 
