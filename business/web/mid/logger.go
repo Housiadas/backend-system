@@ -21,8 +21,6 @@ func (m *Mid) Logger() func(next http.Handler) http.Handler {
 				path = fmt.Sprintf("%s?%s", path, rawQuery)
 			}
 
-			m.Log.Info(ctx, "request started", "method", method, "path", path, "remote_addr", remoteAddr)
-
 			defer func() {
 				m.Log.Info(ctx, "request completed",
 					"path", path,

@@ -15,7 +15,7 @@ func TestNewUsers(n int, role rolePck.Role) []NewUser {
 	newUsrs := make([]NewUser, n)
 
 	idx := rand.Intn(10000)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		idx++
 
 		nu := NewUser{

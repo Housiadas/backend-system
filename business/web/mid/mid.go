@@ -24,6 +24,15 @@ var (
 	group = singleflight.Group{}
 )
 
+type Config struct {
+	Log     *logger.Logger
+	Tracer  trace.Tracer
+	Tx      *sqldb.DBBeginner
+	Auth    *authbus.Auth
+	User    *userbus.Business
+	Product *productbus.Business
+}
+
 type Mid struct {
 	Bus    Business
 	Log    *logger.Logger
@@ -32,15 +41,6 @@ type Mid struct {
 }
 
 type Business struct {
-	Auth    *authbus.Auth
-	User    *userbus.Business
-	Product *productbus.Business
-}
-
-type Config struct {
-	Log     *logger.Logger
-	Tracer  trace.Tracer
-	Tx      *sqldb.DBBeginner
 	Auth    *authbus.Auth
 	User    *userbus.Business
 	Product *productbus.Business
@@ -68,8 +68,8 @@ func (m *Mid) Error(w http.ResponseWriter, err error, statusCode int) {
 	return
 }
 
-// ResponseRecorder a custom http.ResponseWriter to capture the response
-// before it's sent to the client. We are capturing the result of the handlers to the middleware
+// ResponseRecorder a custom http.ResponseWriter to capture the response before it's sent to the client.
+// We are capturing the result of the handlers to the middleware
 type ResponseRecorder struct {
 	http.ResponseWriter
 	statusCode int
@@ -81,7 +81,8 @@ func (rec *ResponseRecorder) WriteHeader(code int) {
 	rec.ResponseWriter.WriteHeader(code)
 }
 
+// Capture the response body
 func (rec *ResponseRecorder) Write(b []byte) (int, error) {
-	rec.body.Write(b) // Capture the response body
+	rec.body.Write(b)
 	return rec.ResponseWriter.Write(b)
 }
