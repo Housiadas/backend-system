@@ -1,5 +1,5 @@
-// Package mid provides app level mid support.
-package mid
+// Package middleware provides app level middleware support.
+package middleware
 
 import (
 	"bytes"
@@ -33,7 +33,7 @@ type Config struct {
 	Product *productbus.Business
 }
 
-type Mid struct {
+type Middleware struct {
 	Bus    Business
 	Log    *logger.Logger
 	Tracer trace.Tracer
@@ -46,8 +46,8 @@ type Business struct {
 	Product *productbus.Business
 }
 
-func New(cfg Config) *Mid {
-	return &Mid{
+func New(cfg Config) *Middleware {
+	return &Middleware{
 		Bus: Business{
 			Auth:    cfg.Auth,
 			User:    cfg.User,
@@ -59,7 +59,7 @@ func New(cfg Config) *Mid {
 	}
 }
 
-func (m *Mid) Error(w http.ResponseWriter, err error, statusCode int) {
+func (m *Middleware) Error(w http.ResponseWriter, err error, statusCode int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	if err := json.NewEncoder(w).Encode(err); err != nil {

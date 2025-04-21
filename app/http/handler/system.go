@@ -6,7 +6,7 @@ import (
 
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
 	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/business/web"
+	"github.com/Housiadas/backend-system/business/sys/web"
 )
 
 // readiness checks if the database is ready and if not will return a 500 status.

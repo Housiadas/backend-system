@@ -1,4 +1,4 @@
-package mid
+package middleware
 
 import (
 	"net/http"
@@ -10,7 +10,7 @@ import (
 
 // Recoverer recovers from panics and converts the panic to an error,
 // so it is reported in Metrics and handled in Errors.
-func (m *Mid) Recoverer() func(next http.Handler) http.Handler {
+func (m *Middleware) Recoverer() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()

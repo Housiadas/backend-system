@@ -18,7 +18,7 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/productbus/stores/productdb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
-	"github.com/Housiadas/backend-system/business/web"
+	"github.com/Housiadas/backend-system/business/sys/web"
 	_ "github.com/Housiadas/backend-system/docs"
 	"github.com/Housiadas/backend-system/foundation/debug"
 	"github.com/Housiadas/backend-system/foundation/kafka"
@@ -29,8 +29,8 @@ import (
 
 var build = "develop"
 
-// @title           Backend System
-// @description     This is a backend system.
+// @title Backend System
+// @description This is a backend system.
 //
 // @contact.name	API Support
 // @contact.url		http://www.swagger.io/support

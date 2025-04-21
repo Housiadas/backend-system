@@ -17,7 +17,6 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/productbus/stores/productdb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
-	"github.com/Housiadas/backend-system/business/web"
 	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/Housiadas/backend-system/foundation/otel"
 )
@@ -52,7 +51,7 @@ func main() {
 		return otel.GetTraceID(ctx)
 	}
 	requestIDFn := func(ctx context.Context) string {
-		return web.GetRequestID(ctx)
+		return ""
 	}
 	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "gRPC", traceIDFn, requestIDFn, events)
 

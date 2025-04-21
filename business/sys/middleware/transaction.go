@@ -1,4 +1,4 @@
-package mid
+package middleware
 
 import (
 	"database/sql"
@@ -10,7 +10,7 @@ import (
 )
 
 // BeginCommitRollback starts a transaction for the domain call.
-func (m *Mid) BeginCommitRollback() func(next http.Handler) http.Handler {
+func (m *Middleware) BeginCommitRollback() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
