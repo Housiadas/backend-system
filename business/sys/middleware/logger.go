@@ -1,4 +1,4 @@
-package mid
+package middleware
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 )
 
 // Logger writes information about the request to the logs.
-func (m *Mid) Logger() func(next http.Handler) http.Handler {
+func (m *Middleware) Logger() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()

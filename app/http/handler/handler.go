@@ -13,8 +13,8 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/web"
-	"github.com/Housiadas/backend-system/business/web/mid"
+	"github.com/Housiadas/backend-system/business/sys/middleware"
+	"github.com/Housiadas/backend-system/business/sys/web"
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
 
@@ -33,8 +33,8 @@ type Handler struct {
 
 // Web represents the set of services for the http.
 type Web struct {
-	Mid *mid.Mid
-	Res *web.Respond
+	Middleware *middleware.Middleware
+	Res        *web.Respond
 }
 
 // App represents the core app layer
@@ -74,7 +74,7 @@ func New(cfg Config) *Handler {
 		Log:         cfg.Log,
 		Tracer:      cfg.Tracer,
 		Web: Web{
-			Mid: mid.New(mid.Config{
+			Middleware: middleware.New(middleware.Config{
 				Log:     cfg.Log,
 				Tracer:  cfg.Tracer,
 				Tx:      sqldb.NewBeginner(cfg.DB),

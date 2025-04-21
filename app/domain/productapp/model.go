@@ -11,7 +11,7 @@ import (
 	namePck "github.com/Housiadas/backend-system/business/sys/types/name"
 	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"github.com/Housiadas/backend-system/business/sys/validation"
-	"github.com/Housiadas/backend-system/business/web"
+	"github.com/Housiadas/backend-system/business/sys/web"
 )
 
 // Product represents information about an individual product.

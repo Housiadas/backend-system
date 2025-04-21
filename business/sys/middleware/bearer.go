@@ -1,4 +1,4 @@
-package mid
+package middleware
 
 import (
 	"errors"
@@ -7,11 +7,11 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/business/web"
+	"github.com/Housiadas/backend-system/business/sys/web"
 )
 
 // Bearer processes JWT token.
-func (m *Mid) Bearer() func(next http.Handler) http.Handler {
+func (m *Middleware) Bearer() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()

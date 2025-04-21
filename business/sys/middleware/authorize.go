@@ -1,15 +1,15 @@
-package mid
+package middleware
 
 import (
 	"net/http"
 
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/business/web"
+	"github.com/Housiadas/backend-system/business/sys/web"
 )
 
 // Authorize validates user's role.
-func (m *Mid) Authorize(rule string) func(next http.Handler) http.Handler {
+func (m *Middleware) Authorize(rule string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()

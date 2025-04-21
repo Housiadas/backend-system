@@ -12,7 +12,7 @@ import (
 
 // Routes returns applications router
 func (h *Handler) Routes() *chi.Mux {
-	mid := h.Web.Mid
+	mid := h.Web.Middleware
 
 	// Bearer middleware
 	authenticate := mid.Bearer()

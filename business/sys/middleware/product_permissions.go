@@ -1,4 +1,4 @@
-package mid
+package middleware
 
 import (
 	"errors"
@@ -10,12 +10,12 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/business/web"
+	"github.com/Housiadas/backend-system/business/sys/web"
 )
 
 // ProductPermissions executes authorization for resource (entity) actions
 // Check if a user is allowed to modify product
-func (m *Mid) ProductPermissions(rule string) func(next http.Handler) http.Handler {
+func (m *Middleware) ProductPermissions(rule string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var userID uuid.UUID

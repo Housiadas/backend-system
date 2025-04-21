@@ -6,7 +6,7 @@ import (
 
 	"github.com/Housiadas/backend-system/app/domain/tranapp"
 	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/business/web"
+	"github.com/Housiadas/backend-system/business/sys/web"
 )
 
 func (h *Handler) transaction(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
