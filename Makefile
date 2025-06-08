@@ -169,8 +169,8 @@ tests:
 coverage:
 	go test -cover -v -coverpkg=./... ./...
 	go test -coverprofile=coverage.out -coverpkg=./... ./...
-	go tool cover -html=coverage.out
-	open cover.html
+	grep -Ev "test/|gen/|debug/|dbtest|unitest" coverage.out > filtered.out
+	go tool cover -func=filtered.out
 
 ## ==================
 ## Modules support

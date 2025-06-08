@@ -12,4 +12,5 @@ config.yaml
 
 cover.out
 coverage.out
+filtered.out
 cover.html
