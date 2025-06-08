@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/Housiadas/backend-system/foundation/kafka"
+	"github.com/Housiadas/backend-system/pkg/kafka"
 )
 
 const (

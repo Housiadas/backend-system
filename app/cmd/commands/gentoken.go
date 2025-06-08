@@ -14,7 +14,7 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/business/sys/types/role"
-	"github.com/Housiadas/backend-system/foundation/keystore"
+	"github.com/Housiadas/backend-system/pkg/keystore"
 )
 
 // GenToken generates a JWT for the specified user.

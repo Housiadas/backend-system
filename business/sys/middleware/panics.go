@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"github.com/Housiadas/backend-system/foundation/errs"
-	"github.com/Housiadas/backend-system/foundation/metrics"
+	"github.com/Housiadas/backend-system/pkg/errs"
+	"github.com/Housiadas/backend-system/pkg/metrics"
 )
 
 // Recoverer recovers from panics and converts the panic to an error,

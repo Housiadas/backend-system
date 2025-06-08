@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/pkg/logger"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 

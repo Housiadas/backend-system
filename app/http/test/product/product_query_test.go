@@ -2,7 +2,7 @@ package product_test
 
 import (
 	"fmt"
-	page2 "github.com/Housiadas/backend-system/foundation/page"
+	page2 "github.com/Housiadas/backend-system/pkg/page"
 	"net/http"
 	"sort"
 	"testing"
@@ -12,7 +12,7 @@ import (
 	"github.com/Housiadas/backend-system/app/domain/productapp"
 	testPck "github.com/Housiadas/backend-system/app/http/test"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
-	"github.com/Housiadas/backend-system/foundation/errs"
+	"github.com/Housiadas/backend-system/pkg/errs"
 )
 
 func Test_Product_Query_200(t *testing.T) {

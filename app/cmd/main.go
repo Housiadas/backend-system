@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/Housiadas/backend-system/app/cmd/commands"
-	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/pkg/logger"
 )
 
 var build = "develop"

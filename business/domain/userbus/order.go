@@ -1,7 +1,7 @@
 package userbus
 
 import (
-	"github.com/Housiadas/backend-system/foundation/order"
+	"github.com/Housiadas/backend-system/pkg/order"
 )
 
 // DefaultOrderBy represents the default way we sort.

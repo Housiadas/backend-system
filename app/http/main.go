@@ -20,11 +20,11 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	_ "github.com/Housiadas/backend-system/docs"
-	"github.com/Housiadas/backend-system/foundation/debug"
-	"github.com/Housiadas/backend-system/foundation/kafka"
-	"github.com/Housiadas/backend-system/foundation/keystore"
-	"github.com/Housiadas/backend-system/foundation/logger"
-	"github.com/Housiadas/backend-system/foundation/otel"
+	"github.com/Housiadas/backend-system/pkg/debug"
+	"github.com/Housiadas/backend-system/pkg/kafka"
+	"github.com/Housiadas/backend-system/pkg/keystore"
+	"github.com/Housiadas/backend-system/pkg/logger"
+	"github.com/Housiadas/backend-system/pkg/otel"
 )
 
 var build = "develop"

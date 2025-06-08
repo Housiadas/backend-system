@@ -7,7 +7,7 @@ import (
 
 	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/data/sqldb"
-	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/pkg/logger"
 )
 
 // ErrHelp provides context that help was given.

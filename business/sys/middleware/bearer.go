@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/Housiadas/backend-system/business/sys/context"
-	"github.com/Housiadas/backend-system/foundation/errs"
+	"github.com/Housiadas/backend-system/pkg/errs"
 )
 
 // Bearer processes JWT token.

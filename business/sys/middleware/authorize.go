@@ -5,7 +5,7 @@ import (
 
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/sys/context"
-	"github.com/Housiadas/backend-system/foundation/errs"
+	"github.com/Housiadas/backend-system/pkg/errs"
 )
 
 // Authorize validates user's role.

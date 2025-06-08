@@ -11,10 +11,10 @@ import (
 
 	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/foundation/logger"
-	"github.com/Housiadas/backend-system/foundation/order"
-	"github.com/Housiadas/backend-system/foundation/otel"
-	"github.com/Housiadas/backend-system/foundation/page"
+	"github.com/Housiadas/backend-system/pkg/logger"
+	"github.com/Housiadas/backend-system/pkg/order"
+	"github.com/Housiadas/backend-system/pkg/otel"
+	"github.com/Housiadas/backend-system/pkg/page"
 )
 
 // Set of error variables for CRUD operations.

@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 
 	testPck "github.com/Housiadas/backend-system/app/http/test"
-	"github.com/Housiadas/backend-system/foundation/errs"
+	"github.com/Housiadas/backend-system/pkg/errs"
 )
 
 func Test_API_User_Delete_200(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	confkafka "github.com/confluentinc/confluent-kafka-go/v2/kafka"
 
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/foundation/kafka"
+	"github.com/Housiadas/backend-system/pkg/kafka"
 )
 
 func (cmd *Command) UserEvents() error {

@@ -11,8 +11,8 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 
-	"github.com/Housiadas/backend-system/foundation/errs"
-	"github.com/Housiadas/backend-system/foundation/otel"
+	"github.com/Housiadas/backend-system/pkg/errs"
+	"github.com/Housiadas/backend-system/pkg/otel"
 )
 
 func (cln *Client) Request(
@@ -36,7 +36,7 @@ func (cln *Client) Request(
 		cln.log.Info(ctx, "http request: completed", "status", statusCode)
 	}()
 
-	ctx, span := otel.AddSpan(ctx, fmt.Sprintf("foundation.httpclient.%s", base), attribute.String("endpoint", endpoint))
+	ctx, span := otel.AddSpan(ctx, fmt.Sprintf("pkg.httpclient.%s", base), attribute.String("endpoint", endpoint))
 	defer func() {
 		span.SetAttributes(attribute.Int("status", statusCode))
 		span.End()

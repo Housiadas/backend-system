@@ -7,7 +7,7 @@ import (
 
 	"github.com/Housiadas/backend-system/app/grpc/server"
 	"github.com/Housiadas/backend-system/business/sys/dbtest"
-	"github.com/Housiadas/backend-system/foundation/otel"
+	"github.com/Housiadas/backend-system/pkg/otel"
 )
 
 // StartTest initialized the system to run a test.

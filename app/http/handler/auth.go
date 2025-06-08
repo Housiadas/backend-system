@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	web2 "github.com/Housiadas/backend-system/foundation/web"
 	"net/http"
 	"time"
 
@@ -12,12 +11,13 @@ import (
 
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	"github.com/Housiadas/backend-system/business/domain/authbus"
-	"github.com/Housiadas/backend-system/foundation/errs"
+	"github.com/Housiadas/backend-system/pkg/errs"
+	"github.com/Housiadas/backend-system/pkg/web"
 )
 
-func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web2.Encoder {
+func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	var requestData userapp.AuthenticateUser
-	if err := web2.Decode(r, &requestData); err != nil {
+	if err := web.Decode(r, &requestData); err != nil {
 		return errs.New(errs.FailedPrecondition, err)
 	}
 
@@ -60,9 +60,9 @@ func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *ht
 	}
 }
 
-func (h *Handler) authorize(ctx context.Context, _ http.ResponseWriter, r *http.Request) web2.Encoder {
+func (h *Handler) authorize(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	var authData authbus.Authorize
-	if err := web2.Decode(r, &authData); err != nil {
+	if err := web.Decode(r, &authData); err != nil {
 		return errs.New(errs.FailedPrecondition, err)
 	}
 
@@ -77,7 +77,7 @@ func (h *Handler) authorize(ctx context.Context, _ http.ResponseWriter, r *http.
 	return nil
 }
 
-func (h *Handler) token(ctx context.Context, _ http.ResponseWriter, r *http.Request) web2.Encoder {
+func (h *Handler) token(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 
 	token, err := h.App.User.Token(ctx)
 	if err != nil {

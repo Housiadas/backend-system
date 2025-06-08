@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/foundation/kafka"
+	"github.com/Housiadas/backend-system/pkg/kafka"
 )
 
 const (

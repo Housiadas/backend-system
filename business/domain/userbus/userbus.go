@@ -13,9 +13,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/Housiadas/backend-system/business/data/sqldb"
-	"github.com/Housiadas/backend-system/foundation/logger"
-	"github.com/Housiadas/backend-system/foundation/order"
-	"github.com/Housiadas/backend-system/foundation/page"
+	"github.com/Housiadas/backend-system/pkg/logger"
+	"github.com/Housiadas/backend-system/pkg/order"
+	"github.com/Housiadas/backend-system/pkg/page"
 )
 
 // Set of error variables for CRUD operations.

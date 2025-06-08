@@ -2,11 +2,11 @@ package handler
 
 import (
 	"context"
-	web2 "github.com/Housiadas/backend-system/foundation/web"
 	"net/http"
 
 	"github.com/Housiadas/backend-system/app/domain/userapp"
-	"github.com/Housiadas/backend-system/foundation/errs"
+	"github.com/Housiadas/backend-system/pkg/errs"
+	"github.com/Housiadas/backend-system/pkg/web"
 )
 
 // User godoc
@@ -19,9 +19,9 @@ import (
 // @Success      200  {object}  userapp.User
 // @Failure      500  {object}  errs.Error
 // @Router       /user [post]
-func (h *Handler) userCreate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web2.Encoder {
+func (h *Handler) userCreate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	var app userapp.NewUser
-	if err := web2.Decode(r, &app); err != nil {
+	if err := web.Decode(r, &app); err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
@@ -43,9 +43,9 @@ func (h *Handler) userCreate(ctx context.Context, _ http.ResponseWriter, r *http
 // @Success      200  {object}  userapp.User
 // @Failure      500  {object}  errs.Error
 // @Router       /user/{user_id} [put]
-func (h *Handler) userUpdate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web2.Encoder {
+func (h *Handler) userUpdate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	var app userapp.UpdateUser
-	if err := web2.Decode(r, &app); err != nil {
+	if err := web.Decode(r, &app); err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
@@ -67,9 +67,9 @@ func (h *Handler) userUpdate(ctx context.Context, _ http.ResponseWriter, r *http
 // @Success      200  {object}  userapp.User
 // @Failure      500  {object}  errs.Error
 // @Router       /user/role/{user_id} [put]
-func (h *Handler) updateRole(ctx context.Context, _ http.ResponseWriter, r *http.Request) web2.Encoder {
+func (h *Handler) updateRole(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	var app userapp.UpdateUserRole
-	if err := web2.Decode(r, &app); err != nil {
+	if err := web.Decode(r, &app); err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
@@ -90,7 +90,7 @@ func (h *Handler) updateRole(ctx context.Context, _ http.ResponseWriter, r *http
 // @Success      204
 // @Failure      500  {object}  errs.Error
 // @Router       /user/{user_id} [delete]
-func (h *Handler) userDelete(ctx context.Context, _ http.ResponseWriter, _ *http.Request) web2.Encoder {
+func (h *Handler) userDelete(ctx context.Context, _ http.ResponseWriter, _ *http.Request) web.Encoder {
 	if err := h.App.User.Delete(ctx); err != nil {
 		return errs.NewError(err)
 	}
@@ -107,7 +107,7 @@ func (h *Handler) userDelete(ctx context.Context, _ http.ResponseWriter, _ *http
 // @Success      200  {object}  userapp.UserPageResult
 // @Failure      500  {object}  errs.Error
 // @Router       /user [get]
-func (h *Handler) userQuery(ctx context.Context, _ http.ResponseWriter, r *http.Request) web2.Encoder {
+func (h *Handler) userQuery(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	qp := userapp.ParseQueryParams(r)
 
 	usr, err := h.App.User.Query(ctx, qp)
@@ -127,7 +127,7 @@ func (h *Handler) userQuery(ctx context.Context, _ http.ResponseWriter, r *http.
 // @Success      200  {object}  userapp.User
 // @Failure      500  {object}  errs.Error
 // @Router       /user/{user_id} [get]
-func (h *Handler) userQueryByID(ctx context.Context, _ http.ResponseWriter, _ *http.Request) web2.Encoder {
+func (h *Handler) userQueryByID(ctx context.Context, _ http.ResponseWriter, _ *http.Request) web.Encoder {
 	usr, err := h.App.User.QueryByID(ctx)
 	if err != nil {
 		return errs.NewError(err)

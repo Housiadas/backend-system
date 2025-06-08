@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/Housiadas/backend-system/foundation/otel"
+	"github.com/Housiadas/backend-system/pkg/otel"
 )
 
 // Otel starts the otel tracing and stores the trace id in the context.

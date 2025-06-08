@@ -14,7 +14,7 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/pkg/logger"
 )
 
 var (

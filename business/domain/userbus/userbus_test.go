@@ -16,7 +16,7 @@ import (
 	"github.com/Housiadas/backend-system/business/sys/types/name"
 	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"github.com/Housiadas/backend-system/business/sys/unitest"
-	"github.com/Housiadas/backend-system/foundation/page"
+	"github.com/Housiadas/backend-system/pkg/page"
 )
 
 func Test_User(t *testing.T) {

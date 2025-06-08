@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/Housiadas/backend-system/foundation/web"
+	"github.com/Housiadas/backend-system/pkg/web"
 	"github.com/jmoiron/sqlx"
 	"go.opentelemetry.io/otel/trace"
 
@@ -15,7 +15,7 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/middleware"
-	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/pkg/logger"
 )
 
 // Handler contains all the mandatory systems required by handlers.

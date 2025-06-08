@@ -13,7 +13,7 @@ import (
 	"github.com/open-policy-agent/opa/rego"
 
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/pkg/logger"
 )
 
 // Claims represents the authorization claims transmitted via a JWT.

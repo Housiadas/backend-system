@@ -7,9 +7,9 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	ctxPck "github.com/Housiadas/backend-system/business/sys/context"
 	"github.com/Housiadas/backend-system/business/sys/validation"
-	"github.com/Housiadas/backend-system/foundation/errs"
-	"github.com/Housiadas/backend-system/foundation/order"
-	"github.com/Housiadas/backend-system/foundation/page"
+	"github.com/Housiadas/backend-system/pkg/errs"
+	"github.com/Housiadas/backend-system/pkg/order"
+	"github.com/Housiadas/backend-system/pkg/page"
 )
 
 // App manages the set of app layer api functions for the product domain.

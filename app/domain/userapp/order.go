@@ -2,7 +2,7 @@ package userapp
 
 import (
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/foundation/order"
+	"github.com/Housiadas/backend-system/pkg/order"
 )
 
 var defaultOrderBy = order.NewBy("user_id", order.ASC)

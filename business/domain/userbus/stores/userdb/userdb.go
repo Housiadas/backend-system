@@ -6,8 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Housiadas/backend-system/foundation/order"
-	"github.com/Housiadas/backend-system/foundation/page"
 	"net/mail"
 
 	"github.com/google/uuid"
@@ -15,7 +13,9 @@ import (
 
 	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/pkg/logger"
+	"github.com/Housiadas/backend-system/pkg/order"
+	"github.com/Housiadas/backend-system/pkg/page"
 )
 
 // Store manages the set of APIs for user database access.

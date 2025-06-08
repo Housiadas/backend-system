@@ -2,7 +2,7 @@ package productapp
 
 import (
 	"github.com/Housiadas/backend-system/business/domain/productbus"
-	"github.com/Housiadas/backend-system/foundation/order"
+	"github.com/Housiadas/backend-system/pkg/order"
 )
 
 var defaultOrderBy = order.NewBy("product_id", order.ASC)

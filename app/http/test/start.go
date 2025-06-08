@@ -11,7 +11,7 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/business/sys/dbtest"
-	"github.com/Housiadas/backend-system/foundation/otel"
+	"github.com/Housiadas/backend-system/pkg/otel"
 )
 
 // StartTest initialized the system to run a test.

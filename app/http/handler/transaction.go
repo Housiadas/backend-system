@@ -2,16 +2,16 @@ package handler
 
 import (
 	"context"
-	web2 "github.com/Housiadas/backend-system/foundation/web"
 	"net/http"
 
 	"github.com/Housiadas/backend-system/app/domain/tranapp"
-	"github.com/Housiadas/backend-system/foundation/errs"
+	"github.com/Housiadas/backend-system/pkg/errs"
+	"github.com/Housiadas/backend-system/pkg/web"
 )
 
-func (h *Handler) transaction(ctx context.Context, _ http.ResponseWriter, r *http.Request) web2.Encoder {
+func (h *Handler) transaction(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
 	var app tranapp.NewTran
-	if err := web2.Decode(r, &app); err != nil {
+	if err := web.Decode(r, &app); err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
