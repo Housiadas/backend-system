@@ -10,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/Housiadas/backend-system/app/domain/userapp"
-	"github.com/Housiadas/backend-system/business/domain/authbus"
+	"github.com/Housiadas/backend-system/internal/domain/authbus"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/web"
 )

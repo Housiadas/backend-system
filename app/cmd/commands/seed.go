@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Housiadas/backend-system/business/data/seed"
-	"github.com/Housiadas/backend-system/business/data/sqldb"
+	"github.com/Housiadas/backend-system/internal/data/seed"
+	"github.com/Housiadas/backend-system/internal/data/sqldb"
 )
 
 // Seed loads test data into the database.

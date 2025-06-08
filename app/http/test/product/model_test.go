@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/Housiadas/backend-system/app/domain/productapp"
-	"github.com/Housiadas/backend-system/business/domain/productbus"
+	"github.com/Housiadas/backend-system/internal/domain/productbus"
 )
 
 func toAppProduct(prd productbus.Product) productapp.Product {

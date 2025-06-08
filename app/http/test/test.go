@@ -13,10 +13,10 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 
-	"github.com/Housiadas/backend-system/business/domain/authbus"
-	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/sys/dbtest"
-	"github.com/Housiadas/backend-system/business/sys/types/role"
+	"github.com/Housiadas/backend-system/internal/domain/authbus"
+	"github.com/Housiadas/backend-system/internal/domain/userbus"
+	"github.com/Housiadas/backend-system/internal/sys/dbtest"
+	"github.com/Housiadas/backend-system/internal/sys/types/role"
 )
 
 // Test contains functions for executing an api test.

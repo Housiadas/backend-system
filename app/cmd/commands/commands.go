@@ -5,8 +5,8 @@ package commands
 import (
 	"errors"
 
-	"github.com/Housiadas/backend-system/business/config"
-	"github.com/Housiadas/backend-system/business/data/sqldb"
+	"github.com/Housiadas/backend-system/internal/config"
+	"github.com/Housiadas/backend-system/internal/data/sqldb"
 	"github.com/Housiadas/backend-system/pkg/logger"
 )
 

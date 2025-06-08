@@ -1,0 +1,88 @@
+// Package middleware provides app level middleware support.
+package middleware
+
+import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"net/http"
+
+	"go.opentelemetry.io/otel/trace"
+	"golang.org/x/sync/singleflight"
+
+	"github.com/Housiadas/backend-system/internal/data/sqldb"
+	"github.com/Housiadas/backend-system/internal/domain/authbus"
+	"github.com/Housiadas/backend-system/internal/domain/productbus"
+	"github.com/Housiadas/backend-system/internal/domain/userbus"
+	"github.com/Housiadas/backend-system/pkg/logger"
+)
+
+var (
+	// ErrInvalidID represents a condition where the id is not an uuid.
+	ErrInvalidID = errors.New("ID is not in its proper form")
+
+	group = singleflight.Group{}
+)
+
+type Config struct {
+	Log     *logger.Logger
+	Tracer  trace.Tracer
+	Tx      *sqldb.DBBeginner
+	Auth    *authbus.Auth
+	User    *userbus.Business
+	Product *productbus.Business
+}
+
+type Middleware struct {
+	Bus    Business
+	Log    *logger.Logger
+	Tracer trace.Tracer
+	Tx     *sqldb.DBBeginner
+}
+
+type Business struct {
+	Auth    *authbus.Auth
+	User    *userbus.Business
+	Product *productbus.Business
+}
+
+func New(cfg Config) *Middleware {
+	return &Middleware{
+		Bus: Business{
+			Auth:    cfg.Auth,
+			User:    cfg.User,
+			Product: cfg.Product,
+		},
+		Log:    cfg.Log,
+		Tracer: cfg.Tracer,
+		Tx:     cfg.Tx,
+	}
+}
+
+func (m *Middleware) Error(w http.ResponseWriter, err error, statusCode int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	if err := json.NewEncoder(w).Encode(err); err != nil {
+		return
+	}
+	return
+}
+
+// ResponseRecorder a custom http.ResponseWriter to capture the response before it's sent to the client.
+// We are capturing the result of the handlers to the middleware
+type ResponseRecorder struct {
+	http.ResponseWriter
+	statusCode int
+	body       bytes.Buffer
+}
+
+func (rec *ResponseRecorder) WriteHeader(code int) {
+	rec.statusCode = code
+	rec.ResponseWriter.WriteHeader(code)
+}
+
+// Capture the response body
+func (rec *ResponseRecorder) Write(b []byte) (int, error) {
+	rec.body.Write(b)
+	return rec.ResponseWriter.Write(b)
+}

@@ -8,9 +8,9 @@ import (
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
 	"github.com/Housiadas/backend-system/app/domain/tranapp"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
-	"github.com/Housiadas/backend-system/business/domain/productbus"
-	"github.com/Housiadas/backend-system/business/domain/userbus"
 	userV1 "github.com/Housiadas/backend-system/gen/go/github.com/Housiadas/backend-system/gen/user/v1"
+	"github.com/Housiadas/backend-system/internal/domain/productbus"
+	"github.com/Housiadas/backend-system/internal/domain/userbus"
 	"github.com/Housiadas/backend-system/pkg/logger"
 )
 
@@ -33,7 +33,7 @@ type App struct {
 	Tx      *tranapp.App
 }
 
-// Business represents the core business layer.
+// Business represents the core internal layer.
 type Business struct {
 	User    *userbus.Business
 	Product *productbus.Business

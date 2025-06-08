@@ -1,7 +1,7 @@
 package userapp
 
 import (
-	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/internal/domain/userbus"
 	"github.com/Housiadas/backend-system/pkg/order"
 )
 

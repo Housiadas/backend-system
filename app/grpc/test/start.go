@@ -6,13 +6,13 @@ import (
 	"testing"
 
 	"github.com/Housiadas/backend-system/app/grpc/server"
-	"github.com/Housiadas/backend-system/business/sys/dbtest"
+	"github.com/Housiadas/backend-system/internal/sys/dbtest"
 	"github.com/Housiadas/backend-system/pkg/otel"
 )
 
 // StartTest initialized the system to run a test.
 func StartTest(t *testing.T, testName string) (*Test, error) {
-	db := dbtest.NewDatabase(t, testName, "file://../../../../business/data/migrations")
+	db := dbtest.NewDatabase(t, testName, "file://../../../../internal/data/migrations")
 
 	// tracer
 	traceProvider, teardown, err := otel.InitTracing(otel.Config{

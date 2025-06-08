@@ -7,7 +7,7 @@ import (
 	"github.com/riandyrn/otelchi"
 	httpSwagger "github.com/swaggo/http-swagger"
 
-	"github.com/Housiadas/backend-system/business/domain/authbus"
+	"github.com/Housiadas/backend-system/internal/domain/authbus"
 )
 
 // Routes returns applications router

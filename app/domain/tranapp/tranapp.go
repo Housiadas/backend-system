@@ -5,9 +5,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/Housiadas/backend-system/business/data/sqldb"
-	"github.com/Housiadas/backend-system/business/domain/productbus"
-	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/internal/data/sqldb"
+	"github.com/Housiadas/backend-system/internal/domain/productbus"
+	"github.com/Housiadas/backend-system/internal/domain/userbus"
 	"github.com/Housiadas/backend-system/pkg/errs"
 )
 

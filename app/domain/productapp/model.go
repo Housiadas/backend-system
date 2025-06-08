@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Housiadas/backend-system/business/domain/productbus"
-	ctxPck "github.com/Housiadas/backend-system/business/sys/context"
-	"github.com/Housiadas/backend-system/business/sys/types/money"
-	namePck "github.com/Housiadas/backend-system/business/sys/types/name"
-	"github.com/Housiadas/backend-system/business/sys/types/quantity"
-	"github.com/Housiadas/backend-system/business/sys/validation"
+	"github.com/Housiadas/backend-system/internal/domain/productbus"
+	ctxPck "github.com/Housiadas/backend-system/internal/sys/context"
+	"github.com/Housiadas/backend-system/internal/sys/types/money"
+	namePck "github.com/Housiadas/backend-system/internal/sys/types/name"
+	"github.com/Housiadas/backend-system/internal/sys/types/quantity"
+	"github.com/Housiadas/backend-system/internal/sys/validation"
 )
 
 // The Product represents information about an individual product.

@@ -6,10 +6,10 @@ import (
 	"net/mail"
 	"time"
 
-	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/sys/types/name"
-	"github.com/Housiadas/backend-system/business/sys/types/role"
-	"github.com/Housiadas/backend-system/business/sys/validation"
+	"github.com/Housiadas/backend-system/internal/domain/userbus"
+	"github.com/Housiadas/backend-system/internal/sys/types/name"
+	"github.com/Housiadas/backend-system/internal/sys/types/role"
+	"github.com/Housiadas/backend-system/internal/sys/validation"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/page"
 )

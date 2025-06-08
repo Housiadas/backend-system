@@ -1,7 +1,7 @@
 package productapp
 
 import (
-	"github.com/Housiadas/backend-system/business/domain/productbus"
+	"github.com/Housiadas/backend-system/internal/domain/productbus"
 	"github.com/Housiadas/backend-system/pkg/order"
 )
 

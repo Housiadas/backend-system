@@ -6,17 +6,17 @@ import (
 	"testing"
 
 	"github.com/Housiadas/backend-system/app/http/handler"
-	cfg "github.com/Housiadas/backend-system/business/config"
-	"github.com/Housiadas/backend-system/business/domain/authbus"
-	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
-	"github.com/Housiadas/backend-system/business/sys/dbtest"
+	cfg "github.com/Housiadas/backend-system/internal/config"
+	"github.com/Housiadas/backend-system/internal/domain/authbus"
+	"github.com/Housiadas/backend-system/internal/domain/userbus"
+	"github.com/Housiadas/backend-system/internal/domain/userbus/stores/userdb"
+	"github.com/Housiadas/backend-system/internal/sys/dbtest"
 	"github.com/Housiadas/backend-system/pkg/otel"
 )
 
 // StartTest initialized the system to run a test.
 func StartTest(t *testing.T, testName string) (*Test, error) {
-	db := dbtest.NewDatabase(t, testName, "file://../../../../business/data/migrations")
+	db := dbtest.NewDatabase(t, testName, "file://../../../../internal/data/migrations")
 
 	// auth
 	auth := authbus.New(authbus.Config{

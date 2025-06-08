@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/Housiadas/backend-system/app/domain/userapp"
-	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/sys/types/role"
+	"github.com/Housiadas/backend-system/internal/domain/userbus"
+	"github.com/Housiadas/backend-system/internal/sys/types/role"
 )
 
 func toAppUser(bus userbus.User) userapp.User {

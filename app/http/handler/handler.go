@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"github.com/Housiadas/backend-system/pkg/web"
 	"github.com/jmoiron/sqlx"
 	"go.opentelemetry.io/otel/trace"
 
@@ -9,13 +8,14 @@ import (
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
 	"github.com/Housiadas/backend-system/app/domain/tranapp"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
-	"github.com/Housiadas/backend-system/business/config"
-	"github.com/Housiadas/backend-system/business/data/sqldb"
-	"github.com/Housiadas/backend-system/business/domain/authbus"
-	"github.com/Housiadas/backend-system/business/domain/productbus"
-	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/sys/middleware"
+	"github.com/Housiadas/backend-system/internal/config"
+	"github.com/Housiadas/backend-system/internal/data/sqldb"
+	"github.com/Housiadas/backend-system/internal/domain/authbus"
+	"github.com/Housiadas/backend-system/internal/domain/productbus"
+	"github.com/Housiadas/backend-system/internal/domain/userbus"
+	"github.com/Housiadas/backend-system/internal/sys/middleware"
 	"github.com/Housiadas/backend-system/pkg/logger"
+	"github.com/Housiadas/backend-system/pkg/web"
 )
 
 // Handler contains all the mandatory systems required by handlers.
@@ -45,7 +45,7 @@ type App struct {
 	Tx      *tranapp.App
 }
 
-// Business represents the core business layer.
+// Business represents the core internal layer.
 type Business struct {
 	Auth    *authbus.Auth
 	User    *userbus.Business

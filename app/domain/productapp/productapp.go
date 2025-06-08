@@ -4,9 +4,9 @@ package productapp
 import (
 	"context"
 
-	"github.com/Housiadas/backend-system/business/domain/productbus"
-	ctxPck "github.com/Housiadas/backend-system/business/sys/context"
-	"github.com/Housiadas/backend-system/business/sys/validation"
+	"github.com/Housiadas/backend-system/internal/domain/productbus"
+	ctxPck "github.com/Housiadas/backend-system/internal/sys/context"
+	"github.com/Housiadas/backend-system/internal/sys/validation"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/order"
 	"github.com/Housiadas/backend-system/pkg/page"

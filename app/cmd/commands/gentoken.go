@@ -9,11 +9,11 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 
-	"github.com/Housiadas/backend-system/business/data/sqldb"
-	"github.com/Housiadas/backend-system/business/domain/authbus"
-	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
-	"github.com/Housiadas/backend-system/business/sys/types/role"
+	"github.com/Housiadas/backend-system/internal/data/sqldb"
+	"github.com/Housiadas/backend-system/internal/domain/authbus"
+	"github.com/Housiadas/backend-system/internal/domain/userbus"
+	"github.com/Housiadas/backend-system/internal/domain/userbus/stores/userdb"
+	"github.com/Housiadas/backend-system/internal/sys/types/role"
 	"github.com/Housiadas/backend-system/pkg/keystore"
 )
 

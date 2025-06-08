@@ -6,11 +6,11 @@ import (
 	"net/mail"
 	"time"
 
-	"github.com/Housiadas/backend-system/business/data/sqldb"
-	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
-	namePck "github.com/Housiadas/backend-system/business/sys/types/name"
-	"github.com/Housiadas/backend-system/business/sys/types/role"
+	"github.com/Housiadas/backend-system/internal/data/sqldb"
+	"github.com/Housiadas/backend-system/internal/domain/userbus"
+	"github.com/Housiadas/backend-system/internal/domain/userbus/stores/userdb"
+	namePck "github.com/Housiadas/backend-system/internal/sys/types/name"
+	"github.com/Housiadas/backend-system/internal/sys/types/role"
 )
 
 // UserAdd adds new users into the database.

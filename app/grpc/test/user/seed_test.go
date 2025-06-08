@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/Housiadas/backend-system/app/http/test"
-	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/sys/dbtest"
-	"github.com/Housiadas/backend-system/business/sys/types/role"
+	"github.com/Housiadas/backend-system/internal/domain/userbus"
+	"github.com/Housiadas/backend-system/internal/sys/dbtest"
+	"github.com/Housiadas/backend-system/internal/sys/types/role"
 )
 
 func insertSeedData(db *dbtest.Database) (test.SeedData, error) {

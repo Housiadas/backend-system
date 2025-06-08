@@ -10,7 +10,7 @@ import (
 
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	testPck "github.com/Housiadas/backend-system/app/http/test"
-	"github.com/Housiadas/backend-system/business/domain/userbus"
+	"github.com/Housiadas/backend-system/internal/domain/userbus"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/page"
 )

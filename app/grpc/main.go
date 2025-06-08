@@ -11,12 +11,12 @@ import (
 	"syscall"
 
 	"github.com/Housiadas/backend-system/app/grpc/server"
-	"github.com/Housiadas/backend-system/business/config"
-	"github.com/Housiadas/backend-system/business/data/sqldb"
-	"github.com/Housiadas/backend-system/business/domain/productbus"
-	"github.com/Housiadas/backend-system/business/domain/productbus/stores/productdb"
-	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
+	"github.com/Housiadas/backend-system/internal/config"
+	"github.com/Housiadas/backend-system/internal/data/sqldb"
+	"github.com/Housiadas/backend-system/internal/domain/productbus"
+	"github.com/Housiadas/backend-system/internal/domain/productbus/stores/productdb"
+	"github.com/Housiadas/backend-system/internal/domain/userbus"
+	"github.com/Housiadas/backend-system/internal/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/pkg/logger"
 	"github.com/Housiadas/backend-system/pkg/otel"
 )
@@ -124,7 +124,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	// Build Business Layer
 	// -------------------------------------------------------------------------
-	log.Info(ctx, "startup", "status", "initializing business layer")
+	log.Info(ctx, "startup", "status", "initializing internal layer")
 
 	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db))
 	productBus := productbus.NewBusiness(log, userBus, productdb.NewStore(log, db))

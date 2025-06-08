@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/test/bufconn"
 
 	"github.com/Housiadas/backend-system/app/grpc/server"
-	"github.com/Housiadas/backend-system/business/sys/dbtest"
+	"github.com/Housiadas/backend-system/internal/sys/dbtest"
 )
 
 // Test contains functions for executing an api test.

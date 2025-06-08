@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/Housiadas/backend-system/business/domain/productbus"
-	"github.com/Housiadas/backend-system/business/sys/types/name"
-	"github.com/Housiadas/backend-system/business/sys/validation"
+	"github.com/Housiadas/backend-system/internal/domain/productbus"
+	"github.com/Housiadas/backend-system/internal/sys/types/name"
+	"github.com/Housiadas/backend-system/internal/sys/validation"
 )
 
 type QueryParams struct {
