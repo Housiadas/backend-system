@@ -3,10 +3,9 @@ package middleware
 import (
 	"net/http"
 
+	"github.com/Housiadas/backend-system/business/sys/context"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
-
-	"github.com/Housiadas/backend-system/business/sys/web"
 )
 
 // RequestID is a middleware that injects uuid as middleware.RequestIDHeader when not present
@@ -29,7 +28,7 @@ func (m *Middleware) RequestID(next http.Handler) http.Handler {
 		}
 
 		us := u.String()
-		ctx = web.SetRequestID(ctx, us)
+		ctx = context.SetRequestID(ctx, us)
 		w.Header().Set(middleware.RequestIDHeader, us)
 
 		next.ServeHTTP(w, r.WithContext(ctx))

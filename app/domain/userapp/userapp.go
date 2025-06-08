@@ -8,11 +8,11 @@ import (
 
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/business/sys/order"
-	"github.com/Housiadas/backend-system/business/sys/page"
+	ctxPck "github.com/Housiadas/backend-system/business/sys/context"
 	"github.com/Housiadas/backend-system/business/sys/validation"
-	"github.com/Housiadas/backend-system/business/sys/web"
+	"github.com/Housiadas/backend-system/foundation/errs"
+	"github.com/Housiadas/backend-system/foundation/order"
+	"github.com/Housiadas/backend-system/foundation/page"
 )
 
 // App manages the set of app layer api functions for the user domain.
@@ -61,7 +61,7 @@ func (a *App) Update(ctx context.Context, app UpdateUser) (User, error) {
 		return User{}, errs.New(errs.InvalidArgument, err)
 	}
 
-	usr, err := web.GetUser(ctx)
+	usr, err := ctxPck.GetUser(ctx)
 	if err != nil {
 		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
 	}
@@ -81,7 +81,7 @@ func (a *App) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) 
 		return User{}, errs.New(errs.InvalidArgument, err)
 	}
 
-	usr, err := web.GetUser(ctx)
+	usr, err := ctxPck.GetUser(ctx)
 	if err != nil {
 		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
 	}
@@ -96,7 +96,7 @@ func (a *App) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) 
 
 // Delete removes a user from the system.
 func (a *App) Delete(ctx context.Context) error {
-	usr, err := web.GetUser(ctx)
+	usr, err := ctxPck.GetUser(ctx)
 	if err != nil {
 		return errs.Newf(errs.Internal, "userID missing in context: %s", err)
 	}
@@ -140,7 +140,7 @@ func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[User], err
 
 // QueryByID returns a user by its Ia.
 func (a *App) QueryByID(ctx context.Context) (User, error) {
-	usr, err := web.GetUser(ctx)
+	usr, err := ctxPck.GetUser(ctx)
 	if err != nil {
 		return User{}, errs.Newf(errs.Internal, "querybyid: %s", err)
 	}
@@ -169,7 +169,7 @@ func (a *App) Token(ctx context.Context) (Token, error) {
 		return Token{}, errs.Newf(errs.Internal, "authapi not configured")
 	}
 
-	claims := web.GetClaims(ctx)
+	claims := ctxPck.GetClaims(ctx)
 
 	tkn, err := a.authbus.GenerateToken(claims)
 	if err != nil {

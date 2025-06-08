@@ -13,13 +13,13 @@ type User struct {
 	Products []productbus.Product
 }
 
-// SeedData represents data that was seeded for the test.
+// SeedData represents data seeded for the test.
 type SeedData struct {
 	Users  []User
 	Admins []User
 }
 
-// Table represent fields needed for running a unit test.
+// The Table represents fields needed for running a unit test.
 type Table struct {
 	Name    string
 	ExpResp any

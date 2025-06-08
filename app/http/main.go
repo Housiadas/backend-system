@@ -4,6 +4,7 @@ import (
 	"context"
 	"expvar"
 	"fmt"
+	ctxPck "github.com/Housiadas/backend-system/business/sys/context"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,7 +19,6 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/productbus/stores/productdb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
-	"github.com/Housiadas/backend-system/business/sys/web"
 	_ "github.com/Housiadas/backend-system/docs"
 	"github.com/Housiadas/backend-system/foundation/debug"
 	"github.com/Housiadas/backend-system/foundation/kafka"
@@ -73,7 +73,7 @@ func main() {
 		return otel.GetTraceID(ctx)
 	}
 	requestIDFn := func(ctx context.Context) string {
-		return web.GetRequestID(ctx)
+		return ctxPck.GetRequestID(ctx)
 	}
 	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "API", traceIDFn, requestIDFn, events)
 

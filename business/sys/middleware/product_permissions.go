@@ -9,8 +9,9 @@ import (
 
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
-	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/business/sys/web"
+	"github.com/Housiadas/backend-system/business/sys/context"
+	"github.com/Housiadas/backend-system/foundation/errs"
+	"github.com/Housiadas/backend-system/foundation/web"
 )
 
 // ProductPermissions executes authorization for resource (entity) actions
@@ -56,11 +57,11 @@ func (m *Middleware) ProductPermissions(rule string) func(next http.Handler) htt
 				}
 
 				userID = prd.UserID
-				ctx = web.SetProduct(ctx, prd)
+				ctx = context.SetProduct(ctx, prd)
 			}
 
 			authData := authbus.Authorize{
-				Claims: web.GetClaims(ctx),
+				Claims: context.GetClaims(ctx),
 				UserID: userID,
 				Rule:   rule,
 			}

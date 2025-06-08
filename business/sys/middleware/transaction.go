@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/Housiadas/backend-system/business/data/sqldb"
-	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/foundation/errs"
 )
 
 // BeginCommitRollback starts a transaction for the domain call.

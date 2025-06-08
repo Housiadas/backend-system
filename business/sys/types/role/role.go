@@ -48,7 +48,7 @@ func Parse(value string) (Role, error) {
 }
 
 // MustParse parses the string value and returns a role if one exists. If
-// an error occurs the function panics.
+// an error occurs, the function panics.
 func MustParse(value string) Role {
 	role, err := Parse(value)
 	if err != nil {

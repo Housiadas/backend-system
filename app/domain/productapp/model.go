@@ -7,14 +7,14 @@ import (
 	"time"
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
+	ctxPck "github.com/Housiadas/backend-system/business/sys/context"
 	"github.com/Housiadas/backend-system/business/sys/types/money"
 	namePck "github.com/Housiadas/backend-system/business/sys/types/name"
 	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"github.com/Housiadas/backend-system/business/sys/validation"
-	"github.com/Housiadas/backend-system/business/sys/web"
 )
 
-// Product represents information about an individual product.
+// The Product represents information about an individual product.
 type Product struct {
 	ID          string  `json:"id"`
 	UserID      string  `json:"userID"`
@@ -76,7 +76,7 @@ func (app *NewProduct) Validate() error {
 }
 
 func toBusNewProduct(ctx context.Context, app NewProduct) (productbus.NewProduct, error) {
-	userID, err := web.GetUserID(ctx)
+	userID, err := ctxPck.GetUserID(ctx)
 	if err != nil {
 		return productbus.NewProduct{}, fmt.Errorf("getuserid: %w", err)
 	}

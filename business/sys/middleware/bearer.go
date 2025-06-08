@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/business/sys/web"
+	"github.com/Housiadas/backend-system/business/sys/context"
+	"github.com/Housiadas/backend-system/foundation/errs"
 )
 
 // Bearer processes JWT token.
@@ -41,8 +41,8 @@ func (m *Middleware) Bearer() func(next http.Handler) http.Handler {
 				return
 			}
 
-			ctx = web.SetClaims(ctx, claims)
-			ctx = web.SetUserID(ctx, subjectID)
+			ctx = context.SetClaims(ctx, claims)
+			ctx = context.SetUserID(ctx, subjectID)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

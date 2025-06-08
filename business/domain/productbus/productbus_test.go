@@ -3,8 +3,6 @@ package productbus_test
 import (
 	"context"
 	"fmt"
-	"github.com/Housiadas/backend-system/business/sys/types/money"
-	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"sort"
 	"testing"
 	"time"
@@ -14,10 +12,12 @@ import (
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/dbtest"
-	"github.com/Housiadas/backend-system/business/sys/page"
+	"github.com/Housiadas/backend-system/business/sys/types/money"
 	"github.com/Housiadas/backend-system/business/sys/types/name"
+	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"github.com/Housiadas/backend-system/business/sys/unitest"
+	"github.com/Housiadas/backend-system/foundation/page"
 )
 
 func Test_Product(t *testing.T) {

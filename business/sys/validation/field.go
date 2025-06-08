@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/foundation/errs"
 )
 
 // FieldError is used to indicate an error with a specific request field.

@@ -3,13 +3,13 @@ package productbus
 import (
 	"context"
 	"fmt"
-	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 	"math/rand"
 
 	"github.com/google/uuid"
 
 	"github.com/Housiadas/backend-system/business/sys/types/money"
 	"github.com/Housiadas/backend-system/business/sys/types/name"
+	"github.com/Housiadas/backend-system/business/sys/types/quantity"
 )
 
 // TestGenerateNewProducts is a helper method for testing.

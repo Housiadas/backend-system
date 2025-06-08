@@ -8,7 +8,7 @@ import (
 	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/foundation/errs"
 )
 
 // App manages the set of app layer http functions for the tran domain.

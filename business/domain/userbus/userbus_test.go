@@ -13,10 +13,10 @@ import (
 
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/dbtest"
-	"github.com/Housiadas/backend-system/business/sys/page"
 	"github.com/Housiadas/backend-system/business/sys/types/name"
 	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"github.com/Housiadas/backend-system/business/sys/unitest"
+	"github.com/Housiadas/backend-system/foundation/page"
 )
 
 func Test_User(t *testing.T) {

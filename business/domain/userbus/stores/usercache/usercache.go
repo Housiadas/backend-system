@@ -3,6 +3,7 @@ package usercache
 
 import (
 	"context"
+
 	"net/mail"
 	"time"
 
@@ -11,9 +12,9 @@ import (
 
 	"github.com/Housiadas/backend-system/business/data/sqldb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/sys/order"
-	"github.com/Housiadas/backend-system/business/sys/page"
 	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/foundation/order"
+	"github.com/Housiadas/backend-system/foundation/page"
 )
 
 // Store manages the set of APIs for user data and caching.

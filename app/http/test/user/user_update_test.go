@@ -11,7 +11,7 @@ import (
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	testPck "github.com/Housiadas/backend-system/app/http/test"
 	"github.com/Housiadas/backend-system/business/sys/dbtest"
-	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/foundation/errs"
 )
 
 func Test_API_User_Update_200(t *testing.T) {

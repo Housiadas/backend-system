@@ -3,14 +3,16 @@ package middleware
 import (
 	"errors"
 	"fmt"
+
 	"net/http"
 
 	"github.com/google/uuid"
 
 	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/business/sys/web"
+	"github.com/Housiadas/backend-system/business/sys/context"
+	"github.com/Housiadas/backend-system/foundation/errs"
+	"github.com/Housiadas/backend-system/foundation/web"
 )
 
 // UserPermissions executes authorization for resource (entity) actions
@@ -57,11 +59,11 @@ func (m *Middleware) UserPermissions(rule string) func(next http.Handler) http.H
 				}
 
 				// Here adds in the context the requested user based on (user_id)
-				ctx = web.SetUser(ctx, usr)
+				ctx = context.SetUser(ctx, usr)
 			}
 
 			authData := authbus.Authorize{
-				Claims: web.GetClaims(ctx),
+				Claims: context.GetClaims(ctx),
 				UserID: userID,
 				Rule:   rule,
 			}

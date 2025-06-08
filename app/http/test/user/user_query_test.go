@@ -2,6 +2,7 @@ package user_test
 
 import (
 	"fmt"
+	page2 "github.com/Housiadas/backend-system/foundation/page"
 	"net/http"
 	"sort"
 	"testing"
@@ -11,8 +12,7 @@ import (
 	"github.com/Housiadas/backend-system/app/domain/userapp"
 	testPck "github.com/Housiadas/backend-system/app/http/test"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/business/sys/page"
+	"github.com/Housiadas/backend-system/foundation/errs"
 )
 
 func Test_API_User_Query_200(t *testing.T) {
@@ -49,10 +49,10 @@ func Test_API_User_Query_200(t *testing.T) {
 			Token:      sd.Admins[0].Token,
 			StatusCode: http.StatusOK,
 			Method:     http.MethodGet,
-			GotResp:    &page.Result[userapp.User]{},
-			ExpResp: &page.Result[userapp.User]{
+			GotResp:    &page2.Result[userapp.User]{},
+			ExpResp: &page2.Result[userapp.User]{
 				Data: toAppUsers(usrs),
-				Metadata: page.Metadata{
+				Metadata: page2.Metadata{
 					FirstPage:   1,
 					CurrentPage: 1,
 					LastPage:    1,

@@ -1,6 +1,8 @@
 package userbus
 
-import "github.com/Housiadas/backend-system/business/sys/order"
+import (
+	"github.com/Housiadas/backend-system/foundation/order"
+)
 
 // DefaultOrderBy represents the default way we sort.
 var DefaultOrderBy = order.NewBy(OrderByID, order.ASC)

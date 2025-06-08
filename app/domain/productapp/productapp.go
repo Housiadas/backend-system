@@ -5,11 +5,11 @@ import (
 	"context"
 
 	"github.com/Housiadas/backend-system/business/domain/productbus"
-	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/business/sys/order"
-	"github.com/Housiadas/backend-system/business/sys/page"
+	ctxPck "github.com/Housiadas/backend-system/business/sys/context"
 	"github.com/Housiadas/backend-system/business/sys/validation"
-	"github.com/Housiadas/backend-system/business/sys/web"
+	"github.com/Housiadas/backend-system/foundation/errs"
+	"github.com/Housiadas/backend-system/foundation/order"
+	"github.com/Housiadas/backend-system/foundation/page"
 )
 
 // App manages the set of app layer api functions for the product domain.
@@ -46,7 +46,7 @@ func (a *App) Update(ctx context.Context, app UpdateProduct) (Product, error) {
 		return Product{}, errs.New(errs.InvalidArgument, err)
 	}
 
-	prd, err := web.GetProduct(ctx)
+	prd, err := ctxPck.GetProduct(ctx)
 	if err != nil {
 		return Product{}, errs.Newf(errs.Internal, "product missing in context: %s", err)
 	}
@@ -61,7 +61,7 @@ func (a *App) Update(ctx context.Context, app UpdateProduct) (Product, error) {
 
 // Delete removes a product from the system.
 func (a *App) Delete(ctx context.Context) error {
-	prd, err := web.GetProduct(ctx)
+	prd, err := ctxPck.GetProduct(ctx)
 	if err != nil {
 		return errs.Newf(errs.Internal, "productID missing in context: %s", err)
 	}
@@ -105,7 +105,7 @@ func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[Product], 
 
 // QueryByID returns a product by its Ia.
 func (a *App) QueryByID(ctx context.Context) (Product, error) {
-	prd, err := web.GetProduct(ctx)
+	prd, err := ctxPck.GetProduct(ctx)
 	if err != nil {
 		return Product{}, errs.Newf(errs.Internal, "querybyid: %s", err)
 	}

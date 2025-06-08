@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/Housiadas/backend-system/business/domain/authbus"
-	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/business/sys/web"
+	"github.com/Housiadas/backend-system/business/sys/context"
+	"github.com/Housiadas/backend-system/foundation/errs"
 )
 
 // Authorize validates user's role.
@@ -13,7 +13,7 @@ func (m *Middleware) Authorize(rule string) func(next http.Handler) http.Handler
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			userID, err := web.GetUserID(ctx)
+			userID, err := context.GetUserID(ctx)
 			if err != nil {
 				err = errs.New(errs.Unauthenticated, err)
 				m.Log.Error(ctx, "authorize mid: get user id", err)
@@ -22,7 +22,7 @@ func (m *Middleware) Authorize(rule string) func(next http.Handler) http.Handler
 			}
 
 			authData := authbus.Authorize{
-				Claims: web.GetClaims(ctx),
+				Claims: context.GetClaims(ctx),
 				UserID: userID,
 				Rule:   rule,
 			}

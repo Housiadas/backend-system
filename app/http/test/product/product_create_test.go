@@ -8,7 +8,7 @@ import (
 
 	"github.com/Housiadas/backend-system/app/domain/productapp"
 	testPck "github.com/Housiadas/backend-system/app/http/test"
-	"github.com/Housiadas/backend-system/business/sys/errs"
+	"github.com/Housiadas/backend-system/foundation/errs"
 )
 
 func Test_Product_Create_200(t *testing.T) {

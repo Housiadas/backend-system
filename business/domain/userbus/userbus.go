@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"net/mail"
 	"time"
 
@@ -12,9 +13,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/Housiadas/backend-system/business/data/sqldb"
-	"github.com/Housiadas/backend-system/business/sys/order"
-	"github.com/Housiadas/backend-system/business/sys/page"
 	"github.com/Housiadas/backend-system/foundation/logger"
+	"github.com/Housiadas/backend-system/foundation/order"
+	"github.com/Housiadas/backend-system/foundation/page"
 )
 
 // Set of error variables for CRUD operations.

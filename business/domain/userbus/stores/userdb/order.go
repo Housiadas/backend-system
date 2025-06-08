@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/sys/order"
+	"github.com/Housiadas/backend-system/foundation/order"
 )
 
 var orderByFields = map[string]string{

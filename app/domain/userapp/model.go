@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/Housiadas/backend-system/business/domain/userbus"
-	"github.com/Housiadas/backend-system/business/sys/errs"
-	"github.com/Housiadas/backend-system/business/sys/page"
 	"github.com/Housiadas/backend-system/business/sys/types/name"
 	"github.com/Housiadas/backend-system/business/sys/types/role"
 	"github.com/Housiadas/backend-system/business/sys/validation"
+	"github.com/Housiadas/backend-system/foundation/errs"
+	"github.com/Housiadas/backend-system/foundation/page"
 )
 
 // =============================================================================
