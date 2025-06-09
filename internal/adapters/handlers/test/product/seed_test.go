@@ -3,25 +3,25 @@ package product_test
 import (
 	"context"
 	"fmt"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 
 	testPck "github.com/Housiadas/backend-system/internal/adapters/handlers/test"
 	"github.com/Housiadas/backend-system/internal/common/dbtest"
 	"github.com/Housiadas/backend-system/internal/core/domain/role"
 	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/productservice"
 )
 
 func insertSeedData(db *dbtest.Database, ath *authbus.Auth) (testPck.SeedData, error) {
 	ctx := context.Background()
 	busDomain := db.BusDomain
 
-	usrs, err := userbus.TestSeedUsers(ctx, 1, role.User, busDomain.User)
+	usrs, err := userservice.TestSeedUsers(ctx, 1, role.User, busDomain.User)
 	if err != nil {
 		return testPck.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err := productbus.TestGenerateSeedProducts(ctx, 2, busDomain.Product, usrs[0].ID)
+	prds, err := productservice.TestGenerateSeedProducts(ctx, 2, busDomain.Product, usrs[0].ID)
 	if err != nil {
 		return testPck.SeedData{}, fmt.Errorf("seeding products : %w", err)
 	}
@@ -35,12 +35,12 @@ func insertSeedData(db *dbtest.Database, ath *authbus.Auth) (testPck.SeedData, e
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = userbus.TestSeedUsers(ctx, 1, role.Admin, busDomain.User)
+	usrs, err = userservice.TestSeedUsers(ctx, 1, role.Admin, busDomain.User)
 	if err != nil {
 		return testPck.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err = productbus.TestGenerateSeedProducts(ctx, 2, busDomain.Product, usrs[0].ID)
+	prds, err = productservice.TestGenerateSeedProducts(ctx, 2, busDomain.Product, usrs[0].ID)
 	if err != nil {
 		return testPck.SeedData{}, fmt.Errorf("seeding products : %w", err)
 	}

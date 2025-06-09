@@ -9,7 +9,7 @@ import (
 	"github.com/Housiadas/backend-system/internal/common/validation"
 	"github.com/Housiadas/backend-system/internal/core/domain/name"
 	"github.com/Housiadas/backend-system/internal/core/domain/role"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/page"
 )
@@ -58,7 +58,7 @@ func (app User) Encode() ([]byte, string, error) {
 	return data, "application/json", err
 }
 
-func toAppUser(bus userbus.User) User {
+func toAppUser(bus userservice.User) User {
 	roles := make([]string, len(bus.Roles))
 	for i, r := range bus.Roles {
 		roles[i] = r.String()
@@ -77,7 +77,7 @@ func toAppUser(bus userbus.User) User {
 	}
 }
 
-func toAppUsers(users []userbus.User) []User {
+func toAppUsers(users []userservice.User) []User {
 	app := make([]User, len(users))
 	for i, usr := range users {
 		app[i] = toAppUser(usr)
@@ -120,28 +120,28 @@ func (app *NewUser) Validate() error {
 	return nil
 }
 
-func toBusNewUser(app NewUser) (userbus.NewUser, error) {
+func toBusNewUser(app NewUser) (userservice.NewUser, error) {
 	roles, err := role.ParseMany(app.Roles)
 	if err != nil {
-		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
+		return userservice.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
 	addr, err := mail.ParseAddress(app.Email)
 	if err != nil {
-		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
+		return userservice.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
 	nme, err := name.Parse(app.Name)
 	if err != nil {
-		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
+		return userservice.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
 	department, err := name.ParseNull(app.Department)
 	if err != nil {
-		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
+		return userservice.NewUser{}, fmt.Errorf("parse: %w", err)
 	}
 
-	bus := userbus.NewUser{
+	bus := userservice.NewUser{
 		Name:       nme,
 		Email:      *addr,
 		Roles:      roles,
@@ -173,20 +173,20 @@ func (app *UpdateUserRole) Validate() error {
 	return nil
 }
 
-func toBusUpdateUserRole(app UpdateUserRole) (userbus.UpdateUser, error) {
+func toBusUpdateUserRole(app UpdateUserRole) (userservice.UpdateUser, error) {
 	var roles []role.Role
 	if app.Roles != nil {
 		roles = make([]role.Role, len(app.Roles))
 		for i, roleStr := range app.Roles {
 			r, err := role.Parse(roleStr)
 			if err != nil {
-				return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
+				return userservice.UpdateUser{}, fmt.Errorf("parse: %w", err)
 			}
 			roles[i] = r
 		}
 	}
 
-	bus := userbus.UpdateUser{
+	bus := userservice.UpdateUser{
 		Roles: roles,
 	}
 
@@ -219,13 +219,13 @@ func (app *UpdateUser) Validate() error {
 	return nil
 }
 
-func toBusUpdateUser(app UpdateUser) (userbus.UpdateUser, error) {
+func toBusUpdateUser(app UpdateUser) (userservice.UpdateUser, error) {
 	var addr *mail.Address
 	if app.Email != nil {
 		var err error
 		addr, err = mail.ParseAddress(*app.Email)
 		if err != nil {
-			return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
+			return userservice.UpdateUser{}, fmt.Errorf("parse: %w", err)
 		}
 	}
 
@@ -233,7 +233,7 @@ func toBusUpdateUser(app UpdateUser) (userbus.UpdateUser, error) {
 	if app.Name != nil {
 		nm, err := name.Parse(*app.Name)
 		if err != nil {
-			return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
+			return userservice.UpdateUser{}, fmt.Errorf("parse: %w", err)
 		}
 		nme = &nm
 	}
@@ -242,12 +242,12 @@ func toBusUpdateUser(app UpdateUser) (userbus.UpdateUser, error) {
 	if app.Department != nil {
 		dep, err := name.ParseNull(*app.Department)
 		if err != nil {
-			return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
+			return userservice.UpdateUser{}, fmt.Errorf("parse: %w", err)
 		}
 		department = &dep
 	}
 
-	bus := userbus.UpdateUser{
+	bus := userservice.UpdateUser{
 		Name:       nme,
 		Email:      addr,
 		Department: department,

@@ -1,14 +1,14 @@
-package productdb
+package productrepository
 
 import (
 	"bytes"
 	"fmt"
 	"strings"
 
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
+	"github.com/Housiadas/backend-system/internal/core/domain/product"
 )
 
-func (s *Store) applyFilter(filter productbus.QueryFilter, data map[string]any, buf *bytes.Buffer) {
+func (s *Store) applyFilter(filter product.QueryFilter, data map[string]any, buf *bytes.Buffer) {
 	var wc []string
 
 	if filter.ID != nil {

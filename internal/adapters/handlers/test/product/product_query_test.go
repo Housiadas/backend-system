@@ -10,7 +10,7 @@ import (
 
 	"github.com/Housiadas/backend-system/internal/adapters/domain/productapp"
 	testPck "github.com/Housiadas/backend-system/internal/adapters/handlers/test"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
+	"github.com/Housiadas/backend-system/internal/core/service/productservice"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/page"
 )
@@ -28,7 +28,7 @@ func Test_Product_Query_200(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	prds := make([]productbus.Product, 0, len(sd.Admins[0].Products)+len(sd.Users[0].Products))
+	prds := make([]productservice.Product, 0, len(sd.Admins[0].Products)+len(sd.Users[0].Products))
 	prds = append(prds, sd.Admins[0].Products...)
 	prds = append(prds, sd.Users[0].Products...)
 

@@ -9,7 +9,7 @@ import (
 	ctxPck "github.com/Housiadas/backend-system/internal/common/context"
 	"github.com/Housiadas/backend-system/internal/common/validation"
 	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/order"
 	"github.com/Housiadas/backend-system/pkg/page"
@@ -18,18 +18,18 @@ import (
 // App manages the set of cli layer api functions for the user core.
 type App struct {
 	authbus *authbus.Auth
-	userBus *userbus.Business
+	userBus *userservice.Service
 }
 
 // NewApp constructs a user cli API for use.
-func NewApp(userBus *userbus.Business) *App {
+func NewApp(userBus *userservice.Service) *App {
 	return &App{
 		userBus: userBus,
 	}
 }
 
 // NewAppWithAuth constructs a user cli API for use.
-func NewAppWithAuth(userBus *userbus.Business, authbus *authbus.Auth) *App {
+func NewAppWithAuth(userBus *userservice.Service, authbus *authbus.Auth) *App {
 	return &App{
 		authbus: authbus,
 		userBus: userBus,
@@ -45,8 +45,8 @@ func (a *App) Create(ctx context.Context, app NewUser) (User, error) {
 
 	usr, err := a.userBus.Create(ctx, nc)
 	if err != nil {
-		if errors.Is(err, userbus.ErrUniqueEmail) {
-			return User{}, errs.New(errs.Aborted, userbus.ErrUniqueEmail)
+		if errors.Is(err, userservice.ErrUniqueEmail) {
+			return User{}, errs.New(errs.Aborted, userservice.ErrUniqueEmail)
 		}
 		return User{}, errs.Newf(errs.Internal, "create: usr[%+v]: %s", usr, err)
 	}

@@ -44,10 +44,10 @@ var typeSQLScanner = reflect.TypeOf((*sql.Scanner)(nil)).Elem()
 //
 // For example:
 //
-//	db.Query(`SELECT * FROM t WHERE id = ANY($1)`, pq.Array([]int{235, 401}))
+//	repository.Query(`SELECT * FROM t WHERE id = ANY($1)`, pq.Array([]int{235, 401}))
 //
 //	var x []sql.NullInt64
-//	db.QueryRow(`SELECT ARRAY[235, 401]`).Scan(pq.Array(&x))
+//	repository.QueryRow(`SELECT ARRAY[235, 401]`).Scan(pq.Array(&x))
 //
 // Scanning multi-dimensional arrays is not supported.  Arrays where the lower
 // bound is not one (such as `[0:0]={1}') are not supported.

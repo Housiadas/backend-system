@@ -3,19 +3,19 @@ package user_test
 import (
 	"context"
 	"fmt"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 
 	testPck "github.com/Housiadas/backend-system/internal/adapters/handlers/test"
 	"github.com/Housiadas/backend-system/internal/common/dbtest"
 	"github.com/Housiadas/backend-system/internal/core/domain/role"
 	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
 )
 
 func insertSeedData(db *dbtest.Database, ath *authbus.Auth) (testPck.SeedData, error) {
 	ctx := context.Background()
 	busDomain := db.BusDomain
 
-	usrs, err := userbus.TestSeedUsers(ctx, 2, role.Admin, busDomain.User)
+	usrs, err := userservice.TestSeedUsers(ctx, 2, role.Admin, busDomain.User)
 	if err != nil {
 		return testPck.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -32,7 +32,7 @@ func insertSeedData(db *dbtest.Database, ath *authbus.Auth) (testPck.SeedData, e
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = userbus.TestSeedUsers(ctx, 3, role.User, busDomain.User)
+	usrs, err = userservice.TestSeedUsers(ctx, 3, role.User, busDomain.User)
 	if err != nil {
 		return testPck.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}

@@ -5,10 +5,10 @@ import (
 
 	"github.com/Housiadas/backend-system/internal/adapters/domain/userapp"
 	"github.com/Housiadas/backend-system/internal/core/domain/role"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 )
 
-func toAppUser(bus userbus.User) userapp.User {
+func toAppUser(bus userservice.User) userapp.User {
 	return userapp.User{
 		ID:           bus.ID.String(),
 		Name:         bus.Name.String(),
@@ -22,7 +22,7 @@ func toAppUser(bus userbus.User) userapp.User {
 	}
 }
 
-func toAppUsers(users []userbus.User) []userapp.User {
+func toAppUsers(users []userservice.User) []userapp.User {
 	items := make([]userapp.User, len(users))
 	for i, usr := range users {
 		items[i] = toAppUser(usr)
@@ -31,7 +31,7 @@ func toAppUsers(users []userbus.User) []userapp.User {
 	return items
 }
 
-func toAppUserPtr(bus userbus.User) *userapp.User {
+func toAppUserPtr(bus userservice.User) *userapp.User {
 	appUsr := toAppUser(bus)
 	return &appUsr
 }

@@ -9,8 +9,8 @@ import (
 	"github.com/Housiadas/backend-system/internal/adapters/domain/systemapp"
 	"github.com/Housiadas/backend-system/internal/adapters/domain/tranapp"
 	"github.com/Housiadas/backend-system/internal/adapters/domain/userapp"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/productservice"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 	"github.com/Housiadas/backend-system/pkg/logger"
 )
 
@@ -35,8 +35,8 @@ type App struct {
 
 // Business represents the core internal layer.
 type Business struct {
-	User    *userbus.Business
-	Product *productbus.Business
+	User    *userservice.Service
+	Product *productservice.Business
 }
 
 type Config struct {
@@ -45,8 +45,8 @@ type Config struct {
 	DB          *sqlx.DB
 	Log         *logger.Logger
 	Tracer      trace.Tracer
-	UserBus     *userbus.Business
-	ProductBus  *productbus.Business
+	UserBus     *userservice.Service
+	ProductBus  *productservice.Business
 }
 
 func New(cfg Config) *Server {

@@ -8,7 +8,7 @@ import (
 	userV1 "github.com/Housiadas/backend-system/gen/go/github.com/Housiadas/backend-system/gen/user/v1"
 	"github.com/Housiadas/backend-system/internal/adapters/domain/userapp"
 	"github.com/Housiadas/backend-system/internal/core/domain/role"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 )
 
 func toUserQueryParams(req *userV1.GetUserByIdRequest) userapp.QueryParams {
@@ -17,7 +17,7 @@ func toUserQueryParams(req *userV1.GetUserByIdRequest) userapp.QueryParams {
 	}
 }
 
-func toProtoUser(user userbus.User) *userV1.User {
+func toProtoUser(user userservice.User) *userV1.User {
 	dateCreated, err := time.Parse(time.RFC3339, user.DateCreated.String())
 	if err != nil {
 		return &userV1.User{}

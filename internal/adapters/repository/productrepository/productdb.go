@@ -1,5 +1,5 @@
-// Package productdb contains product related CRUD functionality.
-package productdb
+// Package productrepository contains productDB related CRUD functionality.
+package productrepository
 
 import (
 	"bytes"
@@ -10,14 +10,14 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
+	"github.com/Housiadas/backend-system/internal/core/domain/product"
 	"github.com/Housiadas/backend-system/pkg/logger"
 	"github.com/Housiadas/backend-system/pkg/order"
 	"github.com/Housiadas/backend-system/pkg/page"
 	"github.com/Housiadas/backend-system/pkg/sqldb"
 )
 
-// Store manages the set of APIs for product database access.
+// Store manages the set of APIs for productDB database access.
 type Store struct {
 	log *logger.Logger
 	db  sqlx.ExtContext
@@ -33,7 +33,7 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 
 // NewWithTx constructs a new Store value replacing the sqlx DB
 // value with a sqlx DB value that is currently inside a transaction.
-func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (productbus.Storer, error) {
+func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (product.Storer, error) {
 	ec, err := sqldb.GetExtContext(tx)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (productbus.Storer, error) 
 
 // Create adds a Product to the sqldb. It returns the created Product with
 // fields like ID and DateCreated populated.
-func (s *Store) Create(ctx context.Context, prd productbus.Product) error {
+func (s *Store) Create(ctx context.Context, prd product.Product) error {
 	const q = `
 	INSERT INTO products
 		(product_id, user_id, name, cost, quantity, date_created, date_updated)
@@ -63,9 +63,9 @@ func (s *Store) Create(ctx context.Context, prd productbus.Product) error {
 	return nil
 }
 
-// Update modifies data about a productbus. It will error if the specified ID is
-// invalid or does not reference an existing productbus.
-func (s *Store) Update(ctx context.Context, prd productbus.Product) error {
+// Update modifies data about a product. It will error if the specified ID is
+// invalid or does not reference an existing product.
+func (s *Store) Update(ctx context.Context, prd product.Product) error {
 	const q = `
 	UPDATE
 		products
@@ -84,10 +84,10 @@ func (s *Store) Update(ctx context.Context, prd productbus.Product) error {
 	return nil
 }
 
-// Delete removes the product identified by a given ID.
-func (s *Store) Delete(ctx context.Context, prd productbus.Product) error {
+// Delete removes the productDB identified by a given ID.
+func (s *Store) Delete(ctx context.Context, prd product.Product) error {
 	data := struct {
-		ID string `db:"product_id"`
+		ID string `repository:"product_id"`
 	}{
 		ID: prd.ID.String(),
 	}
@@ -106,7 +106,7 @@ func (s *Store) Delete(ctx context.Context, prd productbus.Product) error {
 }
 
 // Query gets all Products from the database.
-func (s *Store) Query(ctx context.Context, filter productbus.QueryFilter, orderBy order.By, page page.Page) ([]productbus.Product, error) {
+func (s *Store) Query(ctx context.Context, filter product.QueryFilter, orderBy order.By, page page.Page) ([]product.Product, error) {
 	data := map[string]any{
 		"offset":        (page.Number() - 1) * page.RowsPerPage(),
 		"rows_per_page": page.RowsPerPage(),
@@ -129,7 +129,7 @@ func (s *Store) Query(ctx context.Context, filter productbus.QueryFilter, orderB
 	buf.WriteString(orderByClause)
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
-	var dbPrds []product
+	var dbPrds []productDB
 	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbPrds); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
@@ -138,7 +138,7 @@ func (s *Store) Query(ctx context.Context, filter productbus.QueryFilter, orderB
 }
 
 // Count returns the total number of users in the DB.
-func (s *Store) Count(ctx context.Context, filter productbus.QueryFilter) (int, error) {
+func (s *Store) Count(ctx context.Context, filter product.QueryFilter) (int, error) {
 	data := map[string]any{}
 
 	const q = `
@@ -151,21 +151,21 @@ func (s *Store) Count(ctx context.Context, filter productbus.QueryFilter) (int, 
 	s.applyFilter(filter, data, buf)
 
 	var count struct {
-		Count   int `db:"count"`
-		Sold    int `db:"sold"`
-		Revenue int `db:"revenue"`
+		Count   int `repository:"count"`
+		Sold    int `repository:"sold"`
+		Revenue int `repository:"revenue"`
 	}
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, buf.String(), data, &count); err != nil {
-		return 0, fmt.Errorf("db: %w", err)
+		return 0, fmt.Errorf("repository: %w", err)
 	}
 
 	return count.Count, nil
 }
 
-// QueryByID finds the product identified by a given ID.
-func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (productbus.Product, error) {
+// QueryByID finds the productDB identified by a given ID.
+func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (product.Product, error) {
 	data := struct {
-		ID string `db:"product_id"`
+		ID string `repository:"product_id"`
 	}{
 		ID: productID.String(),
 	}
@@ -178,21 +178,21 @@ func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (productbus.
 	WHERE
 		product_id = :product_id`
 
-	var dbPrd product
+	var dbPrd productDB
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbPrd); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
-			return productbus.Product{}, fmt.Errorf("db: %w", productbus.ErrNotFound)
+			return product.Product{}, fmt.Errorf("repository: %w", product.ErrNotFound)
 		}
-		return productbus.Product{}, fmt.Errorf("db: %w", err)
+		return product.Product{}, fmt.Errorf("repository: %w", err)
 	}
 
 	return toBusProduct(dbPrd)
 }
 
-// QueryByUserID finds the product identified by a given User ID.
-func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]productbus.Product, error) {
+// QueryByUserID finds the productDB identified by a given User ID.
+func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]product.Product, error) {
 	data := struct {
-		ID string `db:"user_id"`
+		ID string `repository:"user_id"`
 	}{
 		ID: userID.String(),
 	}
@@ -205,9 +205,9 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]productb
 	WHERE
 		user_id = :user_id`
 
-	var dbPrds []product
+	var dbPrds []productDB
 	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dbPrds); err != nil {
-		return nil, fmt.Errorf("db: %w", err)
+		return nil, fmt.Errorf("repository: %w", err)
 	}
 
 	return toBusProducts(dbPrds)

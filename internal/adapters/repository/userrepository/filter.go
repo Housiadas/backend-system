@@ -1,14 +1,14 @@
-package userdb
+package userrepository
 
 import (
 	"bytes"
 	"fmt"
 	"strings"
 
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/domain/user"
 )
 
-func applyFilter(filter userbus.QueryFilter, data map[string]any, buf *bytes.Buffer) {
+func applyFilter(filter user.QueryFilter, data map[string]any, buf *bytes.Buffer) {
 	var wc []string
 
 	if filter.ID != nil {

@@ -5,20 +5,20 @@ import (
 	"context"
 	"errors"
 
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/productservice"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/sqldb"
 )
 
 // App manages the set of cli layer http functions for the tran core.
 type App struct {
-	userBus    *userbus.Business
-	productBus *productbus.Business
+	userBus    *userservice.Service
+	productBus *productservice.Business
 }
 
 // NewApp constructs a tran cli API for use.
-func NewApp(userBus *userbus.Business, productBus *productbus.Business) *App {
+func NewApp(userBus *userservice.Service, productBus *productservice.Business) *App {
 	return &App{
 		userBus:    userBus,
 		productBus: productBus,
@@ -70,8 +70,8 @@ func (a *App) Create(ctx context.Context, nt NewTran) (Product, error) {
 
 	usr, err := a.userBus.Create(ctx, nu)
 	if err != nil {
-		if errors.Is(err, userbus.ErrUniqueEmail) {
-			return Product{}, errs.New(errs.Aborted, userbus.ErrUniqueEmail)
+		if errors.Is(err, userservice.ErrUniqueEmail) {
+			return Product{}, errs.New(errs.Aborted, userservice.ErrUniqueEmail)
 		}
 		return Product{}, errs.Newf(errs.Internal, "create: usr[%+v]: %s", usr, err)
 	}

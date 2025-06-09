@@ -1,4 +1,4 @@
-package productbus
+package product
 
 import (
 	"github.com/Housiadas/backend-system/pkg/order"

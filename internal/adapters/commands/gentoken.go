@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"github.com/Housiadas/backend-system/internal/adapters/repository/userrepository"
 	"github.com/Housiadas/backend-system/internal/core/domain/role"
 	"github.com/Housiadas/backend-system/pkg/sqldb"
 	"os"
@@ -12,8 +13,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus/stores/userdb"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 	"github.com/Housiadas/backend-system/pkg/keystore"
 )
 
@@ -28,7 +28,7 @@ func (cmd *Command) GenToken(userID uuid.UUID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	userBus := userbus.NewBusiness(cmd.Log, userdb.NewStore(cmd.Log, db))
+	userBus := userservice.NewBusiness(cmd.Log, userrepository.NewStore(cmd.Log, db))
 
 	usr, err := userBus.QueryByID(ctx, userID)
 	if err != nil {

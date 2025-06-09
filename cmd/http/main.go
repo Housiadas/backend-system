@@ -4,6 +4,8 @@ import (
 	"context"
 	"expvar"
 	"fmt"
+	"github.com/Housiadas/backend-system/internal/adapters/repository/productrepository"
+	"github.com/Housiadas/backend-system/internal/adapters/repository/userrepository"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,10 +17,8 @@ import (
 	ctxPck "github.com/Housiadas/backend-system/internal/common/context"
 	"github.com/Housiadas/backend-system/internal/config"
 	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus/stores/productdb"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus/stores/userdb"
+	"github.com/Housiadas/backend-system/internal/core/service/productservice"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 	"github.com/Housiadas/backend-system/pkg/debug"
 	"github.com/Housiadas/backend-system/pkg/kafka"
 	"github.com/Housiadas/backend-system/pkg/keystore"
@@ -116,7 +116,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 		DisableTLS:   cfg.DB.DisableTLS,
 	})
 	if err != nil {
-		return fmt.Errorf("connecting to db: %w", err)
+		return fmt.Errorf("connecting to repository: %w", err)
 	}
 	defer db.Close()
 
@@ -161,12 +161,12 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	tracer := traceProvider.Tracer(cfg.App.Name)
 
 	// -------------------------------------------------------------------------
-	// Build Business Layer
+	// Build Service Layer
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing internal layer")
 
-	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db))
-	productBus := productbus.NewBusiness(log, userBus, productdb.NewStore(log, db))
+	userBus := userservice.NewBusiness(log, userrepository.NewStore(log, db))
+	productBus := productservice.NewBusiness(log, userBus, productrepository.NewStore(log, db))
 
 	// Load the private keys files from disk. We can assume some system api like
 	// Vault has created these files already. How that happens is not our concern.

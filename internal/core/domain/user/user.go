@@ -1,12 +1,21 @@
-package userbus
+package user
 
 import (
-	"github.com/Housiadas/backend-system/internal/core/domain/name"
-	"github.com/Housiadas/backend-system/internal/core/domain/role"
+	"errors"
 	"net/mail"
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/Housiadas/backend-system/internal/core/domain/name"
+	"github.com/Housiadas/backend-system/internal/core/domain/role"
+)
+
+// Set of error variables for CRUD operations.
+var (
+	ErrNotFound              = errors.New("user not found")
+	ErrUniqueEmail           = errors.New("email is not unique")
+	ErrAuthenticationFailure = errors.New("authentication failed")
 )
 
 // User represents information about an individual user.
@@ -39,4 +48,14 @@ type UpdateUser struct {
 	Department *name.Null
 	Password   *string
 	Enabled    *bool
+}
+
+// QueryFilter holds the available fields a query can be filtered on.
+// We are using pointer semantics because the With API mutates the value.
+type QueryFilter struct {
+	ID               *uuid.UUID
+	Name             *name.Name
+	Email            *mail.Address
+	StartCreatedDate *time.Time
+	EndCreatedDate   *time.Time
 }

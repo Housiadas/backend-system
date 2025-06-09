@@ -9,7 +9,7 @@ import (
 
 	"github.com/Housiadas/backend-system/internal/common/context"
 	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
+	"github.com/Housiadas/backend-system/internal/core/service/productservice"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/web"
 )
@@ -39,7 +39,7 @@ func (m *Middleware) ProductPermissions(rule string) func(next http.Handler) htt
 				})
 				if err != nil {
 					switch {
-					case errors.Is(err, productbus.ErrNotFound):
+					case errors.Is(err, productservice.ErrNotFound):
 						err = errs.New(errs.Unauthenticated, err)
 					default:
 						err = errs.Newf(errs.Internal, "querybyid: productID[%s]: %s", productID, err)
@@ -49,7 +49,7 @@ func (m *Middleware) ProductPermissions(rule string) func(next http.Handler) htt
 					return
 				}
 
-				prd, ok := response.(productbus.Product)
+				prd, ok := response.(productservice.Product)
 				if !ok {
 					err = errs.New(errs.InternalOnlyLog, errors.New("code should be reach here"))
 					m.Log.Error(ctx, "authorize error:", err)

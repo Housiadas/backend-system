@@ -11,7 +11,7 @@ import (
 	"github.com/Housiadas/backend-system/internal/core/domain/money"
 	namePck "github.com/Housiadas/backend-system/internal/core/domain/name"
 	"github.com/Housiadas/backend-system/internal/core/domain/quantity"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
+	"github.com/Housiadas/backend-system/internal/core/service/productservice"
 )
 
 // The Product represents information about an individual product.
@@ -31,7 +31,7 @@ func (app Product) Encode() ([]byte, string, error) {
 	return data, "application/json", err
 }
 
-func toAppProduct(prd productbus.Product) Product {
+func toAppProduct(prd productservice.Product) Product {
 	return Product{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
@@ -43,7 +43,7 @@ func toAppProduct(prd productbus.Product) Product {
 	}
 }
 
-func toAppProducts(prds []productbus.Product) []Product {
+func toAppProducts(prds []productservice.Product) []Product {
 	app := make([]Product, len(prds))
 	for i, prd := range prds {
 		app[i] = toAppProduct(prd)
@@ -75,28 +75,28 @@ func (app *NewProduct) Validate() error {
 	return nil
 }
 
-func toBusNewProduct(ctx context.Context, app NewProduct) (productbus.NewProduct, error) {
+func toBusNewProduct(ctx context.Context, app NewProduct) (productservice.NewProduct, error) {
 	userID, err := ctxPck.GetUserID(ctx)
 	if err != nil {
-		return productbus.NewProduct{}, fmt.Errorf("getuserid: %w", err)
+		return productservice.NewProduct{}, fmt.Errorf("getuserid: %w", err)
 	}
 
 	n, err := namePck.Parse(app.Name)
 	if err != nil {
-		return productbus.NewProduct{}, fmt.Errorf("parse name: %w", err)
+		return productservice.NewProduct{}, fmt.Errorf("parse name: %w", err)
 	}
 
 	cost, err := money.Parse(app.Cost)
 	if err != nil {
-		return productbus.NewProduct{}, fmt.Errorf("parse cost: %w", err)
+		return productservice.NewProduct{}, fmt.Errorf("parse cost: %w", err)
 	}
 
 	q, err := quantity.Parse(app.Quantity)
 	if err != nil {
-		return productbus.NewProduct{}, fmt.Errorf("parse quantity: %w", err)
+		return productservice.NewProduct{}, fmt.Errorf("parse quantity: %w", err)
 	}
 
-	bus := productbus.NewProduct{
+	bus := productservice.NewProduct{
 		UserID:   userID,
 		Name:     n,
 		Cost:     cost,
@@ -129,12 +129,12 @@ func (app *UpdateProduct) Validate() error {
 	return nil
 }
 
-func toBusUpdateProduct(app UpdateProduct) (productbus.UpdateProduct, error) {
+func toBusUpdateProduct(app UpdateProduct) (productservice.UpdateProduct, error) {
 	var nme *namePck.Name
 	if app.Name != nil {
 		nm, err := namePck.Parse(*app.Name)
 		if err != nil {
-			return productbus.UpdateProduct{}, fmt.Errorf("parse: %w", err)
+			return productservice.UpdateProduct{}, fmt.Errorf("parse: %w", err)
 		}
 		nme = &nm
 	}
@@ -143,7 +143,7 @@ func toBusUpdateProduct(app UpdateProduct) (productbus.UpdateProduct, error) {
 	if app.Cost != nil {
 		cst, err := money.Parse(*app.Cost)
 		if err != nil {
-			return productbus.UpdateProduct{}, fmt.Errorf("parse: %w", err)
+			return productservice.UpdateProduct{}, fmt.Errorf("parse: %w", err)
 		}
 		cost = &cst
 	}
@@ -152,12 +152,12 @@ func toBusUpdateProduct(app UpdateProduct) (productbus.UpdateProduct, error) {
 	if app.Cost != nil {
 		qn, err := quantity.Parse(*app.Quantity)
 		if err != nil {
-			return productbus.UpdateProduct{}, fmt.Errorf("parse: %w", err)
+			return productservice.UpdateProduct{}, fmt.Errorf("parse: %w", err)
 		}
 		qnt = &qn
 	}
 
-	bus := productbus.UpdateProduct{
+	bus := productservice.UpdateProduct{
 		Name:     nme,
 		Cost:     cost,
 		Quantity: qnt,

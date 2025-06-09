@@ -10,7 +10,7 @@ import (
 
 	"github.com/Housiadas/backend-system/internal/adapters/domain/userapp"
 	testPck "github.com/Housiadas/backend-system/internal/adapters/handlers/test"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/page"
 )
@@ -28,7 +28,7 @@ func Test_API_User_Query_200(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	usrs := make([]userbus.User, 0, len(sd.Admins)+len(sd.Users))
+	usrs := make([]userservice.User, 0, len(sd.Admins)+len(sd.Users))
 
 	for _, adm := range sd.Admins {
 		usrs = append(usrs, adm.User)

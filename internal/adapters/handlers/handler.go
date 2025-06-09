@@ -11,8 +11,8 @@ import (
 	"github.com/Housiadas/backend-system/internal/adapters/middleware"
 	"github.com/Housiadas/backend-system/internal/config"
 	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/productservice"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 	"github.com/Housiadas/backend-system/pkg/logger"
 	"github.com/Housiadas/backend-system/pkg/sqldb"
 	"github.com/Housiadas/backend-system/pkg/web"
@@ -48,8 +48,8 @@ type App struct {
 // Business represents the core internal layer.
 type Business struct {
 	Auth    *authbus.Auth
-	User    *userbus.Business
-	Product *productbus.Business
+	User    *userservice.Service
+	Product *productservice.Business
 }
 
 // Config represents the configuration for the handlers.
@@ -61,8 +61,8 @@ type Config struct {
 	Log         *logger.Logger
 	Tracer      trace.Tracer
 	AuthBus     *authbus.Auth
-	UserBus     *userbus.Business
-	ProductBus  *productbus.Business
+	UserBus     *userservice.Service
+	ProductBus  *productservice.Business
 }
 
 func New(cfg Config) *Handler {

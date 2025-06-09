@@ -7,8 +7,8 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/productservice"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 )
 
 type ctxKey string
@@ -73,29 +73,29 @@ func GetUserID(ctx context.Context) (uuid.UUID, error) {
 	return v, nil
 }
 
-func SetUser(ctx context.Context, usr userbus.User) context.Context {
+func SetUser(ctx context.Context, usr userservice.User) context.Context {
 	return context.WithValue(ctx, userKey, usr)
 }
 
 // GetUser returns the user from the context.
-func GetUser(ctx context.Context) (userbus.User, error) {
-	v, ok := ctx.Value(userKey).(userbus.User)
+func GetUser(ctx context.Context) (userservice.User, error) {
+	v, ok := ctx.Value(userKey).(userservice.User)
 	if !ok {
-		return userbus.User{}, errors.New("user not found in context")
+		return userservice.User{}, errors.New("user not found in context")
 	}
 
 	return v, nil
 }
 
-func SetProduct(ctx context.Context, prd productbus.Product) context.Context {
+func SetProduct(ctx context.Context, prd productservice.Product) context.Context {
 	return context.WithValue(ctx, productKey, prd)
 }
 
 // GetProduct returns the productapi from the context.
-func GetProduct(ctx context.Context) (productbus.Product, error) {
-	v, ok := ctx.Value(productKey).(productbus.Product)
+func GetProduct(ctx context.Context) (productservice.Product, error) {
+	v, ok := ctx.Value(productKey).(productservice.Product)
 	if !ok {
-		return productbus.Product{}, errors.New("productapi not found in context")
+		return productservice.Product{}, errors.New("productapi not found in context")
 	}
 
 	return v, nil

@@ -3,14 +3,14 @@ package unitest
 import (
 	"context"
 
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/domain/product"
+	"github.com/Housiadas/backend-system/internal/core/domain/user"
 )
 
-// User represents an cli user specified for the test.
+// User represents a cli user specified for the test.
 type User struct {
-	userbus.User
-	Products []productbus.Product
+	user.User
+	Products []product.Product
 }
 
 // SeedData represents data seeded for the test.

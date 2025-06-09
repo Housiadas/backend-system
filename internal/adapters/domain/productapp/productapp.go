@@ -6,7 +6,7 @@ import (
 
 	ctxPck "github.com/Housiadas/backend-system/internal/common/context"
 	"github.com/Housiadas/backend-system/internal/common/validation"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
+	"github.com/Housiadas/backend-system/internal/core/service/productservice"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/order"
 	"github.com/Housiadas/backend-system/pkg/page"
@@ -14,11 +14,11 @@ import (
 
 // App manages the set of cli layer api functions for the product core.
 type App struct {
-	productBus *productbus.Business
+	productBus *productservice.Business
 }
 
 // NewApp constructs a product cli API for use.
-func NewApp(productBus *productbus.Business) *App {
+func NewApp(productBus *productservice.Business) *App {
 	return &App{
 		productBus: productBus,
 	}

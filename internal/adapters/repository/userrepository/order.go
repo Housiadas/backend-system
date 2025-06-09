@@ -1,18 +1,18 @@
-package productdb
+package userrepository
 
 import (
 	"fmt"
 
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
+	"github.com/Housiadas/backend-system/internal/core/domain/user"
 	"github.com/Housiadas/backend-system/pkg/order"
 )
 
 var orderByFields = map[string]string{
-	productbus.OrderByProductID: "product_id",
-	productbus.OrderByUserID:    "user_id",
-	productbus.OrderByName:      "name",
-	productbus.OrderByCost:      "cost",
-	productbus.OrderByQuantity:  "quantity",
+	user.OrderByID:      "user_id",
+	user.OrderByName:    "name",
+	user.OrderByEmail:   "email",
+	user.OrderByRoles:   "roles",
+	user.OrderByEnabled: "enabled",
 }
 
 func orderByClause(orderBy order.By) (string, error) {

@@ -11,8 +11,8 @@ import (
 	"golang.org/x/sync/singleflight"
 
 	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/productservice"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 	"github.com/Housiadas/backend-system/pkg/logger"
 	"github.com/Housiadas/backend-system/pkg/sqldb"
 )
@@ -29,8 +29,8 @@ type Config struct {
 	Tracer  trace.Tracer
 	Tx      *sqldb.DBBeginner
 	Auth    *authbus.Auth
-	User    *userbus.Business
-	Product *productbus.Business
+	User    *userservice.Service
+	Product *productservice.Business
 }
 
 type Middleware struct {
@@ -42,8 +42,8 @@ type Middleware struct {
 
 type Business struct {
 	Auth    *authbus.Auth
-	User    *userbus.Business
-	Product *productbus.Business
+	User    *userservice.Service
+	Product *productservice.Business
 }
 
 func New(cfg Config) *Middleware {

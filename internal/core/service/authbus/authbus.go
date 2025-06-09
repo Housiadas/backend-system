@@ -12,7 +12,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/open-policy-agent/opa/rego"
 
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 	"github.com/Housiadas/backend-system/pkg/logger"
 )
 
@@ -36,14 +36,14 @@ type Config struct {
 	DB        *sqlx.DB
 	KeyLookup KeyLookup
 	Issuer    string
-	Userbus   *userbus.Business
+	Userbus   *userservice.Service
 }
 
 // Auth is used to authenticate clients. It can generate a token for a
 // set of user claims and recreate the claims by parsing the token.
 type Auth struct {
 	keyLookup KeyLookup
-	userBus   *userbus.Business
+	userBus   *userservice.Service
 	method    jwt.SigningMethod
 	parser    *jwt.Parser
 	issuer    string

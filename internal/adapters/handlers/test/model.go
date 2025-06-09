@@ -1,14 +1,14 @@
 package test
 
 import (
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/productservice"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 )
 
 // User extends the dbtest user for api test support.
 type User struct {
-	userbus.User
-	Products []productbus.Product
+	userservice.User
+	Products []productservice.Product
 	Token    string
 }
 

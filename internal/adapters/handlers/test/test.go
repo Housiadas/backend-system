@@ -16,7 +16,7 @@ import (
 	"github.com/Housiadas/backend-system/internal/common/dbtest"
 	"github.com/Housiadas/backend-system/internal/core/domain/role"
 	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 )
 
 // Test contains functions for executing an api test.
@@ -85,7 +85,7 @@ func (at *Test) Run(t *testing.T, table []Table, testName string) {
 // =============================================================================
 
 // Token generates an authenticated token for a user.
-func Token(userBus *userbus.Business, ath *authbus.Auth, email string) string {
+func Token(userBus *userservice.Service, ath *authbus.Auth, email string) string {
 	addr, _ := mail.ParseAddress(email)
 
 	dbUsr, err := userBus.QueryByEmail(context.Background(), *addr)

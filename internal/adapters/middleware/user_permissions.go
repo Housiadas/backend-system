@@ -10,7 +10,7 @@ import (
 
 	"github.com/Housiadas/backend-system/internal/common/context"
 	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/web"
 )
@@ -40,7 +40,7 @@ func (m *Middleware) UserPermissions(rule string) func(next http.Handler) http.H
 				})
 				if err != nil {
 					switch {
-					case errors.Is(err, userbus.ErrNotFound):
+					case errors.Is(err, userservice.ErrNotFound):
 						err = errs.New(errs.Unauthenticated, err)
 					default:
 						err = errs.Newf(errs.Unauthenticated, "querybyid: userID[%s]: %s", userID, err)
@@ -50,7 +50,7 @@ func (m *Middleware) UserPermissions(rule string) func(next http.Handler) http.H
 					return
 				}
 
-				usr, ok := response.(userbus.User)
+				usr, ok := response.(userservice.User)
 				if !ok {
 					err = errs.New(errs.InternalOnlyLog, errors.New("code should be reach here"))
 					m.Log.Error(ctx, "authorize error:", err)

@@ -4,6 +4,8 @@ import (
 	"context"
 	"expvar"
 	"fmt"
+	"github.com/Housiadas/backend-system/internal/adapters/repository/productrepository"
+	"github.com/Housiadas/backend-system/internal/adapters/repository/userrepository"
 	"net"
 	"os"
 	"os/signal"
@@ -12,10 +14,8 @@ import (
 
 	"github.com/Housiadas/backend-system/internal/adapters/grpc"
 	"github.com/Housiadas/backend-system/internal/config"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus/stores/productdb"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus/stores/userdb"
+	"github.com/Housiadas/backend-system/internal/core/service/productservice"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 	"github.com/Housiadas/backend-system/pkg/logger"
 	"github.com/Housiadas/backend-system/pkg/otel"
 	"github.com/Housiadas/backend-system/pkg/sqldb"
@@ -94,7 +94,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 		DisableTLS:   cfg.DB.DisableTLS,
 	})
 	if err != nil {
-		return fmt.Errorf("connecting to db: %w", err)
+		return fmt.Errorf("connecting to repository: %w", err)
 	}
 	defer db.Close()
 
@@ -122,12 +122,12 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	tracer := traceProvider.Tracer(cfg.App.Name)
 
 	// -------------------------------------------------------------------------
-	// Build Business Layer
+	// Build Service Layer
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing internal layer")
 
-	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db))
-	productBus := productbus.NewBusiness(log, userBus, productdb.NewStore(log, db))
+	userBus := userservice.NewBusiness(log, userrepository.NewStore(log, db))
+	productBus := productservice.NewBusiness(log, userBus, productrepository.NewStore(log, db))
 
 	// -------------------------------------------------------------------------
 	// Start Grpc Server

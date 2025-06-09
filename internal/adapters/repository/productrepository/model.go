@@ -1,4 +1,4 @@
-package productdb
+package productrepository
 
 import (
 	"fmt"
@@ -8,22 +8,22 @@ import (
 
 	"github.com/Housiadas/backend-system/internal/core/domain/money"
 	"github.com/Housiadas/backend-system/internal/core/domain/name"
+	"github.com/Housiadas/backend-system/internal/core/domain/product"
 	"github.com/Housiadas/backend-system/internal/core/domain/quantity"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
 )
 
-type product struct {
-	ID          uuid.UUID `db:"product_id"`
-	UserID      uuid.UUID `db:"user_id"`
-	Name        string    `db:"name"`
-	Cost        float64   `db:"cost"`
-	Quantity    int       `db:"quantity"`
-	DateCreated time.Time `db:"date_created"`
-	DateUpdated time.Time `db:"date_updated"`
+type productDB struct {
+	ID          uuid.UUID `repository:"product_id"`
+	UserID      uuid.UUID `repository:"user_id"`
+	Name        string    `repository:"name"`
+	Cost        float64   `repository:"cost"`
+	Quantity    int       `repository:"quantity"`
+	DateCreated time.Time `repository:"date_created"`
+	DateUpdated time.Time `repository:"date_updated"`
 }
 
-func toDBProduct(bus productbus.Product) product {
-	db := product{
+func toDBProduct(bus product.Product) productDB {
+	db := productDB{
 		ID:          bus.ID,
 		UserID:      bus.UserID,
 		Name:        bus.Name.String(),
@@ -36,13 +36,13 @@ func toDBProduct(bus productbus.Product) product {
 	return db
 }
 
-func toBusProduct(db product) (productbus.Product, error) {
+func toBusProduct(db productDB) (product.Product, error) {
 	n, err := name.Parse(db.Name)
 	if err != nil {
-		return productbus.Product{}, fmt.Errorf("parse name: %w", err)
+		return product.Product{}, fmt.Errorf("parse name: %w", err)
 	}
 
-	bus := productbus.Product{
+	bus := product.Product{
 		ID:          db.ID,
 		UserID:      db.UserID,
 		Name:        n,
@@ -55,8 +55,8 @@ func toBusProduct(db product) (productbus.Product, error) {
 	return bus, nil
 }
 
-func toBusProducts(dbs []product) ([]productbus.Product, error) {
-	bus := make([]productbus.Product, len(dbs))
+func toBusProducts(dbs []productDB) ([]product.Product, error) {
+	bus := make([]product.Product, len(dbs))
 
 	for i, db := range dbs {
 		var err error

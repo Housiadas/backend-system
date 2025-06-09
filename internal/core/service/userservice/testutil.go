@@ -1,4 +1,4 @@
-package userbus
+package userservice
 
 import (
 	"context"
@@ -8,17 +8,18 @@ import (
 
 	"github.com/Housiadas/backend-system/internal/core/domain/name"
 	rolePck "github.com/Housiadas/backend-system/internal/core/domain/role"
+	"github.com/Housiadas/backend-system/internal/core/domain/user"
 )
 
 // TestNewUsers is a helper method for testing.
-func TestNewUsers(n int, role rolePck.Role) []NewUser {
-	newUsrs := make([]NewUser, n)
+func TestNewUsers(n int, role rolePck.Role) []user.NewUser {
+	newUsrs := make([]user.NewUser, n)
 
 	idx := rand.Intn(10000)
 	for i := range n {
 		idx++
 
-		nu := NewUser{
+		nu := user.NewUser{
 			Name:       name.MustParse(fmt.Sprintf("Name%d", idx)),
 			Email:      mail.Address{Address: fmt.Sprintf("Email%d@gmail.com", idx)},
 			Roles:      []rolePck.Role{role},
@@ -33,10 +34,10 @@ func TestNewUsers(n int, role rolePck.Role) []NewUser {
 }
 
 // TestSeedUsers is a helper method for testing.
-func TestSeedUsers(ctx context.Context, n int, role rolePck.Role, api *Business) ([]User, error) {
+func TestSeedUsers(ctx context.Context, n int, role rolePck.Role, api *Service) ([]user.User, error) {
 	newUsrs := TestNewUsers(n, role)
 
-	usrs := make([]User, len(newUsrs))
+	usrs := make([]user.User, len(newUsrs))
 	for i, nu := range newUsrs {
 		usr, err := api.Create(ctx, nu)
 		if err != nil {

@@ -3,6 +3,7 @@ package authbus_test
 import (
 	"context"
 	"fmt"
+	"github.com/Housiadas/backend-system/internal/adapters/repository/userrepository"
 	"testing"
 	"time"
 
@@ -13,8 +14,7 @@ import (
 	"github.com/Housiadas/backend-system/internal/common/unitest"
 	"github.com/Housiadas/backend-system/internal/core/domain/role"
 	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus/stores/userdb"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 )
 
 func Test_Auth(t *testing.T) {
@@ -30,7 +30,7 @@ func Test_Auth(t *testing.T) {
 		DB:        db.DB,
 		KeyLookup: &keyStore{},
 		Issuer:    "service project",
-		Userbus:   userbus.NewBusiness(db.Log, userdb.NewStore(db.Log, db.DB)),
+		Userbus:   userservice.NewBusiness(db.Log, userrepository.NewStore(db.Log, db.DB)),
 	})
 
 	t.Run("testAdminAuthorization", testAdminAuthorization(ath, sd))
@@ -233,7 +233,7 @@ func testUserRuleAny(ath *authbus.Auth, sd unitest.SeedData) func(t *testing.T) 
 func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 	ctx := context.Background()
 
-	usrs, err := userbus.TestSeedUsers(ctx, 2, role.Admin, busDomain.User)
+	usrs, err := userservice.TestSeedUsers(ctx, 2, role.Admin, busDomain.User)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -248,7 +248,7 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = userbus.TestSeedUsers(ctx, 2, role.User, busDomain.User)
+	usrs, err = userservice.TestSeedUsers(ctx, 2, role.User, busDomain.User)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}

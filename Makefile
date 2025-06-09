@@ -126,17 +126,17 @@ go/cli/user/events:
 ## Database
 ## ==================
 
-## db/migrations/create name=$1: Create new migration files
+## repository/migrations/create name=$1: Create new migration files
 .PHONY: db/migrate/create
 db/migrate/create:
 	$(MIGRATE) create -seq -ext=.sql -dir=./database/migrations $(INPUT)
 
-## db/migrations/up: Apply all up database migrations
+## repository/migrations/up: Apply all up database migrations
 .PHONY: db/migrate/up
 db/migrate/up:
 	$(MIGRATE) -path=./database/migrations -database=${MIGRATION_DB_DSN} up
 
-## db/migrations/down: Apply all down database migrations (DROP Database)
+## repository/migrations/down: Apply all down database migrations (DROP Database)
 .PHONY: db/migrate/down
 db/migrate/down:
 	$(MIGRATE) -path=./database/migrations -database=${MIGRATION_DB_DSN} down

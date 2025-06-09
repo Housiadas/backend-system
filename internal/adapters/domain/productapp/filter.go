@@ -8,7 +8,7 @@ import (
 
 	"github.com/Housiadas/backend-system/internal/common/validation"
 	"github.com/Housiadas/backend-system/internal/core/domain/name"
-	"github.com/Housiadas/backend-system/internal/core/service/productbus"
+	"github.com/Housiadas/backend-system/internal/core/service/productservice"
 )
 
 type QueryParams struct {
@@ -36,9 +36,9 @@ func ParseQueryParams(r *http.Request) QueryParams {
 
 }
 
-func parseFilter(qp QueryParams) (productbus.QueryFilter, error) {
+func parseFilter(qp QueryParams) (productservice.QueryFilter, error) {
 	var fieldErrors validation.FieldErrors
-	var filter productbus.QueryFilter
+	var filter productservice.QueryFilter
 
 	if qp.ID != "" {
 		id, err := uuid.Parse(qp.ID)
@@ -82,7 +82,7 @@ func parseFilter(qp QueryParams) (productbus.QueryFilter, error) {
 	}
 
 	if fieldErrors != nil {
-		return productbus.QueryFilter{}, fieldErrors.ToError()
+		return productservice.QueryFilter{}, fieldErrors.ToError()
 	}
 
 	return filter, nil

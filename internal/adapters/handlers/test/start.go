@@ -3,14 +3,14 @@ package test
 import (
 	"context"
 	"fmt"
+	"github.com/Housiadas/backend-system/internal/adapters/repository/userrepository"
 	"testing"
 
 	"github.com/Housiadas/backend-system/internal/adapters/handlers"
 	"github.com/Housiadas/backend-system/internal/common/dbtest"
 	cfg "github.com/Housiadas/backend-system/internal/config"
 	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus/stores/userdb"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 	"github.com/Housiadas/backend-system/pkg/otel"
 )
 
@@ -23,7 +23,7 @@ func StartTest(t *testing.T, testName string) (*Test, error) {
 		Log:       db.Log,
 		DB:        db.DB,
 		KeyLookup: &KeyStore{},
-		Userbus:   userbus.NewBusiness(db.Log, userdb.NewStore(db.Log, db.DB)),
+		Userbus:   userservice.NewBusiness(db.Log, userrepository.NewStore(db.Log, db.DB)),
 	})
 
 	// tracer

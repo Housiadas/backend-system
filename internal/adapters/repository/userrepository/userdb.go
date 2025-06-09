@@ -1,5 +1,5 @@
-// Package userdb contains user related CRUD functionality.
-package userdb
+// Package userrepository contains userDB related CRUD functionality.
+package userrepository
 
 import (
 	"bytes"
@@ -11,14 +11,14 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
+	"github.com/Housiadas/backend-system/internal/core/domain/user"
 	"github.com/Housiadas/backend-system/pkg/logger"
 	"github.com/Housiadas/backend-system/pkg/order"
 	"github.com/Housiadas/backend-system/pkg/page"
 	"github.com/Housiadas/backend-system/pkg/sqldb"
 )
 
-// Store manages the set of APIs for user database access.
+// Store manages the set of APIs for userDB database access.
 type Store struct {
 	log *logger.Logger
 	db  sqlx.ExtContext
@@ -34,7 +34,7 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 
 // NewWithTx constructs a new Store value replacing the sqlx DB
 // value with a sqlx DB value that is currently inside a transaction.
-func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (userbus.Storer, error) {
+func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (user.Storer, error) {
 	ec, err := sqldb.GetExtContext(tx)
 	if err != nil {
 		return nil, err
@@ -48,17 +48,17 @@ func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (userbus.Storer, error) {
 	return &store, nil
 }
 
-// Create inserts a new user into the database.
-func (s *Store) Create(ctx context.Context, usr userbus.User) error {
+// Create inserts a new userDB into the database.
+func (s *Store) Create(ctx context.Context, usr user.User) error {
 	const q = `
 	INSERT INTO users
 		(user_id, name, email, password_hash, roles, department, enabled, date_created, date_updated)
 	VALUES
 		(:user_id, :name, :email, :password_hash, :roles, :department, :enabled, :date_created, :date_updated)`
 
-	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBUser(usr)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toUserDB(usr)); err != nil {
 		if errors.Is(err, sqldb.ErrDBDuplicatedEntry) {
-			return fmt.Errorf("namedexeccontext: %w", userbus.ErrUniqueEmail)
+			return fmt.Errorf("namedexeccontext: %w", user.ErrUniqueEmail)
 		}
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
@@ -66,8 +66,8 @@ func (s *Store) Create(ctx context.Context, usr userbus.User) error {
 	return nil
 }
 
-// Update replaces a user document in the database.
-func (s *Store) Update(ctx context.Context, usr userbus.User) error {
+// Update replaces a userDB document in the database.
+func (s *Store) Update(ctx context.Context, usr user.User) error {
 	const q = `
 	UPDATE
 		users
@@ -82,9 +82,9 @@ func (s *Store) Update(ctx context.Context, usr userbus.User) error {
 	WHERE
 		user_id = :user_id`
 
-	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBUser(usr)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toUserDB(usr)); err != nil {
 		if errors.Is(err, sqldb.ErrDBDuplicatedEntry) {
-			return userbus.ErrUniqueEmail
+			return user.ErrUniqueEmail
 		}
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
@@ -92,15 +92,15 @@ func (s *Store) Update(ctx context.Context, usr userbus.User) error {
 	return nil
 }
 
-// Delete removes a user from the database.
-func (s *Store) Delete(ctx context.Context, usr userbus.User) error {
+// Delete removes a userDB from the database.
+func (s *Store) Delete(ctx context.Context, usr user.User) error {
 	const q = `
 	DELETE FROM
 		users
 	WHERE
 		user_id = :user_id`
 
-	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBUser(usr)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toUserDB(usr)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -108,7 +108,7 @@ func (s *Store) Delete(ctx context.Context, usr userbus.User) error {
 }
 
 // Query retrieves a list of existing users from the database.
-func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy order.By, page page.Page) ([]userbus.User, error) {
+func (s *Store) Query(ctx context.Context, filter user.QueryFilter, orderBy order.By, page page.Page) ([]user.User, error) {
 	data := map[string]any{
 		"offset":        (page.Number() - 1) * page.RowsPerPage(),
 		"rows_per_page": page.RowsPerPage(),
@@ -131,16 +131,16 @@ func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy o
 	buf.WriteString(orderByClause)
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
-	var dbUsrs []user
+	var dbUsrs []userDB
 	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbUsrs); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	return toBusUsers(dbUsrs)
+	return toUsersDomain(dbUsrs)
 }
 
 // Count returns the total number of users in the DB.
-func (s *Store) Count(ctx context.Context, filter userbus.QueryFilter) (int, error) {
+func (s *Store) Count(ctx context.Context, filter user.QueryFilter) (int, error) {
 	data := map[string]any{}
 
 	const q = `
@@ -153,19 +153,19 @@ func (s *Store) Count(ctx context.Context, filter userbus.QueryFilter) (int, err
 	applyFilter(filter, data, buf)
 
 	var count struct {
-		Count int `db:"count"`
+		Count int `repository:"count"`
 	}
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, buf.String(), data, &count); err != nil {
-		return 0, fmt.Errorf("db: %w", err)
+		return 0, fmt.Errorf("repository: %w", err)
 	}
 
 	return count.Count, nil
 }
 
-// QueryByID gets the specified user from the database.
-func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (userbus.User, error) {
+// QueryByID gets the specified userDB from the database.
+func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, error) {
 	data := struct {
-		ID string `db:"user_id"`
+		ID string `repository:"user_id"`
 	}{
 		ID: userID.String(),
 	}
@@ -178,21 +178,21 @@ func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (userbus.User, 
 	WHERE 
 		user_id = :user_id`
 
-	var dbUsr user
+	var dbUsr userDB
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbUsr); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
-			return userbus.User{}, fmt.Errorf("db: %w", userbus.ErrNotFound)
+			return user.User{}, fmt.Errorf("repository: %w", user.ErrNotFound)
 		}
-		return userbus.User{}, fmt.Errorf("db: %w", err)
+		return user.User{}, fmt.Errorf("repository: %w", err)
 	}
 
-	return toBusUser(dbUsr)
+	return toUserDomain(dbUsr)
 }
 
-// QueryByEmail gets the specified user from the database by email.
-func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (userbus.User, error) {
+// QueryByEmail gets the specified userDB from the database by email.
+func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (user.User, error) {
 	data := struct {
-		Email string `db:"email"`
+		Email string `repository:"email"`
 	}{
 		Email: email.Address,
 	}
@@ -205,13 +205,13 @@ func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (userbus.U
 	WHERE
 		email = :email`
 
-	var dbUsr user
+	var dbUsr userDB
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbUsr); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
-			return userbus.User{}, fmt.Errorf("db: %w", userbus.ErrNotFound)
+			return user.User{}, fmt.Errorf("repository: %w", user.ErrNotFound)
 		}
-		return userbus.User{}, fmt.Errorf("db: %w", err)
+		return user.User{}, fmt.Errorf("repository: %w", err)
 	}
 
-	return toBusUser(dbUsr)
+	return toUserDomain(dbUsr)
 }

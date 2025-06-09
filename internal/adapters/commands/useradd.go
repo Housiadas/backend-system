@@ -3,14 +3,14 @@ package commands
 import (
 	"context"
 	"fmt"
+	"github.com/Housiadas/backend-system/internal/adapters/repository/userrepository"
 	namePck "github.com/Housiadas/backend-system/internal/core/domain/name"
 	"github.com/Housiadas/backend-system/internal/core/domain/role"
 	"github.com/Housiadas/backend-system/pkg/sqldb"
 	"net/mail"
 	"time"
 
-	"github.com/Housiadas/backend-system/internal/core/service/userbus"
-	"github.com/Housiadas/backend-system/internal/core/service/userbus/stores/userdb"
+	"github.com/Housiadas/backend-system/internal/core/service/userservice"
 )
 
 // UserAdd adds new users into the database.
@@ -29,14 +29,14 @@ func (cmd *Command) UserAdd(name, email, password string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	userBus := userbus.NewBusiness(cmd.Log, userdb.NewStore(cmd.Log, db))
+	userBus := userservice.NewBusiness(cmd.Log, userrepository.NewStore(cmd.Log, db))
 
 	addr, err := mail.ParseAddress(email)
 	if err != nil {
 		return fmt.Errorf("parsing email: %w", err)
 	}
 
-	nu := userbus.NewUser{
+	nu := userservice.NewUser{
 		Name:     namePck.MustParse(name),
 		Email:    *addr,
 		Password: password,
