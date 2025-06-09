@@ -16,7 +16,7 @@ import (
 
 // StartTest initialized the system to run a test.
 func StartTest(t *testing.T, testName string) (*Test, error) {
-	db := dbtest.NewDatabase(t, testName, "file://../../../../../database/migrations")
+	db := dbtest.NewDatabase(t, testName)
 
 	// auth
 	auth := authbus.New(authbus.Config{

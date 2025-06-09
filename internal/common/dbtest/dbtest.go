@@ -52,7 +52,7 @@ func newBusDomains(log *logger.Logger, db *sqlx.DB) BusDomain {
 
 // =============================================================================
 
-// Database owns state for running and shutting down tests.
+// Database owns the state for running and shutting down tests.
 type Database struct {
 	DB        *sqlx.DB
 	Log       *logger.Logger
@@ -62,7 +62,7 @@ type Database struct {
 // NewDatabase creates a new test database inside the database that was started
 // to handle testing. The database is migrated to the current version, and
 // a connection pool is provided with internal core packages.
-func NewDatabase(t *testing.T, testName string, migrationsPath string) *Database {
+func NewDatabase(t *testing.T, testName string) *Database {
 
 	dockerArgs := []string{
 		"-e", "POSTGRES_DB=housi_db",
@@ -127,7 +127,7 @@ func NewDatabase(t *testing.T, testName string, migrationsPath string) *Database
 	// -------------------------------------------------------------------------
 	t.Logf("[TEST]: migrate Database UP %s\n", dbName)
 
-	err = migration(fmt.Sprintf(dbTestURL, dbName), migrationsPath)
+	err = migration(fmt.Sprintf(dbTestURL, dbName))
 	if err != nil {
 		t.Fatalf("[TEST]: Migrating error: %s", err)
 	}

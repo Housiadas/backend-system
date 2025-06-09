@@ -3,7 +3,6 @@ package authbus_test
 import (
 	"context"
 	"fmt"
-	"github.com/Housiadas/backend-system/internal/core/domain/role"
 	"testing"
 	"time"
 
@@ -12,6 +11,7 @@ import (
 
 	"github.com/Housiadas/backend-system/internal/common/dbtest"
 	"github.com/Housiadas/backend-system/internal/common/unitest"
+	"github.com/Housiadas/backend-system/internal/core/domain/role"
 	"github.com/Housiadas/backend-system/internal/core/service/authbus"
 	"github.com/Housiadas/backend-system/internal/core/service/userbus"
 	"github.com/Housiadas/backend-system/internal/core/service/userbus/stores/userdb"
@@ -19,7 +19,7 @@ import (
 
 func Test_Auth(t *testing.T) {
 
-	db := dbtest.NewDatabase(t, "Test_Auth", "file://../../../../database/migrations")
+	db := dbtest.NewDatabase(t, "Test_Auth")
 	sd, err := insertSeedData(db.BusDomain)
 	if err != nil {
 		t.Fatalf("Seeding error: %s", err)
