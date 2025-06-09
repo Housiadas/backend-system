@@ -19,8 +19,8 @@ func newLogHandler(handler slog.Handler, events Events) *logHandler {
 	}
 }
 
-// Enabled reports whether the handler handles records at the given level.
-// The handler ignores records whose level is lower.
+// Enabled reports whether the handlers handles records at the given level.
+// The handlers ignores records whose level is lower.
 func (h *logHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	return h.handler.Enabled(ctx, level)
 }

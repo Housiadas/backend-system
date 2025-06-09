@@ -30,7 +30,7 @@ var (
 	// DeadlineExceeded means operation expired before completion.
 	// For operations that change the state of the system, this error may be
 	// returned even if the operation has completed successfully. For
-	// example, a successful response from a server could have been delayed
+	// example, a successful response from a grpc could have been delayed
 	// long enough for the deadline to expire.
 	DeadlineExceeded = ErrCode{value: 5}
 

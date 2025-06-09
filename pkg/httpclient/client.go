@@ -37,7 +37,7 @@ func New(cfg Config) *Client {
 				MaxIdleConns:          100,
 				IdleConnTimeout:       90 * time.Second,
 				TLSHandshakeTimeout:   10 * time.Second,
-				ExpectContinueTimeout: 2 * time.Second, // specifies the amount of time to wait for a server's first response
+				ExpectContinueTimeout: 2 * time.Second, // specifies the amount of time to wait for a grpc's first response
 			}),
 			Timeout: cfg.Timeout, // specifies a time limit for requests made by this Client.
 		},

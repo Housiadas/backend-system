@@ -1,2 +1,2 @@
-// Package web contains the logic for the web app
+// Package web contains the logic for the web cli
 package web

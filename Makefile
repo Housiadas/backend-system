@@ -15,6 +15,11 @@ DOCKER_COMPOSE_LOCAL := docker compose -f ./compose.yml
 MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm migrate
 MIGRATION_DB_DSN := "postgres://housi:secret123@db:5432/housi_db?sslmode=disable"
 
+.PHONY: help
+help:
+	@echo Usage:
+	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'
+
 ## ==================
 ## Docker
 ## ==================
@@ -30,6 +35,7 @@ docker/build:
 ## docker/up: Start all the containers for the application
 .PHONY: docker/up
 docker/up:
+	make docker/down
 	$(DOCKER_COMPOSE_LOCAL) up -d
 
 ## docker/stop: stop all containers
@@ -93,30 +99,24 @@ go/grpc/curl/list:
 ## CMD Application
 ## ==================
 
-## go/cmd/build: Build cmd application
+## go/cli/build: Build cli application
 .PHONY: go/cmd/build
 go/cmd/build:
 	go build -o app/cmd/cmd app/cmd/main.go
 
-## go/cmd/seed: Seed db
-.PHONY: go/cmd/seed
-go/cmd/seed:
-	make go/cmd/build
-	app/cmd/cmd seed
-
-## go/cmd/genkey: Generate key
+## go/cli/genkey: Generate key
 .PHONY: go/cmd/genkey
 go/cmd/genkey:
 	make go/cmd/build
 	app/cmd/cmd genkey
 
-## go/cmd/useradd: Add user
+## go/cli/useradd: Add user
 .PHONY: go/cmd/useradd
 go/cmd/user/add:
 	make go/cmd/build
 	app/cmd/cmd useradd "chris housi" "example@example.com" "1232455477"
 
-## go/cmd/user/events: User events
+## go/cli/user/events: User events
 .PHONY: go/cmd/userevents
 go/cmd/user/events:
 	make go/cmd/build
@@ -129,17 +129,17 @@ go/cmd/user/events:
 ## db/migrations/create name=$1: Create new migration files
 .PHONY: db/migrate/create
 db/migrate/create:
-	$(MIGRATE) create -seq -ext=.sql -dir=./business/data/migrations $(INPUT)
+	$(MIGRATE) create -seq -ext=.sql -dir=./migrations $(INPUT)
 
 ## db/migrations/up: Apply all up database migrations
 .PHONY: db/migrate/up
 db/migrate/up:
-	$(MIGRATE) -path=./business/data/migrations -database=${MIGRATION_DB_DSN} up
+	$(MIGRATE) -path=./migrations -database=${MIGRATION_DB_DSN} up
 
 ## db/migrations/down: Apply all down database migrations (DROP Database)
 .PHONY: db/migrate/down
 db/migrate/down:
-	$(MIGRATE) -path=./business/data/migrations -database=${MIGRATION_DB_DSN} down
+	$(MIGRATE) -path=./migrations -database=${MIGRATION_DB_DSN} down
 
 ## ==================
 ## Quality Control
@@ -159,9 +159,9 @@ lint:
 errcheck:
 	go tool errcheck ./...
 
-## tests: Run tests
-.PHONY: tests
-tests:
+## test: Run tests
+.PHONY: test
+test:
 	CGO_ENABLED=1 go test -v -cover -short -race -json -p 4 ./... | go tool tparse --all
 
 ## coverage: Inspect coverage
@@ -278,7 +278,3 @@ statsviz:
 .PHONY: kafka/ui
 kafka/ui:
 	open http://localhost:8080
-
-help:
-	@echo Usage:
-	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'
