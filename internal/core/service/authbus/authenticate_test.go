@@ -19,7 +19,7 @@ import (
 
 func Test_Auth(t *testing.T) {
 
-	db := dbtest.NewDatabase(t, "Test_Auth", "file://../../../../migrations")
+	db := dbtest.NewDatabase(t, "Test_Auth", "file://../../../../database/migrations")
 	sd, err := insertSeedData(db.BusDomain)
 	if err != nil {
 		t.Fatalf("Seeding error: %s", err)

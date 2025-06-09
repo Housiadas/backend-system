@@ -5,14 +5,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	ctxPck "github.com/Housiadas/backend-system/internal/common/context"
-	"github.com/Housiadas/backend-system/pkg/sqldb"
 	"math/rand"
 	"testing"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 
+	ctxPck "github.com/Housiadas/backend-system/internal/common/context"
 	"github.com/Housiadas/backend-system/internal/core/service/productbus"
 	"github.com/Housiadas/backend-system/internal/core/service/productbus/stores/productdb"
 	"github.com/Housiadas/backend-system/internal/core/service/userbus"
@@ -20,6 +19,7 @@ import (
 	"github.com/Housiadas/backend-system/pkg/docker"
 	"github.com/Housiadas/backend-system/pkg/logger"
 	"github.com/Housiadas/backend-system/pkg/otel"
+	"github.com/Housiadas/backend-system/pkg/sqldb"
 )
 
 const (
@@ -60,7 +60,7 @@ type Database struct {
 }
 
 // NewDatabase creates a new test database inside the database that was started
-// to handle testing. The database is migrated to the current version and
+// to handle testing. The database is migrated to the current version, and
 // a connection pool is provided with internal core packages.
 func NewDatabase(t *testing.T, testName string, migrationsPath string) *Database {
 

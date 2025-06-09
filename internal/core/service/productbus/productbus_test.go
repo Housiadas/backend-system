@@ -23,7 +23,7 @@ import (
 func Test_Product(t *testing.T) {
 	t.Parallel()
 
-	db := dbtest.NewDatabase(t, "Test_Product", "file://../../../../migrations")
+	db := dbtest.NewDatabase(t, "Test_Product", "file://../../../../database/migrations")
 
 	sd, err := insertSeedData(db.BusDomain)
 	if err != nil {

@@ -62,12 +62,12 @@ docker/clean:
 ## go/http/run: Run main.go locally
 .PHONY: go/http/run
 go/http/run:
-	go run app/http/main.go
+	go run cmd/http/main.go
 
 ## go/http/build: build the http application
 .PHONY: go/http/build
 go/http/build:
-	cd app/http & \
+	cd cm/http & \
 	go build -ldflags=${LINKER_FLAGS} -o=./http-api
 
 ## ==================
@@ -77,12 +77,12 @@ go/http/build:
 ## go/grpc/run: Run gRPC locally
 .PHONY: go/grpc/run
 go/grpc/run:
-	go run app/grpc/main.go
+	go run cmd/grpc/main.go
 
 ## go/grpc/build: build the gRPC application
 .PHONY: go/grpc/build
 go/grpc/build:
-	cd app/grpc & \
+	cd cmd/grpc & \
 	go build -ldflags=${LINKER_FLAGS} -o=./banking-api
 
 ## go/grpc/curl: curl the gRPC application
@@ -96,31 +96,31 @@ go/grpc/curl/list:
 	grpcurl -plaintext localhost:9090 list
 
 ## ==================
-## CMD Application
+## CLI Application
 ## ==================
 
 ## go/cli/build: Build cli application
-.PHONY: go/cmd/build
-go/cmd/build:
-	go build -o app/cmd/cmd app/cmd/main.go
+.PHONY: go/cli/build
+go/cli/build:
+	go build -o cmd/cli/cli cmd/cli/main.go
 
 ## go/cli/genkey: Generate key
-.PHONY: go/cmd/genkey
-go/cmd/genkey:
+.PHONY: go/cli/genkey
+go/cli/genkey:
 	make go/cmd/build
 	app/cmd/cmd genkey
 
 ## go/cli/useradd: Add user
-.PHONY: go/cmd/useradd
-go/cmd/user/add:
-	make go/cmd/build
-	app/cmd/cmd useradd "chris housi" "example@example.com" "1232455477"
+.PHONY: go/cli/useradd
+go/cli/user/add:
+	make go/cli/build
+	cmd/cli/cli useradd "chris housi" "example@example.com" "1232455477"
 
 ## go/cli/user/events: User events
-.PHONY: go/cmd/userevents
-go/cmd/user/events:
-	make go/cmd/build
-	app/cmd/cmd userevents
+.PHONY: go/cli/userevents
+go/cli/user/events:
+	make go/cli/build
+	cmd/cli/cli userevents
 
 ## ==================
 ## Database
@@ -129,17 +129,17 @@ go/cmd/user/events:
 ## db/migrations/create name=$1: Create new migration files
 .PHONY: db/migrate/create
 db/migrate/create:
-	$(MIGRATE) create -seq -ext=.sql -dir=./migrations $(INPUT)
+	$(MIGRATE) create -seq -ext=.sql -dir=./database/migrations $(INPUT)
 
 ## db/migrations/up: Apply all up database migrations
 .PHONY: db/migrate/up
 db/migrate/up:
-	$(MIGRATE) -path=./migrations -database=${MIGRATION_DB_DSN} up
+	$(MIGRATE) -path=./database/migrations -database=${MIGRATION_DB_DSN} up
 
 ## db/migrations/down: Apply all down database migrations (DROP Database)
 .PHONY: db/migrate/down
 db/migrate/down:
-	$(MIGRATE) -path=./migrations -database=${MIGRATION_DB_DSN} down
+	$(MIGRATE) -path=./database/migrations -database=${MIGRATION_DB_DSN} down
 
 ## ==================
 ## Quality Control
