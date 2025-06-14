@@ -2,16 +2,19 @@
 A backend system built with Go `v1.24`.
 
 ## Introduction
-The system is separated in three main layers
-- `app` layer, represents the entry point of our application (request/response)
-- `business` layer, represents the business logic, like communication with database
-- `foundation` layer, represents core modules of the application, like logger
+Hexagonal Architecture, also known as `Ports & Adapters Architecture`, is one of several ways to build decoupled software systems. 
+It was popularized by Alistair Cockburn, who is known as one of the initiators of the agile movement in software development. 
+This way of organizing software is great for making applications that are easy to work on and can change without breaking.
 
-## App Layer
-- `http`, REST API implementation
-- `gRPC` implementation
-- `cmd` commands implementation
-- `domain` contains the entry point for our business logic
+## Project Structure
+- `.docker`, contains docker files
+- `.kubernetes`, contains deployment files
+- `cmd`, entry points for the application
+- `gen` generated rpc code
+- `internal` contains the hexagonal architecture
+- `pkg` core packages that are not related with the domain
+- `proto` protobuf definitions
+- `vendor` application dependencies
 
 ## Docker
 
