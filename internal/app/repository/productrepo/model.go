@@ -13,13 +13,13 @@ import (
 )
 
 type productDB struct {
-	ID          uuid.UUID `repository:"product_id"`
-	UserID      uuid.UUID `repository:"user_id"`
-	Name        string    `repository:"name"`
-	Cost        float64   `repository:"cost"`
-	Quantity    int       `repository:"quantity"`
-	DateCreated time.Time `repository:"date_created"`
-	DateUpdated time.Time `repository:"date_updated"`
+	ID          uuid.UUID `db:"product_id"`
+	UserID      uuid.UUID `db:"user_id"`
+	Name        string    `db:"name"`
+	Cost        float64   `db:"cost"`
+	Quantity    int       `db:"quantity"`
+	DateCreated time.Time `db:"date_created"`
+	DateUpdated time.Time `db:"date_updated"`
 }
 
 func toDBProduct(bus product.Product) productDB {

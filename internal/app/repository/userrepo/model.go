@@ -15,15 +15,15 @@ import (
 )
 
 type userDB struct {
-	ID           uuid.UUID      `repository:"user_id"`
-	Name         string         `repository:"name"`
-	Email        string         `repository:"email"`
-	Roles        dbarray.String `repository:"roles"`
-	PasswordHash []byte         `repository:"password_hash"`
-	Department   sql.NullString `repository:"department"`
-	Enabled      bool           `repository:"enabled"`
-	DateCreated  time.Time      `repository:"date_created"`
-	DateUpdated  time.Time      `repository:"date_updated"`
+	ID           uuid.UUID      `db:"user_id"`
+	Name         string         `db:"name"`
+	Email        string         `db:"email"`
+	Roles        dbarray.String `db:"roles"`
+	PasswordHash []byte         `db:"password_hash"`
+	Department   sql.NullString `db:"department"`
+	Enabled      bool           `db:"enabled"`
+	DateCreated  time.Time      `db:"date_created"`
+	DateUpdated  time.Time      `db:"date_updated"`
 }
 
 func toUserDB(usr user.User) userDB {

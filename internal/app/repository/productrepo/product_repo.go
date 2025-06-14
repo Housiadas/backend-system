@@ -87,7 +87,7 @@ func (s *Store) Update(ctx context.Context, prd product.Product) error {
 // Delete removes the productDB identified by a given ID.
 func (s *Store) Delete(ctx context.Context, prd product.Product) error {
 	data := struct {
-		ID string `repository:"product_id"`
+		ID string `db:"product_id"`
 	}{
 		ID: prd.ID.String(),
 	}
@@ -151,12 +151,12 @@ func (s *Store) Count(ctx context.Context, filter product.QueryFilter) (int, err
 	s.applyFilter(filter, data, buf)
 
 	var count struct {
-		Count   int `repository:"count"`
-		Sold    int `repository:"sold"`
-		Revenue int `repository:"revenue"`
+		Count   int `db:"count"`
+		Sold    int `db:"sold"`
+		Revenue int `db:"revenue"`
 	}
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, buf.String(), data, &count); err != nil {
-		return 0, fmt.Errorf("repository: %w", err)
+		return 0, fmt.Errorf("db: %w", err)
 	}
 
 	return count.Count, nil
@@ -165,7 +165,7 @@ func (s *Store) Count(ctx context.Context, filter product.QueryFilter) (int, err
 // QueryByID finds the productDB identified by a given ID.
 func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (product.Product, error) {
 	data := struct {
-		ID string `repository:"product_id"`
+		ID string `db:"product_id"`
 	}{
 		ID: productID.String(),
 	}
@@ -181,9 +181,9 @@ func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (product.Pro
 	var dbPrd productDB
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbPrd); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
-			return product.Product{}, fmt.Errorf("repository: %w", product.ErrNotFound)
+			return product.Product{}, fmt.Errorf("db: %w", product.ErrNotFound)
 		}
-		return product.Product{}, fmt.Errorf("repository: %w", err)
+		return product.Product{}, fmt.Errorf("db: %w", err)
 	}
 
 	return toBusProduct(dbPrd)
@@ -192,7 +192,7 @@ func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (product.Pro
 // QueryByUserID finds the productDB identified by a given User ID.
 func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]product.Product, error) {
 	data := struct {
-		ID string `repository:"user_id"`
+		ID string `db:"user_id"`
 	}{
 		ID: userID.String(),
 	}
@@ -207,7 +207,7 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]product.
 
 	var dbPrds []productDB
 	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dbPrds); err != nil {
-		return nil, fmt.Errorf("repository: %w", err)
+		return nil, fmt.Errorf("db: %w", err)
 	}
 
 	return toBusProducts(dbPrds)

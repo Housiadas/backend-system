@@ -1,4 +1,4 @@
-// Package commands contains the functionality for the set of commands
+// Package commands contain the functionality for the set of commands
 // currently supported by the CLI tooling.
 package commands
 
@@ -7,7 +7,7 @@ import (
 
 	"github.com/Housiadas/backend-system/internal/config"
 	"github.com/Housiadas/backend-system/pkg/logger"
-	
+	"github.com/Housiadas/backend-system/pkg/sqldb"
 )
 
 // ErrHelp provides context that help was given.

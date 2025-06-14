@@ -94,7 +94,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 		DisableTLS:   cfg.DB.DisableTLS,
 	})
 	if err != nil {
-		return fmt.Errorf("connecting to repository: %w", err)
+		return fmt.Errorf("connecting to db: %w", err)
 	}
 	defer db.Close()
 

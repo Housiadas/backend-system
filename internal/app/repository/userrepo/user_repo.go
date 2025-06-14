@@ -153,10 +153,10 @@ func (s *Store) Count(ctx context.Context, filter user.QueryFilter) (int, error)
 	applyFilter(filter, data, buf)
 
 	var count struct {
-		Count int `repository:"count"`
+		Count int `db:"count"`
 	}
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, buf.String(), data, &count); err != nil {
-		return 0, fmt.Errorf("repository: %w", err)
+		return 0, fmt.Errorf("db: %w", err)
 	}
 
 	return count.Count, nil
@@ -165,7 +165,7 @@ func (s *Store) Count(ctx context.Context, filter user.QueryFilter) (int, error)
 // QueryByID gets the specified userDB from the database.
 func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, error) {
 	data := struct {
-		ID string `repository:"user_id"`
+		ID string `db:"user_id"`
 	}{
 		ID: userID.String(),
 	}
@@ -181,9 +181,9 @@ func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, err
 	var dbUsr userDB
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbUsr); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
-			return user.User{}, fmt.Errorf("repository: %w", user.ErrNotFound)
+			return user.User{}, fmt.Errorf("db: %w", user.ErrNotFound)
 		}
-		return user.User{}, fmt.Errorf("repository: %w", err)
+		return user.User{}, fmt.Errorf("db: %w", err)
 	}
 
 	return toUserDomain(dbUsr)
@@ -192,7 +192,7 @@ func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, err
 // QueryByEmail gets the specified userDB from the database by email.
 func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (user.User, error) {
 	data := struct {
-		Email string `repository:"email"`
+		Email string `db:"email"`
 	}{
 		Email: email.Address,
 	}
@@ -208,9 +208,9 @@ func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (user.User
 	var dbUsr userDB
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbUsr); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
-			return user.User{}, fmt.Errorf("repository: %w", user.ErrNotFound)
+			return user.User{}, fmt.Errorf("db: %w", user.ErrNotFound)
 		}
-		return user.User{}, fmt.Errorf("repository: %w", err)
+		return user.User{}, fmt.Errorf("db: %w", err)
 	}
 
 	return toUserDomain(dbUsr)

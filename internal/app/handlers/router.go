@@ -23,7 +23,7 @@ func (h *Handler) Routes() *chi.Mux {
 	ruleUserOnly := mid.Authorize(authcore.RuleUserOnly)
 
 	// authorization for resource (entity) actions
-	// Check if a user is allowed to modify other user's resources
+	// Check if a user is allowed to modify another user's resources
 	requestUserAuthorizeAdmin := mid.UserPermissions(authcore.RuleAdminOnly)
 	requestUserAdminOrSubject := mid.UserPermissions(authcore.RuleAdminOrSubject)
 	requestProductAdminOrSubject := mid.ProductPermissions(authcore.RuleAdminOrSubject)

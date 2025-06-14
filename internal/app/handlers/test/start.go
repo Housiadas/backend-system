@@ -3,10 +3,10 @@ package test
 import (
 	"context"
 	"fmt"
-	"github.com/Housiadas/backend-system/internal/app/repository/userrepo"
 	"testing"
 
 	"github.com/Housiadas/backend-system/internal/app/handlers"
+	"github.com/Housiadas/backend-system/internal/app/repository/userrepo"
 	"github.com/Housiadas/backend-system/internal/common/dbtest"
 	cfg "github.com/Housiadas/backend-system/internal/config"
 	"github.com/Housiadas/backend-system/internal/core/service/authcore"
