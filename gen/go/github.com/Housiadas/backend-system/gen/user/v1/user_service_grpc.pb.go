@@ -47,7 +47,7 @@ func (c *userServiceClient) GetUserById(ctx context.Context, in *GetUserByIdRequ
 	return out, nil
 }
 
-// UserServiceServer is the server API for UserService service.
+// UserServiceServer is the grpc API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {

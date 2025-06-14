@@ -8,7 +8,7 @@ volumes:
 services:
   db:
     image: postgres:17.3
-    container_name: db-container
+    container_name: repository-container
     restart: always
     environment:
       POSTGRES_DB: "housi_db"
@@ -62,7 +62,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT"
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka-broker-1:9092,PLAINTEXT_INTERNAL://localhost:19092"
       KAFKA_JMX_PORT: 9997
-      KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=kafka0 -Dcom.sun.management.jmxremote.rmi.port=9997
+      KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.grpc.hostname=kafka0 -Dcom.sun.management.jmxremote.rmi.port=9997
     ports:
       - "19092:19092"
     networks:
@@ -82,7 +82,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT"
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka-broker-2:9092,PLAINTEXT_INTERNAL://localhost:29092"
       KAFKA_JMX_PORT: 9997
-      KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=kafka0 -Dcom.sun.management.jmxremote.rmi.port=9997
+      KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.grpc.hostname=kafka0 -Dcom.sun.management.jmxremote.rmi.port=9997
     networks:
       - app_local_network
 
@@ -100,7 +100,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT"
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka-broker-3:9092,PLAINTEXT_INTERNAL://localhost:39092"
       KAFKA_JMX_PORT: 9997
-      KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=kafka0 -Dcom.sun.management.jmxremote.rmi.port=9997
+      KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.grpc.hostname=kafka0 -Dcom.sun.management.jmxremote.rmi.port=9997
     networks:
       - app_local_network
 
