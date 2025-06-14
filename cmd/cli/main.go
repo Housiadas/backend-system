@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/viper"
 
-	"github.com/Housiadas/backend-system/internal/adapters/commands"
+	"github.com/Housiadas/backend-system/internal/app/commands"
 	"github.com/Housiadas/backend-system/pkg/logger"
 )
 
@@ -81,11 +81,6 @@ func processCommands(args []string, cmd *commands.Command) error {
 	case "genkey":
 		if err := cmd.GenKey(); err != nil {
 			return fmt.Errorf("key generation: %w", err)
-		}
-
-	case "userevents":
-		if err := cmd.UserEvents(); err != nil {
-			return fmt.Errorf("kafka consumer for user events: %w", err)
 		}
 
 	default:

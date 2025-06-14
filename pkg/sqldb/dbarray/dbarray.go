@@ -21,7 +21,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// Package dbarray provides support for database array domain.
+// Package dbarray provides support for database array service.
 package dbarray
 
 import (
@@ -376,7 +376,7 @@ func (Generic) evaluateDestination(rt reflect.Type) (reflect.Type, func([]byte, 
 	var assign func([]byte, reflect.Value) error
 	var del = ","
 
-	// TODO calculate the assign function for other domain
+	// TODO calculate the assign function for other service
 	// TODO repeat this section on the element type of arrays or slices (multidimensional)
 	{
 		if reflect.PointerTo(rt).Implements(typeSQLScanner) {
@@ -524,7 +524,7 @@ func (a Generic) Value() (driver.Value, error) {
 	return "{}", nil
 }
 
-// Int64 represents a one-dimensional array of the PostgresSQL integer domain.
+// Int64 represents a one-dimensional array of the PostgresSQL integer service.
 type Int64 []int64
 
 // Scan implements the sql.Scanner interface.
@@ -585,7 +585,7 @@ func (a Int64) Value() (driver.Value, error) {
 	return "{}", nil
 }
 
-// Int32 represents a one-dimensional array of the PostgresSQL integer domain.
+// Int32 represents a one-dimensional array of the PostgresSQL integer service.
 type Int32 []int32
 
 // Scan implements the sql.Scanner interface.
@@ -648,7 +648,7 @@ func (a Int32) Value() (driver.Value, error) {
 	return "{}", nil
 }
 
-// String represents a one-dimensional array of the PostgresSQL character domain.
+// String represents a one-dimensional array of the PostgresSQL character service.
 type String []string
 
 // Scan implements the sql.Scanner interface.

@@ -46,7 +46,7 @@ type NewProduct struct {
 // existing Product. All fields are optional so clients can send just the
 // fields they want changed. It uses pointer fields, so we can differentiate
 // between a field that was not provided and a field provided as
-// explicitly blank. Normally we do not want to use pointers to basic domain, but
+// explicitly blank. Normally we do not want to use pointers to basic service, but
 // we make exceptions around marshaling/unmarshalling.
 type UpdateProduct struct {
 	Name     *name.Name

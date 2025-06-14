@@ -4,18 +4,18 @@ import (
 	"context"
 	"expvar"
 	"fmt"
-	"github.com/Housiadas/backend-system/internal/adapters/repository/productrepository"
-	"github.com/Housiadas/backend-system/internal/adapters/repository/userrepository"
 	"net"
 	"os"
 	"os/signal"
 	"runtime"
 	"syscall"
 
-	"github.com/Housiadas/backend-system/internal/adapters/grpc"
+	"github.com/Housiadas/backend-system/internal/app/grpc"
+	"github.com/Housiadas/backend-system/internal/app/repository/productrepo"
+	"github.com/Housiadas/backend-system/internal/app/repository/userrepo"
 	"github.com/Housiadas/backend-system/internal/config"
-	"github.com/Housiadas/backend-system/internal/core/service/productservice"
-	"github.com/Housiadas/backend-system/internal/core/service/userservice"
+	"github.com/Housiadas/backend-system/internal/core/service/productcore"
+	"github.com/Housiadas/backend-system/internal/core/service/usercore"
 	"github.com/Housiadas/backend-system/pkg/logger"
 	"github.com/Housiadas/backend-system/pkg/otel"
 	"github.com/Housiadas/backend-system/pkg/sqldb"
@@ -122,12 +122,12 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	tracer := traceProvider.Tracer(cfg.App.Name)
 
 	// -------------------------------------------------------------------------
-	// Build Service Layer
+	// Build Core Services
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing internal layer")
 
-	userBus := userservice.NewBusiness(log, userrepository.NewStore(log, db))
-	productBus := productservice.NewBusiness(log, userBus, productrepository.NewStore(log, db))
+	userBus := usercore.NewBusiness(log, userrepo.NewStore(log, db))
+	productBus := productcore.NewBusiness(log, userBus, productrepo.NewStore(log, db))
 
 	// -------------------------------------------------------------------------
 	// Start Grpc Server

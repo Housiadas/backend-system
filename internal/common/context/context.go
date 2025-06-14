@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/productservice"
-	"github.com/Housiadas/backend-system/internal/core/service/userservice"
+	"github.com/Housiadas/backend-system/internal/core/domain/product"
+	"github.com/Housiadas/backend-system/internal/core/domain/user"
+	"github.com/Housiadas/backend-system/internal/core/service/authcore"
 )
 
 type ctxKey string
@@ -46,15 +46,15 @@ func GetApiVersion(ctx context.Context) string {
 	return v
 }
 
-func SetClaims(ctx context.Context, claims authbus.Claims) context.Context {
+func SetClaims(ctx context.Context, claims authcore.Claims) context.Context {
 	return context.WithValue(ctx, claimKey, claims)
 }
 
 // GetClaims returns the claims from the context.
-func GetClaims(ctx context.Context) authbus.Claims {
-	v, ok := ctx.Value(claimKey).(authbus.Claims)
+func GetClaims(ctx context.Context) authcore.Claims {
+	v, ok := ctx.Value(claimKey).(authcore.Claims)
 	if !ok {
-		return authbus.Claims{}
+		return authcore.Claims{}
 	}
 	return v
 }
@@ -73,29 +73,29 @@ func GetUserID(ctx context.Context) (uuid.UUID, error) {
 	return v, nil
 }
 
-func SetUser(ctx context.Context, usr userservice.User) context.Context {
+func SetUser(ctx context.Context, usr user.User) context.Context {
 	return context.WithValue(ctx, userKey, usr)
 }
 
 // GetUser returns the user from the context.
-func GetUser(ctx context.Context) (userservice.User, error) {
-	v, ok := ctx.Value(userKey).(userservice.User)
+func GetUser(ctx context.Context) (user.User, error) {
+	v, ok := ctx.Value(userKey).(user.User)
 	if !ok {
-		return userservice.User{}, errors.New("user not found in context")
+		return user.User{}, errors.New("user not found in context")
 	}
 
 	return v, nil
 }
 
-func SetProduct(ctx context.Context, prd productservice.Product) context.Context {
+func SetProduct(ctx context.Context, prd product.Product) context.Context {
 	return context.WithValue(ctx, productKey, prd)
 }
 
 // GetProduct returns the productapi from the context.
-func GetProduct(ctx context.Context) (productservice.Product, error) {
-	v, ok := ctx.Value(productKey).(productservice.Product)
+func GetProduct(ctx context.Context) (product.Product, error) {
+	v, ok := ctx.Value(productKey).(product.Product)
 	if !ok {
-		return productservice.Product{}, errors.New("productapi not found in context")
+		return product.Product{}, errors.New("productapi not found in context")
 	}
 
 	return v, nil

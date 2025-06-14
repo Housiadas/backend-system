@@ -5,8 +5,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/Housiadas/backend-system/internal/adapters/repository/productrepository"
-	"github.com/Housiadas/backend-system/internal/adapters/repository/userrepository"
+	"github.com/Housiadas/backend-system/internal/app/repository/productrepo"
+	"github.com/Housiadas/backend-system/internal/app/repository/userrepo"
 	"math/rand"
 	"testing"
 	"time"
@@ -14,8 +14,8 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	ctxPck "github.com/Housiadas/backend-system/internal/common/context"
-	"github.com/Housiadas/backend-system/internal/core/service/productservice"
-	"github.com/Housiadas/backend-system/internal/core/service/userservice"
+	"github.com/Housiadas/backend-system/internal/core/service/productcore"
+	"github.com/Housiadas/backend-system/internal/core/service/usercore"
 	"github.com/Housiadas/backend-system/pkg/docker"
 	"github.com/Housiadas/backend-system/pkg/logger"
 	"github.com/Housiadas/backend-system/pkg/otel"
@@ -36,13 +36,13 @@ var dbTestURL = "postgres://housi:secret123@localhost:5432/%s?sslmode=disable"
 
 // BusDomain represents all the internal core apis needed for testing.
 type BusDomain struct {
-	User    *userservice.Service
-	Product *productservice.Business
+	User    *usercore.Service
+	Product *productcore.Business
 }
 
 func newBusDomains(log *logger.Logger, db *sqlx.DB) BusDomain {
-	userBus := userservice.NewBusiness(log, userrepository.NewStore(log, db))
-	productBus := productservice.NewBusiness(log, userBus, productrepository.NewStore(log, db))
+	userBus := usercore.NewBusiness(log, userrepo.NewStore(log, db))
+	productBus := productcore.NewBusiness(log, userBus, productrepo.NewStore(log, db))
 
 	return BusDomain{
 		User:    userBus,

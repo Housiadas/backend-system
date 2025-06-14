@@ -4,8 +4,6 @@ import (
 	"context"
 	"expvar"
 	"fmt"
-	"github.com/Housiadas/backend-system/internal/adapters/repository/productrepository"
-	"github.com/Housiadas/backend-system/internal/adapters/repository/userrepository"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,12 +11,14 @@ import (
 	"syscall"
 
 	_ "github.com/Housiadas/backend-system/docs"
-	"github.com/Housiadas/backend-system/internal/adapters/handlers"
+	"github.com/Housiadas/backend-system/internal/app/handlers"
+	"github.com/Housiadas/backend-system/internal/app/repository/productrepo"
+	"github.com/Housiadas/backend-system/internal/app/repository/userrepo"
 	ctxPck "github.com/Housiadas/backend-system/internal/common/context"
 	"github.com/Housiadas/backend-system/internal/config"
-	"github.com/Housiadas/backend-system/internal/core/service/authbus"
-	"github.com/Housiadas/backend-system/internal/core/service/productservice"
-	"github.com/Housiadas/backend-system/internal/core/service/userservice"
+	"github.com/Housiadas/backend-system/internal/core/service/authcore"
+	"github.com/Housiadas/backend-system/internal/core/service/productcore"
+	"github.com/Housiadas/backend-system/internal/core/service/usercore"
 	"github.com/Housiadas/backend-system/pkg/debug"
 	"github.com/Housiadas/backend-system/pkg/kafka"
 	"github.com/Housiadas/backend-system/pkg/keystore"
@@ -161,12 +161,12 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	tracer := traceProvider.Tracer(cfg.App.Name)
 
 	// -------------------------------------------------------------------------
-	// Build Service Layer
+	// Core Services
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing internal layer")
 
-	userBus := userservice.NewBusiness(log, userrepository.NewStore(log, db))
-	productBus := productservice.NewBusiness(log, userBus, productrepository.NewStore(log, db))
+	userCore := usercore.NewBusiness(log, userrepo.NewStore(log, db))
+	productCore := productcore.NewBusiness(log, userCore, productrepo.NewStore(log, db))
 
 	// Load the private keys files from disk. We can assume some system api like
 	// Vault has created these files already. How that happens is not our concern.
@@ -174,11 +174,11 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
 		return fmt.Errorf("reading keys: %w", err)
 	}
-	authBus := authbus.New(authbus.Config{
+	authCore := authcore.New(authcore.Config{
 		Log:       log,
 		DB:        db,
 		KeyLookup: ks,
-		Userbus:   userBus,
+		Userbus:   userCore,
 	})
 
 	// -------------------------------------------------------------------------
@@ -205,9 +205,9 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 		DB:          db,
 		Log:         log,
 		Tracer:      tracer,
-		AuthBus:     authBus,
-		UserBus:     userBus,
-		ProductBus:  productBus,
+		AuthCore:    authCore,
+		UserCore:    userCore,
+		ProductCore: productCore,
 	})
 
 	api := http.Server{

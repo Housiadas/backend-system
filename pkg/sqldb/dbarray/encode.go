@@ -55,7 +55,7 @@ type parameterStatus struct {
 //
 // Once EnableInfinityTS has been called, all connections created using this
 // driver will decode Postgres' "-infinity" and "infinity" for "timestamp",
-// "timestamp with time zone" and "date" domain to the predefined minimum and
+// "timestamp with time zone" and "date" service to the predefined minimum and
 // maximum times, respectively.  When encoding time.Time values, any time which
 // equals or precedes the predefined minimum time will be encoded to
 // "-infinity".  Any values at or past the maximum time will similarly be
