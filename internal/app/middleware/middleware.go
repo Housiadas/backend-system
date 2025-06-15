@@ -29,8 +29,8 @@ type Config struct {
 	Tracer  trace.Tracer
 	Tx      *sqldb.DBBeginner
 	Auth    *authcore.Auth
-	User    *usercore.Service
-	Product *productcore.Business
+	User    *usercore.Core
+	Product *productcore.Core
 }
 
 type Middleware struct {
@@ -42,8 +42,8 @@ type Middleware struct {
 
 type Business struct {
 	Auth    *authcore.Auth
-	User    *usercore.Service
-	Product *productcore.Business
+	User    *usercore.Core
+	Product *productcore.Core
 }
 
 func New(cfg Config) *Middleware {

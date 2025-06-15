@@ -1,6 +1,7 @@
-package test
+package apitest
 
 import (
+	"github.com/Housiadas/backend-system/internal/core/domain/audit"
 	"github.com/Housiadas/backend-system/internal/core/domain/product"
 	"github.com/Housiadas/backend-system/internal/core/domain/user"
 )
@@ -9,6 +10,7 @@ import (
 type User struct {
 	user.User
 	Products []product.Product
+	Audits   []audit.Audit
 	Token    string
 }
 

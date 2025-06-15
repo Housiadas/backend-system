@@ -28,7 +28,7 @@ func (cmd *Command) GenToken(userID uuid.UUID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	userBus := usercore.NewBusiness(cmd.Log, userrepo.NewStore(cmd.Log, db))
+	userBus := usercore.NewCore(cmd.Log, userrepo.NewStore(cmd.Log, db))
 
 	usr, err := userBus.QueryByID(ctx, userID)
 	if err != nil {

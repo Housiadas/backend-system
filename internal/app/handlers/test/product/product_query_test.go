@@ -2,13 +2,13 @@ package product_test
 
 import (
 	"fmt"
+	"github.com/Housiadas/backend-system/internal/common/apitest"
 	"net/http"
 	"sort"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 
-	testPck "github.com/Housiadas/backend-system/internal/app/handlers/test"
 	"github.com/Housiadas/backend-system/internal/app/service/productapp"
 	"github.com/Housiadas/backend-system/internal/core/domain/product"
 	"github.com/Housiadas/backend-system/pkg/errs"
@@ -18,7 +18,7 @@ import (
 func Test_Product_Query_200(t *testing.T) {
 	t.Parallel()
 
-	test, err := testPck.StartTest(t, "Test_API_User")
+	test, err := apitest.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -36,7 +36,7 @@ func Test_Product_Query_200(t *testing.T) {
 		return prds[i].ID.String() <= prds[j].ID.String()
 	})
 
-	table := []testPck.Table{
+	table := []apitest.Table{
 		{
 			Name:       "basic",
 			URL:        "/api/v1/products?page=1&rows=10&orderBy=product_id,ASC",
@@ -66,7 +66,7 @@ func Test_Product_Query_200(t *testing.T) {
 func Test_Product_Query_By_ID_200(t *testing.T) {
 	t.Parallel()
 
-	test, err := testPck.StartTest(t, "Test_API_Product")
+	test, err := apitest.StartTest(t, "Test_API_Product")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -76,7 +76,7 @@ func Test_Product_Query_By_ID_200(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testPck.Table{
+	table := []apitest.Table{
 		{
 			Name:       "basic",
 			URL:        fmt.Sprintf("/api/v1/products/%s", sd.Users[0].Products[0].ID),
@@ -97,7 +97,7 @@ func Test_Product_Query_By_ID_200(t *testing.T) {
 func Test_Product_Query_400(t *testing.T) {
 	t.Parallel()
 
-	test, err := testPck.StartTest(t, "Test_API_Product")
+	test, err := apitest.StartTest(t, "Test_API_Product")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -107,7 +107,7 @@ func Test_Product_Query_400(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testPck.Table{
+	table := []apitest.Table{
 		{
 			Name:       "bad-query-filter",
 			URL:        "/api/v1/products?page=1&rows=10&name=$#!",

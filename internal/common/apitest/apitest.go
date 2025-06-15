@@ -1,5 +1,5 @@
-// Package test provides support for integration http tests.
-package test
+// Package apitest provides support for integration http tests.
+package apitest
 
 import (
 	"bytes"
@@ -85,10 +85,10 @@ func (at *Test) Run(t *testing.T, table []Table, testName string) {
 // =============================================================================
 
 // Token generates an authenticated token for a user.
-func Token(userBus *usercore.Service, ath *authcore.Auth, email string) string {
+func Token(userCore *usercore.Core, ath *authcore.Auth, email string) string {
 	addr, _ := mail.ParseAddress(email)
 
-	dbUsr, err := userBus.QueryByEmail(context.Background(), *addr)
+	dbUsr, err := userCore.QueryByEmail(context.Background(), *addr)
 	if err != nil {
 		return ""
 	}

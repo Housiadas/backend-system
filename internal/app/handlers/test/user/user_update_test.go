@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	testPck "github.com/Housiadas/backend-system/internal/app/handlers/test"
 	"github.com/Housiadas/backend-system/internal/app/service/userapp"
+	"github.com/Housiadas/backend-system/internal/common/apitest"
 	"github.com/Housiadas/backend-system/internal/common/dbtest"
 	"github.com/Housiadas/backend-system/pkg/errs"
 )
@@ -17,7 +17,7 @@ import (
 func Test_API_User_Update_200(t *testing.T) {
 	t.Parallel()
 
-	test, err := testPck.StartTest(t, "Test_API_User")
+	test, err := apitest.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -27,7 +27,7 @@ func Test_API_User_Update_200(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testPck.Table{
+	table := []apitest.Table{
 		{
 			Name:       "basic",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),
@@ -104,7 +104,7 @@ func Test_API_User_Update_200(t *testing.T) {
 func Test_API_User_Update_400(t *testing.T) {
 	t.Parallel()
 
-	test, err := testPck.StartTest(t, "Test_API_User")
+	test, err := apitest.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -114,7 +114,7 @@ func Test_API_User_Update_400(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testPck.Table{
+	table := []apitest.Table{
 		{
 			Name:       "bad-input",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),
@@ -154,7 +154,7 @@ func Test_API_User_Update_400(t *testing.T) {
 func Test_API_User_Update_401(t *testing.T) {
 	t.Parallel()
 
-	test, err := testPck.StartTest(t, "Test_API_User")
+	test, err := apitest.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -164,7 +164,7 @@ func Test_API_User_Update_401(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testPck.Table{
+	table := []apitest.Table{
 		{
 			Name:       "empty token",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),

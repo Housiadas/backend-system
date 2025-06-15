@@ -126,8 +126,8 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing internal layer")
 
-	userBus := usercore.NewBusiness(log, userrepo.NewStore(log, db))
-	productBus := productcore.NewBusiness(log, userBus, productrepo.NewStore(log, db))
+	userBus := usercore.NewCore(log, userrepo.NewStore(log, db))
+	productBus := productcore.NewCore(log, userBus, productrepo.NewStore(log, db))
 
 	// -------------------------------------------------------------------------
 	// Start Grpc Server

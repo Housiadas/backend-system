@@ -18,15 +18,15 @@ import (
 	"github.com/Housiadas/backend-system/pkg/sqldb"
 )
 
-// Service manages the set of APIs for user access.
-type Service struct {
+// Core manages the set of APIs for user access.
+type Core struct {
 	log    *logger.Logger
 	storer user.Storer
 }
 
-// NewBusiness constructs a user.User internal API for use.
-func NewBusiness(log *logger.Logger, storer user.Storer) *Service {
-	return &Service{
+// NewCore constructs a user.User internal API for use.
+func NewCore(log *logger.Logger, storer user.Storer) *Core {
+	return &Core{
 		log:    log,
 		storer: storer,
 	}
@@ -34,14 +34,14 @@ func NewBusiness(log *logger.Logger, storer user.Storer) *Service {
 
 // NewWithTx constructs a new internal value that will use the
 // specified transaction in any store-related calls.
-func (b *Service) NewWithTx(tx sqldb.CommitRollbacker) (*Service, error) {
-	storer, err := b.storer.NewWithTx(tx)
+func (c *Core) NewWithTx(tx sqldb.CommitRollbacker) (*Core, error) {
+	storer, err := c.storer.NewWithTx(tx)
 	if err != nil {
 		return nil, err
 	}
 
-	bus := Service{
-		log:    b.log,
+	bus := Core{
+		log:    c.log,
 		storer: storer,
 	}
 
@@ -49,7 +49,7 @@ func (b *Service) NewWithTx(tx sqldb.CommitRollbacker) (*Service, error) {
 }
 
 // Create adds a new User to the system.
-func (b *Service) Create(ctx context.Context, nu user.NewUser) (user.User, error) {
+func (c *Core) Create(ctx context.Context, nu user.NewUser) (user.User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(nu.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return user.User{}, fmt.Errorf("generatefrompassword: %w", err)
@@ -69,7 +69,7 @@ func (b *Service) Create(ctx context.Context, nu user.NewUser) (user.User, error
 		DateUpdated:  now,
 	}
 
-	if err := b.storer.Create(ctx, usr); err != nil {
+	if err := c.storer.Create(ctx, usr); err != nil {
 		return user.User{}, fmt.Errorf("create: %w", err)
 	}
 
@@ -77,7 +77,7 @@ func (b *Service) Create(ctx context.Context, nu user.NewUser) (user.User, error
 }
 
 // Update modifies information about a user.User.
-func (b *Service) Update(ctx context.Context, usr user.User, uu user.UpdateUser) (user.User, error) {
+func (c *Core) Update(ctx context.Context, usr user.User, uu user.UpdateUser) (user.User, error) {
 	if uu.Name != nil {
 		usr.Name = *uu.Name
 	}
@@ -107,7 +107,7 @@ func (b *Service) Update(ctx context.Context, usr user.User, uu user.UpdateUser)
 	}
 	usr.DateUpdated = time.Now()
 
-	if err := b.storer.Update(ctx, usr); err != nil {
+	if err := c.storer.Update(ctx, usr); err != nil {
 		return user.User{}, fmt.Errorf("update: %w", err)
 	}
 
@@ -115,8 +115,8 @@ func (b *Service) Update(ctx context.Context, usr user.User, uu user.UpdateUser)
 }
 
 // Delete removes the specified user.
-func (b *Service) Delete(ctx context.Context, usr user.User) error {
-	if err := b.storer.Delete(ctx, usr); err != nil {
+func (c *Core) Delete(ctx context.Context, usr user.User) error {
+	if err := c.storer.Delete(ctx, usr); err != nil {
 		return fmt.Errorf("delete: %w", err)
 	}
 
@@ -124,8 +124,8 @@ func (b *Service) Delete(ctx context.Context, usr user.User) error {
 }
 
 // Query retrieves a list of existing users.
-func (b *Service) Query(ctx context.Context, filter user.QueryFilter, orderBy order.By, page page.Page) ([]user.User, error) {
-	users, err := b.storer.Query(ctx, filter, orderBy, page)
+func (c *Core) Query(ctx context.Context, filter user.QueryFilter, orderBy order.By, page page.Page) ([]user.User, error) {
+	users, err := c.storer.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
@@ -134,13 +134,13 @@ func (b *Service) Query(ctx context.Context, filter user.QueryFilter, orderBy or
 }
 
 // Count returns the total number of users.
-func (b *Service) Count(ctx context.Context, filter user.QueryFilter) (int, error) {
-	return b.storer.Count(ctx, filter)
+func (c *Core) Count(ctx context.Context, filter user.QueryFilter) (int, error) {
+	return c.storer.Count(ctx, filter)
 }
 
 // QueryByID finds the user by the specified ID.
-func (b *Service) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, error) {
-	usr, err := b.storer.QueryByID(ctx, userID)
+func (c *Core) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, error) {
+	usr, err := c.storer.QueryByID(ctx, userID)
 	if err != nil {
 		return user.User{}, fmt.Errorf("query: userID[%s]: %w", userID, err)
 	}
@@ -149,8 +149,8 @@ func (b *Service) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, e
 }
 
 // QueryByEmail finds the user by a specified user email.
-func (b *Service) QueryByEmail(ctx context.Context, email mail.Address) (user.User, error) {
-	usr, err := b.storer.QueryByEmail(ctx, email)
+func (c *Core) QueryByEmail(ctx context.Context, email mail.Address) (user.User, error) {
+	usr, err := c.storer.QueryByEmail(ctx, email)
 	if err != nil {
 		return user.User{}, fmt.Errorf("query: email[%s]: %w", email, err)
 	}
@@ -161,8 +161,8 @@ func (b *Service) QueryByEmail(ctx context.Context, email mail.Address) (user.Us
 // Authenticate finds a user by their email and verifies their password. On
 // success, it returns a Claims User representing this user. The claims can be
 // used to generate a token for future authentication.
-func (b *Service) Authenticate(ctx context.Context, email mail.Address, password string) (user.User, error) {
-	usr, err := b.QueryByEmail(ctx, email)
+func (c *Core) Authenticate(ctx context.Context, email mail.Address, password string) (user.User, error) {
+	usr, err := c.QueryByEmail(ctx, email)
 	if err != nil {
 		return user.User{}, fmt.Errorf("query: email[%s]: %w", email, err)
 	}

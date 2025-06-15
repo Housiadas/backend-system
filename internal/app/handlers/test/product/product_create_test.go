@@ -1,8 +1,8 @@
 package product_test
 
 import (
-	testPck "github.com/Housiadas/backend-system/internal/app/handlers/test"
 	"github.com/Housiadas/backend-system/internal/app/service/productapp"
+	"github.com/Housiadas/backend-system/internal/common/apitest"
 	"net/http"
 	"testing"
 
@@ -14,7 +14,7 @@ import (
 func Test_Product_Create_200(t *testing.T) {
 	t.Parallel()
 
-	test, err := testPck.StartTest(t, "Test_API_Product")
+	test, err := apitest.StartTest(t, "Test_API_Product")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -24,7 +24,7 @@ func Test_Product_Create_200(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testPck.Table{
+	table := []apitest.Table{
 		{
 			Name:       "basic",
 			URL:        "/api/v1/products",
@@ -66,7 +66,7 @@ func Test_Product_Create_200(t *testing.T) {
 func Test_Product_Create_400(t *testing.T) {
 	t.Parallel()
 
-	test, err := testPck.StartTest(t, "Test_API_User")
+	test, err := apitest.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -76,7 +76,7 @@ func Test_Product_Create_400(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testPck.Table{
+	table := []apitest.Table{
 		{
 			Name:       "missing-input",
 			URL:        "/api/v1/products",
@@ -98,7 +98,7 @@ func Test_Product_Create_400(t *testing.T) {
 func Test_Product_Create_401(t *testing.T) {
 	t.Parallel()
 
-	test, err := testPck.StartTest(t, "Test_API_User")
+	test, err := apitest.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -108,7 +108,7 @@ func Test_Product_Create_401(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testPck.Table{
+	table := []apitest.Table{
 		{
 			Name:       "emptytoken",
 			URL:        "/api/v1/products",

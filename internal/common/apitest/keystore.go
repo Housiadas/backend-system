@@ -1,4 +1,4 @@
-package test
+package apitest
 
 // KeyStore represents a mock keystore with a hardcoded key.
 type KeyStore struct{}

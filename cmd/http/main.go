@@ -4,6 +4,8 @@ import (
 	"context"
 	"expvar"
 	"fmt"
+	"github.com/Housiadas/backend-system/internal/app/repository/auditrepo"
+	"github.com/Housiadas/backend-system/internal/core/service/auditcore"
 	"net/http"
 	"os"
 	"os/signal"
@@ -165,8 +167,9 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing internal layer")
 
-	userCore := usercore.NewBusiness(log, userrepo.NewStore(log, db))
-	productCore := productcore.NewBusiness(log, userCore, productrepo.NewStore(log, db))
+	auditCore := auditcore.NewCore(log, auditrepo.NewStore(log, db))
+	userCore := usercore.NewCore(log, userrepo.NewStore(log, db))
+	productCore := productcore.NewCore(log, userCore, productrepo.NewStore(log, db))
 
 	// Load the private keys files from disk. We can assume some system api like
 	// Vault has created these files already. How that happens is not our concern.
@@ -182,7 +185,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	})
 
 	// -------------------------------------------------------------------------
-	// Start Debug Http Service
+	// Start Debug Http Core
 	// -------------------------------------------------------------------------
 	go func() {
 		log.Info(ctx, "startup", "status", "Debug grpc starting", "host", cfg.Http.Debug)
@@ -205,6 +208,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 		DB:          db,
 		Log:         log,
 		Tracer:      tracer,
+		AuditCore:   auditCore,
 		AuthCore:    authCore,
 		UserCore:    userCore,
 		ProductCore: productCore,

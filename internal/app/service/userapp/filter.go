@@ -1,7 +1,6 @@
 package userapp
 
 import (
-	"net/http"
 	"net/mail"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 	"github.com/Housiadas/backend-system/internal/core/domain/user"
 )
 
-type QueryParams struct {
+type AppQueryParams struct {
 	Page             string
 	Rows             string
 	OrderBy          string
@@ -23,22 +22,7 @@ type QueryParams struct {
 	EndCreatedDate   string
 }
 
-func ParseQueryParams(r *http.Request) QueryParams {
-	values := r.URL.Query()
-
-	return QueryParams{
-		Page:             values.Get("page"),
-		Rows:             values.Get("rows"),
-		OrderBy:          values.Get("orderBy"),
-		ID:               values.Get("user_id"),
-		Name:             values.Get("name"),
-		Email:            values.Get("email"),
-		StartCreatedDate: values.Get("start_created_date"),
-		EndCreatedDate:   values.Get("end_created_date"),
-	}
-}
-
-func parseFilter(qp QueryParams) (user.QueryFilter, error) {
+func parseFilter(qp AppQueryParams) (user.QueryFilter, error) {
 	var fieldErrors validation.FieldErrors
 	var filter user.QueryFilter
 
