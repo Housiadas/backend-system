@@ -53,6 +53,7 @@ func StartTest(t *testing.T, testName string) (*Test, error) {
 		DB:          db.DB,
 		Log:         db.Log,
 		Tracer:      tracer,
+		AuditCore:   db.Core.Audit,
 		AuthCore:    auth,
 		UserCore:    db.Core.User,
 		ProductCore: db.Core.Product,
