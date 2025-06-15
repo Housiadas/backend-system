@@ -77,6 +77,11 @@ func (h *Handler) Routes() *chi.Mux {
 			p.With(requestProductAdminOrSubject).Delete("/{product_id}", h.Web.Res.Respond(h.productDelete))
 		})
 
+		// Audits
+		v1.With(authenticate).Route("/audits", func(a chi.Router) {
+			a.With(ruleAdmin).Get("/", h.Web.Res.Respond(h.auditQuery))
+		})
+
 		// Transaction example
 		v1.With(tran).Post("/transaction", h.Web.Res.Respond(h.transaction))
 	})

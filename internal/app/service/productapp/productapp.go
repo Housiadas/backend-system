@@ -14,11 +14,11 @@ import (
 
 // App manages the set of cli layer api functions for the product core.
 type App struct {
-	productBus *productcore.Business
+	productBus *productcore.Core
 }
 
 // NewApp constructs a product cli API for use.
-func NewApp(productBus *productcore.Business) *App {
+func NewApp(productBus *productcore.Core) *App {
 	return &App{
 		productBus: productBus,
 	}
@@ -74,7 +74,7 @@ func (a *App) Delete(ctx context.Context) error {
 }
 
 // Query returns a list of products with paging.
-func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[Product], error) {
+func (a *App) Query(ctx context.Context, qp AppQueryParams) (page.Result[Product], error) {
 	p, err := page.Parse(qp.Page, qp.Rows)
 	if err != nil {
 		return page.Result[Product]{}, validation.NewFieldErrors("page", err)

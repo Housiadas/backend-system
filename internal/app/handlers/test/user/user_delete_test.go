@@ -7,14 +7,14 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	testPck "github.com/Housiadas/backend-system/internal/app/handlers/test"
+	"github.com/Housiadas/backend-system/internal/common/apitest"
 	"github.com/Housiadas/backend-system/pkg/errs"
 )
 
 func Test_API_User_Delete_200(t *testing.T) {
 	t.Parallel()
 
-	test, err := testPck.StartTest(t, "Test_API_User")
+	test, err := apitest.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -24,7 +24,7 @@ func Test_API_User_Delete_200(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testPck.Table{
+	table := []apitest.Table{
 		{
 			Name:       "asuser",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[1].ID),
@@ -47,7 +47,7 @@ func Test_API_User_Delete_200(t *testing.T) {
 func Test_API_User_Delete_401(t *testing.T) {
 	t.Parallel()
 
-	test, err := testPck.StartTest(t, "Test_API_User")
+	test, err := apitest.StartTest(t, "Test_API_User")
 	if err != nil {
 		t.Fatalf("Start error: %s", err)
 	}
@@ -57,7 +57,7 @@ func Test_API_User_Delete_401(t *testing.T) {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
-	table := []testPck.Table{
+	table := []apitest.Table{
 		{
 			Name:       "emptytoken",
 			URL:        fmt.Sprintf("/api/v1/users/%s", sd.Users[0].ID),

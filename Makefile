@@ -2,18 +2,21 @@
 # VARIABLES
 # ==================================================================================== #
 
-GO_VERSION := 1.24
-UID := $(shell id -u)
-GID := $(shell id -g)
+UID			:= $(shell id -u)
+GID			:= $(shell id -g)
+GO_VERSION	:= 1.24
+ALPINE		:= alpine:3.22
+GRAFANA		:= grafana/grafana:11.6.0
+POSTGRES	:= postgres:17.5
 
-INPUT ?= $(shell bash -c 'read -p "Insert name: " name; echo $$name')
-CURRENT_TIME := $(shell date --iso-8601=seconds)
-GIT_VERSION := $(shell git describe --always --dirty --tags --long)
-LINKER_FLAGS := "-s -X main.buildTime=${CURRENT_TIME} -X main.version=${GIT_VERSION}"
+INPUT			?= $(shell bash -c 'read -p "Insert name: " name; echo $$name')
+CURRENT_TIME	:= $(shell date --iso-8601=seconds)
+GIT_VERSION		:= $(shell git describe --always --dirty --tags --long)
+LINKER_FLAGS	:= "-s -X main.buildTime=${CURRENT_TIME} -X main.version=${GIT_VERSION}"
 
-DOCKER_COMPOSE_LOCAL := docker compose -f ./compose.yml
-MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm migrate
-MIGRATION_DB_DSN := "postgres://housi:secret123@db:5432/housi_db?sslmode=disable"
+MIGRATE 				:= $(DOCKER_COMPOSE_LOCAL) run --rm migrate
+MIGRATION_DB_DSN 		:= "postgres://housi:secret123@db:5432/housi_db?sslmode=disable"
+DOCKER_COMPOSE_LOCAL	:= docker compose -f ./compose.yml
 
 .PHONY: help
 help:

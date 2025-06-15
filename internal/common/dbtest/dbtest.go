@@ -5,8 +5,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/Housiadas/backend-system/internal/app/repository/productrepo"
-	"github.com/Housiadas/backend-system/internal/app/repository/userrepo"
 	"math/rand"
 	"testing"
 	"time"
@@ -14,8 +12,6 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	ctxPck "github.com/Housiadas/backend-system/internal/common/context"
-	"github.com/Housiadas/backend-system/internal/core/service/productcore"
-	"github.com/Housiadas/backend-system/internal/core/service/usercore"
 	"github.com/Housiadas/backend-system/pkg/docker"
 	"github.com/Housiadas/backend-system/pkg/logger"
 	"github.com/Housiadas/backend-system/pkg/otel"
@@ -34,35 +30,17 @@ const (
 
 var dbTestURL = "postgres://housi:secret123@localhost:5432/%s?sslmode=disable"
 
-// BusDomain represents all the internal core apis needed for testing.
-type BusDomain struct {
-	User    *usercore.Service
-	Product *productcore.Business
-}
-
-func newBusDomains(log *logger.Logger, db *sqlx.DB) BusDomain {
-	userBus := usercore.NewBusiness(log, userrepo.NewStore(log, db))
-	productBus := productcore.NewBusiness(log, userBus, productrepo.NewStore(log, db))
-
-	return BusDomain{
-		User:    userBus,
-		Product: productBus,
-	}
-}
-
-// =============================================================================
-
 // Database owns the state for running and shutting down tests.
 type Database struct {
-	DB        *sqlx.DB
-	Log       *logger.Logger
-	BusDomain BusDomain
+	DB   *sqlx.DB
+	Log  *logger.Logger
+	Core Core
 }
 
-// NewDatabase creates a new test database inside the database that was started
+// New creates a new test database inside the database that was started
 // to handle testing. The database is migrated to the current version, and
 // a connection pool is provided with internal core packages.
-func NewDatabase(t *testing.T, testName string) *Database {
+func New(t *testing.T, testName string) *Database {
 
 	dockerArgs := []string{
 		"-e", "POSTGRES_DB=housi_db",
@@ -159,8 +137,8 @@ func NewDatabase(t *testing.T, testName string) *Database {
 	})
 
 	return &Database{
-		DB:        db,
-		Log:       log,
-		BusDomain: newBusDomains(log, db),
+		DB:   db,
+		Log:  log,
+		Core: newCore(log, db),
 	}
 }

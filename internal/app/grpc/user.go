@@ -36,8 +36,8 @@ func (s *Server) GetUserById(
 	}, nil
 }
 
-func toUserQueryParams(req *userV1.GetUserByIdRequest) userapp.QueryParams {
-	return userapp.QueryParams{
+func toUserQueryParams(req *userV1.GetUserByIdRequest) userapp.AppQueryParams {
+	return userapp.AppQueryParams{
 		ID: req.Id,
 	}
 }

@@ -23,24 +23,24 @@ import (
 func Test_User(t *testing.T) {
 	t.Parallel()
 
-	db := dbtest.NewDatabase(t, "Test_User")
+	db := dbtest.New(t, "Test_User")
 
-	sd, err := insertSeedData(db.BusDomain)
+	sd, err := insertSeedData(db.Core)
 	if err != nil {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
 	// -------------------------------------------------------------------------
 
-	unitest.Run(t, query(db.BusDomain, sd), "query")
-	unitest.Run(t, create(db.BusDomain), "create")
-	unitest.Run(t, update(db.BusDomain, sd), "update")
-	unitest.Run(t, deleteUser(db.BusDomain, sd), "delete")
+	unitest.Run(t, query(db.Core, sd), "query")
+	unitest.Run(t, create(db.Core), "create")
+	unitest.Run(t, update(db.Core, sd), "update")
+	unitest.Run(t, deleteUser(db.Core, sd), "delete")
 }
 
 // =============================================================================
 
-func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
+func insertSeedData(busDomain dbtest.Core) (unitest.SeedData, error) {
 	ctx := context.Background()
 
 	usrs, err := usercore.TestSeedUsers(ctx, 2, role.Admin, busDomain.User)
@@ -83,7 +83,7 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 
 // =============================================================================
 
-func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
+func query(busDomain dbtest.Core, sd unitest.SeedData) []unitest.Table {
 	usrs := make([]user.User, 0, len(sd.Admins)+len(sd.Users))
 
 	for _, adm := range sd.Admins {
@@ -170,7 +170,7 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 	return table
 }
 
-func create(busDomain dbtest.BusDomain) []unitest.Table {
+func create(busDomain dbtest.Core) []unitest.Table {
 	email, _ := mail.ParseAddress("chris@housi.com")
 
 	table := []unitest.Table{
@@ -224,7 +224,7 @@ func create(busDomain dbtest.BusDomain) []unitest.Table {
 	return table
 }
 
-func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
+func update(busDomain dbtest.Core, sd unitest.SeedData) []unitest.Table {
 	email, _ := mail.ParseAddress("chris2@housi.com")
 
 	table := []unitest.Table{
@@ -278,7 +278,7 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 	return table
 }
 
-func deleteUser(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
+func deleteUser(busDomain dbtest.Core, sd unitest.SeedData) []unitest.Table {
 	table := []unitest.Table{
 		{
 			Name:    "user",

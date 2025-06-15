@@ -1,7 +1,6 @@
 package productapp
 
 import (
-	"net/http"
 	"strconv"
 
 	"github.com/google/uuid"
@@ -11,7 +10,7 @@ import (
 	"github.com/Housiadas/backend-system/internal/core/domain/product"
 )
 
-type QueryParams struct {
+type AppQueryParams struct {
 	Page     string
 	Rows     string
 	OrderBy  string
@@ -21,22 +20,7 @@ type QueryParams struct {
 	Quantity string
 }
 
-func ParseQueryParams(r *http.Request) QueryParams {
-	values := r.URL.Query()
-
-	return QueryParams{
-		Page:     values.Get("page"),
-		Rows:     values.Get("rows"),
-		OrderBy:  values.Get("orderBy"),
-		ID:       values.Get("product_id"),
-		Name:     values.Get("name"),
-		Cost:     values.Get("cost"),
-		Quantity: values.Get("quantity"),
-	}
-
-}
-
-func parseFilter(qp QueryParams) (product.QueryFilter, error) {
+func parseFilter(qp AppQueryParams) (product.QueryFilter, error) {
 	var fieldErrors validation.FieldErrors
 	var filter product.QueryFilter
 

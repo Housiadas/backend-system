@@ -34,7 +34,7 @@ func TestNewUsers(n int, role rolePck.Role) []user.NewUser {
 }
 
 // TestSeedUsers is a helper method for testing.
-func TestSeedUsers(ctx context.Context, n int, role rolePck.Role, api *Service) ([]user.User, error) {
+func TestSeedUsers(ctx context.Context, n int, role rolePck.Role, api *Core) ([]user.User, error) {
 	newUsrs := TestNewUsers(n, role)
 
 	usrs := make([]user.User, len(newUsrs))

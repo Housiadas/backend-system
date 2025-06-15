@@ -6,7 +6,7 @@ CREATE TABLE users
     email         TEXT UNIQUE NOT NULL,
     roles         TEXT[]      NOT NULL,
     password_hash TEXT        NOT NULL,
-    department    TEXT        NULL,
+    department    TEXT NULL,
     enabled       BOOLEAN     NOT NULL,
     date_created  TIMESTAMP   NOT NULL,
     date_updated  TIMESTAMP   NOT NULL,
@@ -27,4 +27,20 @@ CREATE TABLE products
 
     PRIMARY KEY (product_id),
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+);
+
+-- Description: Create table audit
+CREATE TABLE audit
+(
+    id         UUID      NOT NULL,
+    obj_id     UUID      NOT NULL,
+    obj_entity TEXT      NOT NULL,
+    obj_name   TEXT      NOT NULL,
+    actor_id   UUID      NOT NULL,
+    action     TEXT      NOT NULL,
+    data       JSONB NULL,
+    message    TEXT NULL,
+    timestamp  TIMESTAMP NOT NULL,
+
+    PRIMARY KEY (id)
 );

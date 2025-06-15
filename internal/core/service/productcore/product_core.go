@@ -17,20 +17,20 @@ import (
 	"github.com/Housiadas/backend-system/pkg/sqldb"
 )
 
-// Business manages the set of APIs for product access.
-type Business struct {
+// Core manages the set of APIs for product access.
+type Core struct {
 	log     *logger.Logger
-	userBus *usercore.Service
+	userBus *usercore.Core
 	storer  product.Storer
 }
 
-// NewBusiness constructs a product internal API for use.
-func NewBusiness(
+// NewCore constructs a product internal API for use.
+func NewCore(
 	log *logger.Logger,
-	userBus *usercore.Service,
+	userBus *usercore.Core,
 	storer product.Storer,
-) *Business {
-	b := Business{
+) *Core {
+	b := Core{
 		log:     log,
 		userBus: userBus,
 		storer:  storer,
@@ -41,19 +41,19 @@ func NewBusiness(
 
 // NewWithTx constructs a new internal value that will use the
 // specified transaction in any store-related calls.
-func (b *Business) NewWithTx(tx sqldb.CommitRollbacker) (*Business, error) {
-	storer, err := b.storer.NewWithTx(tx)
+func (c *Core) NewWithTx(tx sqldb.CommitRollbacker) (*Core, error) {
+	storer, err := c.storer.NewWithTx(tx)
 	if err != nil {
 		return nil, err
 	}
 
-	userBus, err := b.userBus.NewWithTx(tx)
+	userBus, err := c.userBus.NewWithTx(tx)
 	if err != nil {
 		return nil, err
 	}
 
-	bus := Business{
-		log:     b.log,
+	bus := Core{
+		log:     c.log,
 		userBus: userBus,
 		storer:  storer,
 	}
@@ -62,11 +62,11 @@ func (b *Business) NewWithTx(tx sqldb.CommitRollbacker) (*Business, error) {
 }
 
 // Create adds a new product to the system.
-func (b *Business) Create(ctx context.Context, np product.NewProduct) (product.Product, error) {
+func (c *Core) Create(ctx context.Context, np product.NewProduct) (product.Product, error) {
 	ctx, span := otel.AddSpan(ctx, "internal.productcore.create")
 	defer span.End()
 
-	usr, err := b.userBus.QueryByID(ctx, np.UserID)
+	usr, err := c.userBus.QueryByID(ctx, np.UserID)
 	if err != nil {
 		return product.Product{}, fmt.Errorf("user.querybyid: %s: %w", np.UserID, err)
 	}
@@ -87,7 +87,7 @@ func (b *Business) Create(ctx context.Context, np product.NewProduct) (product.P
 		DateUpdated: now,
 	}
 
-	if err := b.storer.Create(ctx, prd); err != nil {
+	if err := c.storer.Create(ctx, prd); err != nil {
 		return product.Product{}, fmt.Errorf("create: %w", err)
 	}
 
@@ -95,7 +95,7 @@ func (b *Business) Create(ctx context.Context, np product.NewProduct) (product.P
 }
 
 // Update modifies information about a product.
-func (b *Business) Update(ctx context.Context, prd product.Product, up product.UpdateProduct) (product.Product, error) {
+func (c *Core) Update(ctx context.Context, prd product.Product, up product.UpdateProduct) (product.Product, error) {
 	if up.Name != nil {
 		prd.Name = *up.Name
 	}
@@ -110,7 +110,7 @@ func (b *Business) Update(ctx context.Context, prd product.Product, up product.U
 
 	prd.DateUpdated = time.Now()
 
-	if err := b.storer.Update(ctx, prd); err != nil {
+	if err := c.storer.Update(ctx, prd); err != nil {
 		return product.Product{}, fmt.Errorf("update: %w", err)
 	}
 
@@ -118,8 +118,8 @@ func (b *Business) Update(ctx context.Context, prd product.Product, up product.U
 }
 
 // Delete removes the specified product.
-func (b *Business) Delete(ctx context.Context, prd product.Product) error {
-	if err := b.storer.Delete(ctx, prd); err != nil {
+func (c *Core) Delete(ctx context.Context, prd product.Product) error {
+	if err := c.storer.Delete(ctx, prd); err != nil {
 		return fmt.Errorf("deleteUser: %w", err)
 	}
 
@@ -127,8 +127,8 @@ func (b *Business) Delete(ctx context.Context, prd product.Product) error {
 }
 
 // Query retrieves a list of existing products.
-func (b *Business) Query(ctx context.Context, filter product.QueryFilter, orderBy order.By, page page.Page) ([]product.Product, error) {
-	prds, err := b.storer.Query(ctx, filter, orderBy, page)
+func (c *Core) Query(ctx context.Context, filter product.QueryFilter, orderBy order.By, page page.Page) ([]product.Product, error) {
+	prds, err := c.storer.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
@@ -137,13 +137,13 @@ func (b *Business) Query(ctx context.Context, filter product.QueryFilter, orderB
 }
 
 // Count returns the total number of products.
-func (b *Business) Count(ctx context.Context, filter product.QueryFilter) (int, error) {
-	return b.storer.Count(ctx, filter)
+func (c *Core) Count(ctx context.Context, filter product.QueryFilter) (int, error) {
+	return c.storer.Count(ctx, filter)
 }
 
 // QueryByID finds the product by the specified Ib.
-func (b *Business) QueryByID(ctx context.Context, productID uuid.UUID) (product.Product, error) {
-	prd, err := b.storer.QueryByID(ctx, productID)
+func (c *Core) QueryByID(ctx context.Context, productID uuid.UUID) (product.Product, error) {
+	prd, err := c.storer.QueryByID(ctx, productID)
 	if err != nil {
 		return product.Product{}, fmt.Errorf("query: productID[%s]: %w", productID, err)
 	}
@@ -152,8 +152,8 @@ func (b *Business) QueryByID(ctx context.Context, productID uuid.UUID) (product.
 }
 
 // QueryByUserID finds the products by a specified User Ib.
-func (b *Business) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]product.Product, error) {
-	prds, err := b.storer.QueryByUserID(ctx, userID)
+func (c *Core) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]product.Product, error) {
+	prds, err := c.storer.QueryByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}

@@ -14,12 +14,12 @@ import (
 
 // App manages the set of cli layer http functions for the tran core.
 type App struct {
-	userBus    *usercore.Service
-	productBus *productcore.Business
+	userBus    *usercore.Core
+	productBus *productcore.Core
 }
 
 // NewApp constructs a tran cli API for use.
-func NewApp(userBus *usercore.Service, productBus *productcore.Business) *App {
+func NewApp(userBus *usercore.Core, productBus *productcore.Core) *App {
 	return &App{
 		userBus:    userBus,
 		productBus: productBus,

@@ -1,4 +1,4 @@
-package test
+package apitest
 
 import (
 	"context"
@@ -16,20 +16,20 @@ import (
 
 // StartTest initialized the system to run a test.
 func StartTest(t *testing.T, testName string) (*Test, error) {
-	db := dbtest.NewDatabase(t, testName)
+	db := dbtest.New(t, testName)
 
 	// auth
 	auth := authcore.New(authcore.Config{
 		Log:       db.Log,
 		DB:        db.DB,
 		KeyLookup: &KeyStore{},
-		Userbus:   usercore.NewBusiness(db.Log, userrepo.NewStore(db.Log, db.DB)),
+		Userbus:   usercore.NewCore(db.Log, userrepo.NewStore(db.Log, db.DB)),
 	})
 
 	// tracer
 	traceProvider, teardown, err := otel.InitTracing(otel.Config{
 		Log:         db.Log,
-		ServiceName: "Service Name",
+		ServiceName: "Core Name",
 		Host:        "Test host",
 		ExcludedRoutes: map[string]struct{}{
 			"/v1/liveness":  {},
@@ -43,7 +43,7 @@ func StartTest(t *testing.T, testName string) (*Test, error) {
 
 	defer teardown(context.Background())
 
-	tracer := traceProvider.Tracer("Service Name")
+	tracer := traceProvider.Tracer("Core Name")
 
 	// Initialize handlers
 	h := handlers.New(handlers.Config{
@@ -53,9 +53,10 @@ func StartTest(t *testing.T, testName string) (*Test, error) {
 		DB:          db.DB,
 		Log:         db.Log,
 		Tracer:      tracer,
+		AuditCore:   db.Core.Audit,
 		AuthCore:    auth,
-		UserCore:    db.BusDomain.User,
-		ProductCore: db.BusDomain.Product,
+		UserCore:    db.Core.User,
+		ProductCore: db.Core.Product,
 	})
 
 	return New(db, auth, h.Routes()), nil

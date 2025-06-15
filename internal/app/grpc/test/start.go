@@ -12,7 +12,7 @@ import (
 
 // StartTest initialized the system to run a test.
 func StartTest(t *testing.T, testName string) (*Test, error) {
-	db := dbtest.NewDatabase(t, testName)
+	db := dbtest.New(t, testName)
 
 	// tracer
 	traceProvider, teardown, err := otel.InitTracing(otel.Config{
@@ -40,8 +40,8 @@ func StartTest(t *testing.T, testName string) (*Test, error) {
 		DB:          db.DB,
 		Log:         db.Log,
 		Tracer:      tracer,
-		UserBus:     db.BusDomain.User,
-		ProductBus:  db.BusDomain.Product,
+		UserBus:     db.Core.User,
+		ProductBus:  db.Core.Product,
 	})
 
 	return New(db, s), nil

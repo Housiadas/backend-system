@@ -35,8 +35,8 @@ type App struct {
 
 // Business represents the core internal layer.
 type Business struct {
-	User    *usercore.Service
-	Product *productcore.Business
+	User    *usercore.Core
+	Product *productcore.Core
 }
 
 type Config struct {
@@ -45,8 +45,8 @@ type Config struct {
 	DB          *sqlx.DB
 	Log         *logger.Logger
 	Tracer      trace.Tracer
-	UserBus     *usercore.Service
-	ProductBus  *productcore.Business
+	UserBus     *usercore.Core
+	ProductBus  *productcore.Core
 }
 
 func New(cfg Config) *Server {

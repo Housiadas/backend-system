@@ -108,7 +108,7 @@ func (h *Handler) userDelete(ctx context.Context, _ http.ResponseWriter, _ *http
 // @Failure      500  {object}  errs.Error
 // @Router       /user [get]
 func (h *Handler) userQuery(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
-	qp := userapp.ParseQueryParams(r)
+	qp := userParseQueryParams(r)
 
 	usr, err := h.App.User.Query(ctx, qp)
 	if err != nil {
@@ -134,4 +134,19 @@ func (h *Handler) userQueryByID(ctx context.Context, _ http.ResponseWriter, _ *h
 	}
 
 	return usr
+}
+
+func userParseQueryParams(r *http.Request) userapp.AppQueryParams {
+	values := r.URL.Query()
+
+	return userapp.AppQueryParams{
+		Page:             values.Get("page"),
+		Rows:             values.Get("rows"),
+		OrderBy:          values.Get("orderBy"),
+		ID:               values.Get("user_id"),
+		Name:             values.Get("name"),
+		Email:            values.Get("email"),
+		StartCreatedDate: values.Get("start_created_date"),
+		EndCreatedDate:   values.Get("end_created_date"),
+	}
 }

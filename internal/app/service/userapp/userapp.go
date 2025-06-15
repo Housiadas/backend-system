@@ -18,22 +18,22 @@ import (
 
 // App manages the set of cli layer api functions for the user core.
 type App struct {
-	authbus *authcore.Auth
-	userBus *usercore.Service
+	authCore *authcore.Auth
+	userCore *usercore.Core
 }
 
 // NewApp constructs a user cli API for use.
-func NewApp(userBus *usercore.Service) *App {
+func NewApp(userBus *usercore.Core) *App {
 	return &App{
-		userBus: userBus,
+		userCore: userBus,
 	}
 }
 
 // NewAppWithAuth constructs a user cli API for use.
-func NewAppWithAuth(userBus *usercore.Service, authbus *authcore.Auth) *App {
+func NewAppWithAuth(userBus *usercore.Core, authbus *authcore.Auth) *App {
 	return &App{
-		authbus: authbus,
-		userBus: userBus,
+		authCore: authbus,
+		userCore: userBus,
 	}
 }
 
@@ -44,7 +44,7 @@ func (a *App) Create(ctx context.Context, app NewUser) (User, error) {
 		return User{}, errs.New(errs.InvalidArgument, err)
 	}
 
-	usr, err := a.userBus.Create(ctx, nc)
+	usr, err := a.userCore.Create(ctx, nc)
 	if err != nil {
 		if errors.Is(err, user.ErrUniqueEmail) {
 			return User{}, errs.New(errs.Aborted, user.ErrUniqueEmail)
@@ -67,7 +67,7 @@ func (a *App) Update(ctx context.Context, app UpdateUser) (User, error) {
 		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
 	}
 
-	updUsr, err := a.userBus.Update(ctx, usr, uu)
+	updUsr, err := a.userCore.Update(ctx, usr, uu)
 	if err != nil {
 		return User{}, errs.Newf(errs.Internal, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
 	}
@@ -87,7 +87,7 @@ func (a *App) UpdateRole(ctx context.Context, app UpdateUserRole) (User, error) 
 		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
 	}
 
-	updUsr, err := a.userBus.Update(ctx, usr, uu)
+	updUsr, err := a.userCore.Update(ctx, usr, uu)
 	if err != nil {
 		return User{}, errs.Newf(errs.Internal, "updaterole: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
 	}
@@ -102,7 +102,7 @@ func (a *App) Delete(ctx context.Context) error {
 		return errs.Newf(errs.Internal, "userID missing in context: %s", err)
 	}
 
-	if err := a.userBus.Delete(ctx, usr); err != nil {
+	if err := a.userCore.Delete(ctx, usr); err != nil {
 		return errs.Newf(errs.Internal, "delete: userID[%s]: %s", usr.ID, err)
 	}
 
@@ -110,7 +110,7 @@ func (a *App) Delete(ctx context.Context) error {
 }
 
 // Query returns a list of users with paging.
-func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[User], error) {
+func (a *App) Query(ctx context.Context, qp AppQueryParams) (page.Result[User], error) {
 	p, err := page.Parse(qp.Page, qp.Rows)
 	if err != nil {
 		return page.Result[User]{}, validation.NewFieldErrors("page", err)
@@ -126,12 +126,12 @@ func (a *App) Query(ctx context.Context, qp QueryParams) (page.Result[User], err
 		return page.Result[User]{}, validation.NewFieldErrors("order", err)
 	}
 
-	usrs, err := a.userBus.Query(ctx, filter, orderBy, p)
+	usrs, err := a.userCore.Query(ctx, filter, orderBy, p)
 	if err != nil {
 		return page.Result[User]{}, errs.Newf(errs.Internal, "query: %s", err)
 	}
 
-	total, err := a.userBus.Count(ctx, filter)
+	total, err := a.userCore.Count(ctx, filter)
 	if err != nil {
 		return page.Result[User]{}, errs.Newf(errs.Internal, "count: %s", err)
 	}
@@ -156,7 +156,7 @@ func (a *App) Authenticate(ctx context.Context, authUser AuthenticateUser) (User
 		return User{}, validation.NewFieldErrors("email", err)
 	}
 
-	usr, err := a.userBus.Authenticate(ctx, *addr, authUser.Password)
+	usr, err := a.userCore.Authenticate(ctx, *addr, authUser.Password)
 	if err != nil {
 		return User{}, err
 	}
@@ -166,13 +166,13 @@ func (a *App) Authenticate(ctx context.Context, authUser AuthenticateUser) (User
 
 // Token provides an API token for the authenticated user.
 func (a *App) Token(ctx context.Context) (Token, error) {
-	if a.authbus == nil {
+	if a.authCore == nil {
 		return Token{}, errs.Newf(errs.Internal, "authapi not configured")
 	}
 
 	claims := ctxPck.GetClaims(ctx)
 
-	tkn, err := a.authbus.GenerateToken(claims)
+	tkn, err := a.authCore.GenerateToken(claims)
 	if err != nil {
 		return Token{}, errs.New(errs.Internal, err)
 	}

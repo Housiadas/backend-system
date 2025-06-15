@@ -16,7 +16,7 @@ import (
 	"github.com/Housiadas/backend-system/pkg/logger"
 )
 
-// Claims represents the authorization claims transmitted via a JWT.
+// Claims represent the authorization claims transmitted via a JWT.
 type Claims struct {
 	jwt.RegisteredClaims
 	Roles []string `json:"roles"`
@@ -36,14 +36,14 @@ type Config struct {
 	DB        *sqlx.DB
 	KeyLookup KeyLookup
 	Issuer    string
-	Userbus   *usercore.Service
+	Userbus   *usercore.Core
 }
 
 // Auth is used to authenticate clients. It can generate a token for a
 // set of user claims and recreate the claims by parsing the token.
 type Auth struct {
 	keyLookup KeyLookup
-	userBus   *usercore.Service
+	userBus   *usercore.Core
 	method    jwt.SigningMethod
 	parser    *jwt.Parser
 	issuer    string

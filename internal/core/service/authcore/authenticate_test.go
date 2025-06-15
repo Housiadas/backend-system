@@ -19,8 +19,8 @@ import (
 
 func Test_Auth(t *testing.T) {
 
-	db := dbtest.NewDatabase(t, "Test_Auth")
-	sd, err := insertSeedData(db.BusDomain)
+	db := dbtest.New(t, "Test_Auth")
+	sd, err := insertSeedData(db.Core)
 	if err != nil {
 		t.Fatalf("Seeding error: %s", err)
 	}
@@ -30,7 +30,7 @@ func Test_Auth(t *testing.T) {
 		DB:        db.DB,
 		KeyLookup: &keyStore{},
 		Issuer:    "service project",
-		Userbus:   usercore.NewBusiness(db.Log, userrepo.NewStore(db.Log, db.DB)),
+		Userbus:   usercore.NewCore(db.Log, userrepo.NewStore(db.Log, db.DB)),
 	})
 
 	t.Run("testAdminAuthorization", testAdminAuthorization(ath, sd))
@@ -230,7 +230,7 @@ func testUserRuleAny(ath *authcore.Auth, sd unitest.SeedData) func(t *testing.T)
 
 // =============================================================================
 
-func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
+func insertSeedData(busDomain dbtest.Core) (unitest.SeedData, error) {
 	ctx := context.Background()
 
 	usrs, err := usercore.TestSeedUsers(ctx, 2, role.Admin, busDomain.User)

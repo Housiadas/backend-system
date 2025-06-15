@@ -23,24 +23,24 @@ import (
 func Test_Product(t *testing.T) {
 	t.Parallel()
 
-	db := dbtest.NewDatabase(t, "Test_Product")
+	db := dbtest.New(t, "Test_Product")
 
-	sd, err := insertSeedData(db.BusDomain)
+	sd, err := insertSeedData(db.Core)
 	if err != nil {
 		t.Fatalf("Seeding error: %s", err)
 	}
 
 	// -------------------------------------------------------------------------
 
-	unitest.Run(t, query(db.BusDomain, sd), "query")
-	unitest.Run(t, create(db.BusDomain, sd), "create")
-	unitest.Run(t, update(db.BusDomain, sd), "update")
-	unitest.Run(t, deleteUser(db.BusDomain, sd), "deleteUser")
+	unitest.Run(t, query(db.Core, sd), "query")
+	unitest.Run(t, create(db.Core, sd), "create")
+	unitest.Run(t, update(db.Core, sd), "update")
+	unitest.Run(t, deleteUser(db.Core, sd), "deleteUser")
 }
 
 // =============================================================================
 
-func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
+func insertSeedData(busDomain dbtest.Core) (unitest.SeedData, error) {
 	ctx := context.Background()
 
 	usrs, err := usercore.TestSeedUsers(ctx, 1, role.User, busDomain.User)
@@ -87,7 +87,7 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 
 // =============================================================================
 
-func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
+func query(busDomain dbtest.Core, sd unitest.SeedData) []unitest.Table {
 	prds := make([]product.Product, 0, len(sd.Admins[0].Products)+len(sd.Users[0].Products))
 	prds = append(prds, sd.Admins[0].Products...)
 	prds = append(prds, sd.Users[0].Products...)
@@ -168,7 +168,7 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 	return table
 }
 
-func create(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
+func create(busDomain dbtest.Core, sd unitest.SeedData) []unitest.Table {
 	table := []unitest.Table{
 		{
 			Name: "basic",
@@ -213,7 +213,7 @@ func create(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 	return table
 }
 
-func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
+func update(busDomain dbtest.Core, sd unitest.SeedData) []unitest.Table {
 	table := []unitest.Table{
 		{
 			Name: "basic",
@@ -258,7 +258,7 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 	return table
 }
 
-func deleteUser(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
+func deleteUser(busDomain dbtest.Core, sd unitest.SeedData) []unitest.Table {
 	table := []unitest.Table{
 		{
 			Name:    "user",

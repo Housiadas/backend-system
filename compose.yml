@@ -7,7 +7,7 @@ volumes:
 
 services:
   db:
-    image: postgres:17.3
+    image: postgres:17.5
     container_name: repository-container
     restart: always
     environment:
@@ -141,7 +141,7 @@ services:
       - app_local_network
 
   grafana:
-    image: grafana/grafana:10.1.1
+    image: grafana/grafana:11.6.0
     container_name: grafana-container
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
