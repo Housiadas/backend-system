@@ -7,7 +7,7 @@
 // read-only and writable layers. The exported
 // tar data for a read-only layer should match
 // the tar used to create the layer.
-package layer // import "github.com/docker/docker/layer"
+package layer
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 
 	"github.com/containerd/log"
 	"github.com/docker/distribution"
-	"github.com/docker/docker/pkg/archive"
+	"github.com/moby/go-archive"
 	"github.com/opencontainers/go-digest"
 )
 
