@@ -4,6 +4,7 @@ package audit_repo
 import (
 	"bytes"
 	"context"
+	_ "embed"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -13,6 +14,16 @@ import (
 	"github.com/Housiadas/backend-system/pkg/order"
 	"github.com/Housiadas/backend-system/pkg/page"
 	"github.com/Housiadas/backend-system/pkg/pgsql"
+)
+
+// queries
+var (
+	//go:embed query/audit_create.sql
+	auditCreateSql string
+	//go:embed query/audit_query.sql
+	auditQuerySql string
+	//go:embed query/audit_count.sql
+	auditCountSql string
 )
 
 // Store manages the set of APIs for auditDB database access.
@@ -31,18 +42,12 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 
 // Create inserts a new auditDB record into the database.
 func (s *Store) Create(ctx context.Context, a audit.Audit) error {
-	const q = `
-	INSERT INTO audit
-		(id, obj_id, obj_entity, obj_name, actor_id, action, data, message, timestamp)
-	VALUES
-		(:id, :obj_id, :obj_entity, :obj_name, :actor_id, :action, :data, :message, :timestamp)`
-
 	dbAudit, err := toDBAudit(a)
 	if err != nil {
 		return err
 	}
 
-	if err := pgsql.NamedExecContext(ctx, s.log, s.db, q, dbAudit); err != nil {
+	if err := pgsql.NamedExecContext(ctx, s.log, s.db, auditCreateSql, dbAudit); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -60,14 +65,7 @@ func (s *Store) Query(
 		"rows_per_page": page.RowsPerPage(),
 	}
 
-	const q = `
-	SELECT
-		id, obj_id, obj_entity, obj_name, actor_id, action, data, message, timestamp
-	FROM
-		audit
-	`
-
-	buf := bytes.NewBufferString(q)
+	buf := bytes.NewBufferString(auditQuerySql)
 	applyFilter(filter, data, buf)
 
 	orderByClause, err := orderByClause(orderBy)
@@ -90,13 +88,7 @@ func (s *Store) Query(
 func (s *Store) Count(ctx context.Context, filter audit.QueryFilter) (int, error) {
 	data := map[string]any{}
 
-	const q = `
-	SELECT
-		count(1)
-	FROM
-		audit`
-
-	buf := bytes.NewBufferString(q)
+	buf := bytes.NewBufferString(auditCountSql)
 	applyFilter(filter, data, buf)
 
 	var count struct {

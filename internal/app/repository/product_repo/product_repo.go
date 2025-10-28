@@ -4,6 +4,7 @@ package product_repo
 import (
 	"bytes"
 	"context"
+	_ "embed"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,24 @@ import (
 	"github.com/Housiadas/backend-system/pkg/order"
 	"github.com/Housiadas/backend-system/pkg/page"
 	"github.com/Housiadas/backend-system/pkg/pgsql"
+)
+
+// queries
+var (
+	//go:embed query/product_create.sql
+	productCreateSql string
+	//go:embed query/product_update.sql
+	productUpdateSql string
+	//go:embed query/product_delete.sql
+	productDeleteSql string
+	//go:embed query/product_query.sql
+	productQuerySql string
+	//go:embed query/product_query_by_id.sql
+	productQueryByIdSql string
+	//go:embed query/product_query_by_user_id.sql
+	productQueryByUserIdSql string
+	//go:embed query/product_count.sql
+	productCountSql string
 )
 
 // Store manages the set of APIs for productDB database access.
@@ -50,14 +69,8 @@ func (s *Store) NewWithTx(tx pgsql.CommitRollbacker) (product.Storer, error) {
 // Create adds a Product to the pgsql. It returns the created Product with
 // fields like ID and DateCreated populated.
 func (s *Store) Create(ctx context.Context, prd product.Product) error {
-	const q = `
-	INSERT INTO products
-		(product_id, user_id, name, cost, quantity, date_created, date_updated)
-	VALUES
-		(:product_id, :user_id, :name, :cost, :quantity, :date_created, :date_updated)`
-
-	if err := pgsql.NamedExecContext(ctx, s.log, s.db, q, toDBProduct(prd)); err != nil {
-		return fmt.Errorf("namedexeccontext: %w", err)
+	if err := pgsql.NamedExecContext(ctx, s.log, s.db, productCreateSql, toDBProduct(prd)); err != nil {
+		return fmt.Errorf("name_exec_context: %w", err)
 	}
 
 	return nil
@@ -66,19 +79,8 @@ func (s *Store) Create(ctx context.Context, prd product.Product) error {
 // Update modifies data about a product. It will error if the specified ID is
 // invalid or does not reference an existing product.
 func (s *Store) Update(ctx context.Context, prd product.Product) error {
-	const q = `
-	UPDATE
-		products
-	SET
-		"name" = :name,
-		"cost" = :cost,
-		"quantity" = :quantity,
-		"date_updated" = :date_updated
-	WHERE
-		product_id = :product_id`
-
-	if err := pgsql.NamedExecContext(ctx, s.log, s.db, q, toDBProduct(prd)); err != nil {
-		return fmt.Errorf("namedexeccontext: %w", err)
+	if err := pgsql.NamedExecContext(ctx, s.log, s.db, productUpdateSql, toDBProduct(prd)); err != nil {
+		return fmt.Errorf("name_exec_context: %w", err)
 	}
 
 	return nil
@@ -92,14 +94,8 @@ func (s *Store) Delete(ctx context.Context, prd product.Product) error {
 		ID: prd.ID.String(),
 	}
 
-	const q = `
-	DELETE FROM
-		products
-	WHERE
-		product_id = :product_id`
-
-	if err := pgsql.NamedExecContext(ctx, s.log, s.db, q, data); err != nil {
-		return fmt.Errorf("namedexeccontext: %w", err)
+	if err := pgsql.NamedExecContext(ctx, s.log, s.db, productDeleteSql, data); err != nil {
+		return fmt.Errorf("named_exec_context: %w", err)
 	}
 
 	return nil
@@ -112,13 +108,7 @@ func (s *Store) Query(ctx context.Context, filter product.QueryFilter, orderBy o
 		"rows_per_page": page.RowsPerPage(),
 	}
 
-	const q = `
-	SELECT
-	    product_id, user_id, name, cost, quantity, date_created, date_updated
-	FROM
-		products`
-
-	buf := bytes.NewBufferString(q)
+	buf := bytes.NewBufferString(productQuerySql)
 	s.applyFilter(filter, data, buf)
 
 	orderByClause, err := orderByClause(orderBy)
@@ -140,14 +130,7 @@ func (s *Store) Query(ctx context.Context, filter product.QueryFilter, orderBy o
 // Count returns the total number of users in the DB.
 func (s *Store) Count(ctx context.Context, filter product.QueryFilter) (int, error) {
 	data := map[string]any{}
-
-	const q = `
-	SELECT
-		count(1)
-	FROM
-		products`
-
-	buf := bytes.NewBufferString(q)
+	buf := bytes.NewBufferString(productCountSql)
 	s.applyFilter(filter, data, buf)
 
 	var count struct {
@@ -170,16 +153,8 @@ func (s *Store) QueryByID(ctx context.Context, productID uuid.UUID) (product.Pro
 		ID: productID.String(),
 	}
 
-	const q = `
-	SELECT
-	    product_id, user_id, name, cost, quantity, date_created, date_updated
-	FROM
-		products
-	WHERE
-		product_id = :product_id`
-
 	var dbPrd productDB
-	if err := pgsql.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbPrd); err != nil {
+	if err := pgsql.NamedQueryStruct(ctx, s.log, s.db, productQueryByIdSql, data, &dbPrd); err != nil {
 		if errors.Is(err, pgsql.ErrDBNotFound) {
 			return product.Product{}, fmt.Errorf("db: %w", product.ErrNotFound)
 		}
@@ -197,16 +172,8 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]product.
 		ID: userID.String(),
 	}
 
-	const q = `
-	SELECT
-	    product_id, user_id, name, cost, quantity, date_created, date_updated
-	FROM
-		products
-	WHERE
-		user_id = :user_id`
-
 	var dbPrds []productDB
-	if err := pgsql.NamedQuerySlice(ctx, s.log, s.db, q, data, &dbPrds); err != nil {
+	if err := pgsql.NamedQuerySlice(ctx, s.log, s.db, productQueryByUserIdSql, data, &dbPrds); err != nil {
 		return nil, fmt.Errorf("db: %w", err)
 	}
 

@@ -1,9 +1,10 @@
-// Package user_repo contains userDB related CRUD functionality.
+// Package user_repo contains database related CRUD functionality.
 package user_repo
 
 import (
 	"bytes"
 	"context"
+	_ "embed"
 	"errors"
 	"fmt"
 	"net/mail"
@@ -16,6 +17,24 @@ import (
 	"github.com/Housiadas/backend-system/pkg/order"
 	"github.com/Housiadas/backend-system/pkg/page"
 	"github.com/Housiadas/backend-system/pkg/pgsql"
+)
+
+// queries
+var (
+	//go:embed query/user_create.sql
+	userCreateSql string
+	//go:embed query/user_update.sql
+	userUpdateSql string
+	//go:embed query/user_delete.sql
+	userDeleteSql string
+	//go:embed query/user_query.sql
+	userQuerySql string
+	//go:embed query/user_query_by_id.sql
+	userQueryByIdSql string
+	//go:embed query/user_query_by_email.sql
+	userQueryByEmailSql string
+	//go:embed query/user_count.sql
+	userCountSql string
 )
 
 // Store manages the set of APIs for userDB database access.
@@ -50,13 +69,7 @@ func (s *Store) NewWithTx(tx pgsql.CommitRollbacker) (user.Storer, error) {
 
 // Create inserts a new userDB into the database.
 func (s *Store) Create(ctx context.Context, usr user.User) error {
-	const q = `
-	INSERT INTO users
-		(user_id, name, email, password_hash, roles, department, enabled, date_created, date_updated)
-	VALUES
-		(:user_id, :name, :email, :password_hash, :roles, :department, :enabled, :date_created, :date_updated)`
-
-	if err := pgsql.NamedExecContext(ctx, s.log, s.db, q, toUserDB(usr)); err != nil {
+	if err := pgsql.NamedExecContext(ctx, s.log, s.db, userCreateSql, toUserDB(usr)); err != nil {
 		if errors.Is(err, pgsql.ErrDBDuplicatedEntry) {
 			return fmt.Errorf("namedexeccontext: %w", user.ErrUniqueEmail)
 		}
@@ -68,21 +81,7 @@ func (s *Store) Create(ctx context.Context, usr user.User) error {
 
 // Update replaces a userDB document in the database.
 func (s *Store) Update(ctx context.Context, usr user.User) error {
-	const q = `
-	UPDATE
-		users
-	SET 
-		"name" = :name,
-		"email" = :email,
-		"roles" = :roles,
-		"password_hash" = :password_hash,
-		"department" = :department,
-		"enabled" = :enabled,
-		"date_updated" = :date_updated
-	WHERE
-		user_id = :user_id`
-
-	if err := pgsql.NamedExecContext(ctx, s.log, s.db, q, toUserDB(usr)); err != nil {
+	if err := pgsql.NamedExecContext(ctx, s.log, s.db, userUpdateSql, toUserDB(usr)); err != nil {
 		if errors.Is(err, pgsql.ErrDBDuplicatedEntry) {
 			return user.ErrUniqueEmail
 		}
@@ -94,13 +93,7 @@ func (s *Store) Update(ctx context.Context, usr user.User) error {
 
 // Delete removes a userDB from the database.
 func (s *Store) Delete(ctx context.Context, usr user.User) error {
-	const q = `
-	DELETE FROM
-		users
-	WHERE
-		user_id = :user_id`
-
-	if err := pgsql.NamedExecContext(ctx, s.log, s.db, q, toUserDB(usr)); err != nil {
+	if err := pgsql.NamedExecContext(ctx, s.log, s.db, userDeleteSql, toUserDB(usr)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -114,13 +107,7 @@ func (s *Store) Query(ctx context.Context, filter user.QueryFilter, orderBy orde
 		"rows_per_page": page.RowsPerPage(),
 	}
 
-	const q = `
-	SELECT
-		user_id, name, email, password_hash, roles, department, enabled, date_created, date_updated
-	FROM
-		users`
-
-	buf := bytes.NewBufferString(q)
+	buf := bytes.NewBufferString(userQuerySql)
 	applyFilter(filter, data, buf)
 
 	orderByClause, err := orderByClause(orderBy)
@@ -142,14 +129,7 @@ func (s *Store) Query(ctx context.Context, filter user.QueryFilter, orderBy orde
 // Count returns the total number of users in the DB.
 func (s *Store) Count(ctx context.Context, filter user.QueryFilter) (int, error) {
 	data := map[string]any{}
-
-	const q = `
-	SELECT
-		count(1)
-	FROM
-		users`
-
-	buf := bytes.NewBufferString(q)
+	buf := bytes.NewBufferString(userCountSql)
 	applyFilter(filter, data, buf)
 
 	var count struct {
@@ -170,16 +150,8 @@ func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, err
 		ID: userID.String(),
 	}
 
-	const q = `
-	SELECT
-        user_id, name, email, password_hash, roles, department, enabled, date_created, date_updated
-	FROM
-		users
-	WHERE 
-		user_id = :user_id`
-
 	var dbUsr userDB
-	if err := pgsql.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbUsr); err != nil {
+	if err := pgsql.NamedQueryStruct(ctx, s.log, s.db, userQueryByIdSql, data, &dbUsr); err != nil {
 		if errors.Is(err, pgsql.ErrDBNotFound) {
 			return user.User{}, fmt.Errorf("db: %w", user.ErrNotFound)
 		}
@@ -197,16 +169,8 @@ func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (user.User
 		Email: email.Address,
 	}
 
-	const q = `
-	SELECT
-        user_id, name, email, password_hash, roles, department, enabled, date_created, date_updated
-	FROM
-		users
-	WHERE
-		email = :email`
-
 	var dbUsr userDB
-	if err := pgsql.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbUsr); err != nil {
+	if err := pgsql.NamedQueryStruct(ctx, s.log, s.db, userQueryByEmailSql, data, &dbUsr); err != nil {
 		if errors.Is(err, pgsql.ErrDBNotFound) {
 			return user.User{}, fmt.Errorf("db: %w", user.ErrNotFound)
 		}
