@@ -7,12 +7,12 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	userV1 "github.com/Housiadas/backend-system/gen/go/github.com/Housiadas/backend-system/gen/user/v1"
-	"github.com/Housiadas/backend-system/internal/app/service/userapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/user_usecase"
 	"github.com/Housiadas/backend-system/internal/core/domain/role"
 )
 
-func toUserQueryParams(req *userV1.GetUserByIdRequest) userapp.AppQueryParams {
-	return userapp.AppQueryParams{
+func toUserQueryParams(req *userV1.GetUserByIdRequest) user_usecase.AppQueryParams {
+	return user_usecase.AppQueryParams{
 		ID: req.Id,
 	}
 }

@@ -3,13 +3,13 @@ package user_test
 import (
 	"time"
 
-	"github.com/Housiadas/backend-system/internal/app/service/userapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/user_usecase"
 	"github.com/Housiadas/backend-system/internal/core/domain/role"
 	"github.com/Housiadas/backend-system/internal/core/domain/user"
 )
 
-func toAppUser(bus user.User) userapp.User {
-	return userapp.User{
+func toAppUser(bus user.User) user_usecase.User {
+	return user_usecase.User{
 		ID:           bus.ID.String(),
 		Name:         bus.Name.String(),
 		Email:        bus.Email.Address,
@@ -22,8 +22,8 @@ func toAppUser(bus user.User) userapp.User {
 	}
 }
 
-func toAppUsers(users []user.User) []userapp.User {
-	items := make([]userapp.User, len(users))
+func toAppUsers(users []user.User) []user_usecase.User {
+	items := make([]user_usecase.User, len(users))
 	for i, usr := range users {
 		items[i] = toAppUser(usr)
 	}
@@ -31,7 +31,7 @@ func toAppUsers(users []user.User) []userapp.User {
 	return items
 }
 
-func toAppUserPtr(bus user.User) *userapp.User {
+func toAppUserPtr(bus user.User) *user_usecase.User {
 	appUsr := toAppUser(bus)
 	return &appUsr
 }

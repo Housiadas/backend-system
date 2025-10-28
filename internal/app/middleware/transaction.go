@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/Housiadas/backend-system/pkg/errs"
-	"github.com/Housiadas/backend-system/pkg/sqldb"
+	"github.com/Housiadas/backend-system/pkg/pgsql"
 )
 
 // BeginCommitRollback starts a transaction for the core call.
@@ -38,7 +38,7 @@ func (m *Middleware) BeginCommitRollback() func(next http.Handler) http.Handler 
 				}
 			}()
 
-			ctx = sqldb.SetTran(ctx, tx)
+			ctx = pgsql.SetTran(ctx, tx)
 
 			// Create a response recorder to capture the response
 			rec := &ResponseRecorder{ResponseWriter: w, statusCode: http.StatusOK}

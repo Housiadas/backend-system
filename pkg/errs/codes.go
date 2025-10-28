@@ -83,7 +83,7 @@ var (
 	OutOfRange = ErrCode{value: 12}
 
 	// Unimplemented indicates operation is not implemented or not
-	// supported/enabled in this service.
+	// supported/enabled in this usecase.
 	Unimplemented = ErrCode{value: 13}
 
 	// Internal errors. Means some invariants expected by the underlying
@@ -91,7 +91,7 @@ var (
 	// something is very broken.
 	Internal = ErrCode{value: 14}
 
-	// Unavailable indicates the service is currently unavailable.
+	// Unavailable indicates the usecase is currently unavailable.
 	// This is a most likely a transient condition and may be corrected
 	// by retrying with a backoff. Note that it is not always safe to retry
 	// non-idempotent operations.

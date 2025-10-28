@@ -9,17 +9,17 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 
-	"github.com/Housiadas/backend-system/internal/app/repository/userrepo"
+	"github.com/Housiadas/backend-system/internal/app/repository/user_repo"
 	"github.com/Housiadas/backend-system/internal/core/domain/role"
 	"github.com/Housiadas/backend-system/internal/core/service/authcore"
 	"github.com/Housiadas/backend-system/internal/core/service/usercore"
 	"github.com/Housiadas/backend-system/pkg/keystore"
-	"github.com/Housiadas/backend-system/pkg/sqldb"
+	"github.com/Housiadas/backend-system/pkg/pgsql"
 )
 
 // GenToken generates a JWT for the specified user.
 func (cmd *Command) GenToken(userID uuid.UUID) error {
-	db, err := sqldb.Open(cmd.DB)
+	db, err := pgsql.Open(cmd.DB)
 	if err != nil {
 		return fmt.Errorf("connect database: %w", err)
 	}
@@ -28,7 +28,7 @@ func (cmd *Command) GenToken(userID uuid.UUID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	userBus := usercore.NewCore(cmd.Log, userrepo.NewStore(cmd.Log, db))
+	userBus := usercore.NewCore(cmd.Log, user_repo.NewStore(cmd.Log, db))
 
 	usr, err := userBus.QueryByID(ctx, userID)
 	if err != nil {
@@ -63,7 +63,7 @@ func (cmd *Command) GenToken(userID uuid.UUID) error {
 	claims := authcore.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   usr.ID.String(),
-			Issuer:    "service project",
+			Issuer:    "usecase project",
 			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(8760 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		},

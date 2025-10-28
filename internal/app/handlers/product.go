@@ -4,13 +4,13 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Housiadas/backend-system/internal/app/service/productapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/product_usecase"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/web"
 )
 
 func (h *Handler) productCreate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
-	var app productapp.NewProduct
+	var app product_usecase.NewProduct
 	if err := web.Decode(r, &app); err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
@@ -24,7 +24,7 @@ func (h *Handler) productCreate(ctx context.Context, _ http.ResponseWriter, r *h
 }
 
 func (h *Handler) productUpdate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
-	var app productapp.UpdateProduct
+	var app product_usecase.UpdateProduct
 	if err := web.Decode(r, &app); err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
@@ -65,10 +65,10 @@ func (h *Handler) productQueryByID(ctx context.Context, _ http.ResponseWriter, _
 	return prd
 }
 
-func productParseQueryParams(r *http.Request) productapp.AppQueryParams {
+func productParseQueryParams(r *http.Request) product_usecase.AppQueryParams {
 	values := r.URL.Query()
 
-	return productapp.AppQueryParams{
+	return product_usecase.AppQueryParams{
 		Page:     values.Get("page"),
 		Rows:     values.Get("rows"),
 		OrderBy:  values.Get("orderBy"),

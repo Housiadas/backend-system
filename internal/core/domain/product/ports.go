@@ -7,12 +7,12 @@ import (
 
 	"github.com/Housiadas/backend-system/pkg/order"
 	"github.com/Housiadas/backend-system/pkg/page"
-	"github.com/Housiadas/backend-system/pkg/sqldb"
+	"github.com/Housiadas/backend-system/pkg/pgsql"
 )
 
 // Storer interface declares the behavior this package needs to priests and retrieve data.
 type Storer interface {
-	NewWithTx(tx sqldb.CommitRollbacker) (Storer, error)
+	NewWithTx(tx pgsql.CommitRollbacker) (Storer, error)
 	Create(ctx context.Context, prd Product) error
 	Update(ctx context.Context, prd Product) error
 	Delete(ctx context.Context, prd Product) error

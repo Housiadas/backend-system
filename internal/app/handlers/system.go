@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Housiadas/backend-system/internal/app/service/systemapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/system_usecase"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/web"
 )
@@ -19,7 +19,7 @@ import (
 // @Tags		 System
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  systemapp.Status
+// @Success      200  {object}  system_usecase.Status
 // @Failure      500  {object}  errs.Error
 // @Router       /readiness [get]
 func (h *Handler) readiness(ctx context.Context, _ http.ResponseWriter, _ *http.Request) web.Encoder {
@@ -27,25 +27,25 @@ func (h *Handler) readiness(ctx context.Context, _ http.ResponseWriter, _ *http.
 		return errs.Newf(errs.Internal, "database not ready")
 	}
 
-	data := systemapp.Status{
+	data := system_usecase.Status{
 		Status: "OK",
 	}
 
 	return data
 }
 
-// liveness returns simple status info if the service is alive. If the
+// liveness returns simple status info if the usecase is alive. If the
 // cli is deployed to a Kubernetes cluster, it will also return pod, node, and
 // namespace details via the Downward API. The Kubernetes environment variables
 // need to be set within your Pod/Deployment manifest.
 //
 // Liveness godoc
 // @Summary      App Liveness
-// @Description  Returns application's status info if the service is alive
+// @Description  Returns application's status info if the usecase is alive
 // @Tags		 System
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  systemapp.Info
+// @Success      200  {object}  system_usecase.Info
 // @Router       /liveness [get]
 func (h *Handler) liveness(_ context.Context, _ http.ResponseWriter, _ *http.Request) web.Encoder {
 	info := h.App.System.Liveness()

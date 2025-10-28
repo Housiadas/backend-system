@@ -1,4 +1,4 @@
-// Package errs provides service and support related to web error functionality.
+// Package errs provides usecase and support related to web error functionality.
 package errs
 
 import (

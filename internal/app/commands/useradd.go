@@ -6,12 +6,12 @@ import (
 	"net/mail"
 	"time"
 
-	"github.com/Housiadas/backend-system/internal/app/repository/userrepo"
+	"github.com/Housiadas/backend-system/internal/app/repository/user_repo"
 	namePck "github.com/Housiadas/backend-system/internal/core/domain/name"
 	"github.com/Housiadas/backend-system/internal/core/domain/role"
 	"github.com/Housiadas/backend-system/internal/core/domain/user"
 	"github.com/Housiadas/backend-system/internal/core/service/usercore"
-	"github.com/Housiadas/backend-system/pkg/sqldb"
+	"github.com/Housiadas/backend-system/pkg/pgsql"
 )
 
 // UserAdd adds new users into the database.
@@ -21,7 +21,7 @@ func (cmd *Command) UserAdd(name, email, password string) error {
 		return ErrHelp
 	}
 
-	db, err := sqldb.Open(cmd.DB)
+	db, err := pgsql.Open(cmd.DB)
 	if err != nil {
 		return fmt.Errorf("connect database: %w", err)
 	}
@@ -30,7 +30,7 @@ func (cmd *Command) UserAdd(name, email, password string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	userBus := usercore.NewCore(cmd.Log, userrepo.NewStore(cmd.Log, db))
+	userBus := usercore.NewCore(cmd.Log, user_repo.NewStore(cmd.Log, db))
 
 	addr, err := mail.ParseAddress(email)
 	if err != nil {

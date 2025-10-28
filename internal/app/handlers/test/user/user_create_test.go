@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/Housiadas/backend-system/internal/app/service/userapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/user_usecase"
 	"github.com/Housiadas/backend-system/internal/common/apitest"
 	"github.com/Housiadas/backend-system/pkg/errs"
 )
@@ -31,7 +31,7 @@ func Test_API_User_Create_200(t *testing.T) {
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
-			Input: &userapp.NewUser{
+			Input: &user_usecase.NewUser{
 				Name:            "Chris Housi",
 				Email:           "chris@housi.com",
 				Roles:           []string{"ADMIN"},
@@ -39,8 +39,8 @@ func Test_API_User_Create_200(t *testing.T) {
 				Password:        "123",
 				PasswordConfirm: "123",
 			},
-			GotResp: &userapp.User{},
-			ExpResp: &userapp.User{
+			GotResp: &user_usecase.User{},
+			ExpResp: &user_usecase.User{
 				Name:       "Chris Housi",
 				Email:      "chris@housi.com",
 				Roles:      []string{"ADMIN"},
@@ -48,12 +48,12 @@ func Test_API_User_Create_200(t *testing.T) {
 				Enabled:    true,
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(*userapp.User)
+				gotResp, exists := got.(*user_usecase.User)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(*userapp.User)
+				expResp := exp.(*user_usecase.User)
 
 				expResp.ID = gotResp.ID
 				expResp.DateCreated = gotResp.DateCreated
@@ -87,7 +87,7 @@ func Test_API_User_Create_400(t *testing.T) {
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
-			Input:      &userapp.NewUser{},
+			Input:      &user_usecase.NewUser{},
 			GotResp:    &errs.Error{},
 			ExpResp:    errs.Newf(errs.InvalidArgument, "validation: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"email\",\"error\":\"email is a required field\"},{\"field\":\"roles\",\"error\":\"roles is a required field\"},{\"field\":\"password\",\"error\":\"password is a required field\"}]"),
 			CmpFunc: func(got any, exp any) string {
@@ -100,7 +100,7 @@ func Test_API_User_Create_400(t *testing.T) {
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
-			Input: &userapp.NewUser{
+			Input: &user_usecase.NewUser{
 				Name:            "Chris Housi",
 				Email:           "chris@housi.com",
 				Roles:           []string{"SUPER"},
@@ -120,7 +120,7 @@ func Test_API_User_Create_400(t *testing.T) {
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
-			Input: &userapp.NewUser{
+			Input: &user_usecase.NewUser{
 				Name:            "Bi",
 				Email:           "chris@housi.com",
 				Roles:           []string{"USER"},

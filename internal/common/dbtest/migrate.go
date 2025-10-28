@@ -21,7 +21,7 @@ func migration(dbTestURL string) error {
 	if err != nil {
 		return err
 	}
-	// or m.Step(2) if you want to explicitly set the number of migrations to run
+	// or m.Step(2) if you want to explicitly set the number of .migrations to run
 	err = m.Up()
 	if err != nil {
 		return err
@@ -32,6 +32,6 @@ func migration(dbTestURL string) error {
 func getMigrationsDir() string {
 	_, file, _, _ := runtime.Caller(0)
 	basepath := filepath.Dir(file)
-	migrationsPath := filepath.Join(basepath, "../../../database/migrations")
+	migrationsPath := filepath.Join(basepath, "../../../.migrations")
 	return "file://" + migrationsPath
 }

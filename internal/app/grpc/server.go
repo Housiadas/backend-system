@@ -5,10 +5,10 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	userV1 "github.com/Housiadas/backend-system/gen/go/github.com/Housiadas/backend-system/gen/user/v1"
-	"github.com/Housiadas/backend-system/internal/app/service/productapp"
-	"github.com/Housiadas/backend-system/internal/app/service/systemapp"
-	"github.com/Housiadas/backend-system/internal/app/service/tranapp"
-	"github.com/Housiadas/backend-system/internal/app/service/userapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/product_usecase"
+	"github.com/Housiadas/backend-system/internal/app/usecase/system_usecase"
+	"github.com/Housiadas/backend-system/internal/app/usecase/transaction_usecase"
+	"github.com/Housiadas/backend-system/internal/app/usecase/user_usecase"
 	"github.com/Housiadas/backend-system/internal/core/service/productcore"
 	"github.com/Housiadas/backend-system/internal/core/service/usercore"
 	"github.com/Housiadas/backend-system/pkg/logger"
@@ -27,10 +27,10 @@ type Server struct {
 
 // App represents the core cli layer
 type App struct {
-	User    *userapp.App
-	Product *productapp.App
-	System  *systemapp.App
-	Tx      *tranapp.App
+	User    *user_usecase.App
+	Product *product_usecase.App
+	System  *system_usecase.App
+	Tx      *transaction_usecase.App
 }
 
 // Business represents the core internal layer.
@@ -57,10 +57,10 @@ func New(cfg Config) *Server {
 		Log:         cfg.Log,
 		Tracer:      cfg.Tracer,
 		App: App{
-			User:    userapp.NewApp(cfg.UserBus),
-			Product: productapp.NewApp(cfg.ProductBus),
-			System:  systemapp.NewApp(cfg.Build, cfg.Log, cfg.DB),
-			Tx:      tranapp.NewApp(cfg.UserBus, cfg.ProductBus),
+			User:    user_usecase.NewApp(cfg.UserBus),
+			Product: product_usecase.NewApp(cfg.ProductBus),
+			System:  system_usecase.NewApp(cfg.Build, cfg.Log, cfg.DB),
+			Tx:      transaction_usecase.NewApp(cfg.UserBus, cfg.ProductBus),
 		},
 		Business: Business{
 			User:    cfg.UserBus,

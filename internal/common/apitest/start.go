@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/Housiadas/backend-system/internal/app/handlers"
-	"github.com/Housiadas/backend-system/internal/app/repository/userrepo"
+	"github.com/Housiadas/backend-system/internal/app/repository/user_repo"
 	"github.com/Housiadas/backend-system/internal/common/dbtest"
 	cfg "github.com/Housiadas/backend-system/internal/config"
 	"github.com/Housiadas/backend-system/internal/core/service/authcore"
@@ -23,7 +23,7 @@ func StartTest(t *testing.T, testName string) (*Test, error) {
 		Log:       db.Log,
 		DB:        db.DB,
 		KeyLookup: &KeyStore{},
-		Userbus:   usercore.NewCore(db.Log, userrepo.NewStore(db.Log, db.DB)),
+		Userbus:   usercore.NewCore(db.Log, user_repo.NewStore(db.Log, db.DB)),
 	})
 
 	// tracer

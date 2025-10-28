@@ -11,14 +11,14 @@ import (
 	"syscall"
 
 	"github.com/Housiadas/backend-system/internal/app/grpc"
-	"github.com/Housiadas/backend-system/internal/app/repository/productrepo"
-	"github.com/Housiadas/backend-system/internal/app/repository/userrepo"
+	"github.com/Housiadas/backend-system/internal/app/repository/product_repo"
+	"github.com/Housiadas/backend-system/internal/app/repository/user_repo"
 	"github.com/Housiadas/backend-system/internal/config"
 	"github.com/Housiadas/backend-system/internal/core/service/productcore"
 	"github.com/Housiadas/backend-system/internal/core/service/usercore"
 	"github.com/Housiadas/backend-system/pkg/logger"
 	"github.com/Housiadas/backend-system/pkg/otel"
-	"github.com/Housiadas/backend-system/pkg/sqldb"
+	"github.com/Housiadas/backend-system/pkg/pgsql"
 )
 
 var build = "develop"
@@ -74,7 +74,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	// App Starting
 	// -------------------------------------------------------------------------
-	log.Info(ctx, "starting service", "version", cfg.Version.Build)
+	log.Info(ctx, "starting usecase", "version", cfg.Version.Build)
 	defer log.Info(ctx, "shutdown complete")
 
 	log.BuildInfo(ctx)
@@ -84,7 +84,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	// Initialize Database
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing database", "host port", cfg.DB.Host)
-	db, err := sqldb.Open(sqldb.Config{
+	db, err := pgsql.Open(pgsql.Config{
 		User:         cfg.DB.User,
 		Password:     cfg.DB.Password,
 		Host:         cfg.DB.Host,
@@ -126,8 +126,8 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing internal layer")
 
-	userBus := usercore.NewCore(log, userrepo.NewStore(log, db))
-	productBus := productcore.NewCore(log, userBus, productrepo.NewStore(log, db))
+	userBus := usercore.NewCore(log, user_repo.NewStore(log, db))
+	productBus := productcore.NewCore(log, userBus, product_repo.NewStore(log, db))
 
 	// -------------------------------------------------------------------------
 	// Start Grpc Server
@@ -142,7 +142,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 		ProductBus:  productBus,
 	})
 
-	// Register gRPC service
+	// Register gRPC usecase
 	grpcServer := s.Registrar()
 
 	listener, err := net.Listen("tcp", cfg.Grpc.Api)

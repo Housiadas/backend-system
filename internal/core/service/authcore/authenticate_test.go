@@ -3,13 +3,13 @@ package authcore_test
 import (
 	"context"
 	"fmt"
-	"github.com/Housiadas/backend-system/internal/app/repository/userrepo"
 	"testing"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 
+	"github.com/Housiadas/backend-system/internal/app/repository/user_repo"
 	"github.com/Housiadas/backend-system/internal/common/dbtest"
 	"github.com/Housiadas/backend-system/internal/common/unitest"
 	"github.com/Housiadas/backend-system/internal/core/domain/role"
@@ -29,8 +29,8 @@ func Test_Auth(t *testing.T) {
 		Log:       db.Log,
 		DB:        db.DB,
 		KeyLookup: &keyStore{},
-		Issuer:    "service project",
-		Userbus:   usercore.NewCore(db.Log, userrepo.NewStore(db.Log, db.DB)),
+		Issuer:    "usecase project",
+		Userbus:   usercore.NewCore(db.Log, user_repo.NewStore(db.Log, db.DB)),
 	})
 
 	t.Run("testAdminAuthorization", testAdminAuthorization(ath, sd))

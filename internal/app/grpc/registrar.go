@@ -32,7 +32,7 @@ func (s *Server) Registrar() *grpc.Server {
 	}()
 
 	// -------------------------------------------------------------------------
-	// Register gRPC service
+	// Register gRPC usecase
 	// -------------------------------------------------------------------------
 	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(s.grpcInterceptor),

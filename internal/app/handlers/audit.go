@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Housiadas/backend-system/internal/app/service/auditapp"
+	auditUsacase "github.com/Housiadas/backend-system/internal/app/usecase/audit_usecase"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/web"
 )
@@ -20,10 +20,10 @@ func (h *Handler) auditQuery(ctx context.Context, _ http.ResponseWriter, r *http
 	return audits
 }
 
-func auditParseQueryParams(r *http.Request) auditapp.AppQueryParams {
+func auditParseQueryParams(r *http.Request) auditUsacase.AppQueryParams {
 	values := r.URL.Query()
 
-	return auditapp.AppQueryParams{
+	return auditUsacase.AppQueryParams{
 		Page:      values.Get("page"),
 		Rows:      values.Get("rows"),
 		OrderBy:   values.Get("orderBy"),

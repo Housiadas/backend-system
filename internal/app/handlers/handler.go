@@ -5,18 +5,18 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/Housiadas/backend-system/internal/app/middleware"
-	"github.com/Housiadas/backend-system/internal/app/service/auditapp"
-	"github.com/Housiadas/backend-system/internal/app/service/productapp"
-	"github.com/Housiadas/backend-system/internal/app/service/systemapp"
-	"github.com/Housiadas/backend-system/internal/app/service/tranapp"
-	"github.com/Housiadas/backend-system/internal/app/service/userapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/audit_usecase"
+	"github.com/Housiadas/backend-system/internal/app/usecase/product_usecase"
+	"github.com/Housiadas/backend-system/internal/app/usecase/system_usecase"
+	"github.com/Housiadas/backend-system/internal/app/usecase/transaction_usecase"
+	"github.com/Housiadas/backend-system/internal/app/usecase/user_usecase"
 	"github.com/Housiadas/backend-system/internal/config"
 	"github.com/Housiadas/backend-system/internal/core/service/auditcore"
 	"github.com/Housiadas/backend-system/internal/core/service/authcore"
 	"github.com/Housiadas/backend-system/internal/core/service/productcore"
 	"github.com/Housiadas/backend-system/internal/core/service/usercore"
 	"github.com/Housiadas/backend-system/pkg/logger"
-	"github.com/Housiadas/backend-system/pkg/sqldb"
+	"github.com/Housiadas/backend-system/pkg/pgsql"
 	"github.com/Housiadas/backend-system/pkg/web"
 )
 
@@ -33,7 +33,7 @@ type Handler struct {
 	Core        Core
 }
 
-// Web represents the set of service for the http.
+// Web represents the set of usecase for the http.
 type Web struct {
 	Middleware *middleware.Middleware
 	Res        *web.Respond
@@ -41,11 +41,11 @@ type Web struct {
 
 // App represents the core cli layer
 type App struct {
-	Audit   *auditapp.App
-	User    *userapp.App
-	Product *productapp.App
-	System  *systemapp.App
-	Tx      *tranapp.App
+	Audit   *audit_usecase.App
+	User    *user_usecase.App
+	Product *product_usecase.App
+	System  *system_usecase.App
+	Tx      *transaction_usecase.App
 }
 
 // Core represents the core internal layer.
@@ -82,7 +82,7 @@ func New(cfg Config) *Handler {
 			Middleware: middleware.New(middleware.Config{
 				Log:     cfg.Log,
 				Tracer:  cfg.Tracer,
-				Tx:      sqldb.NewBeginner(cfg.DB),
+				Tx:      pgsql.NewBeginner(cfg.DB),
 				Auth:    cfg.AuthCore,
 				User:    cfg.UserCore,
 				Product: cfg.ProductCore,
@@ -90,11 +90,11 @@ func New(cfg Config) *Handler {
 			Res: web.NewRespond(cfg.Log),
 		},
 		App: App{
-			Audit:   auditapp.NewApp(cfg.AuditCore),
-			User:    userapp.NewAppWithAuth(cfg.UserCore, cfg.AuthCore),
-			Product: productapp.NewApp(cfg.ProductCore),
-			System:  systemapp.NewApp(cfg.Build, cfg.Log, cfg.DB),
-			Tx:      tranapp.NewApp(cfg.UserCore, cfg.ProductCore),
+			Audit:   audit_usecase.NewApp(cfg.AuditCore),
+			User:    user_usecase.NewAppWithAuth(cfg.UserCore, cfg.AuthCore),
+			Product: product_usecase.NewApp(cfg.ProductCore),
+			System:  system_usecase.NewApp(cfg.Build, cfg.Log, cfg.DB),
+			Tx:      transaction_usecase.NewApp(cfg.UserCore, cfg.ProductCore),
 		},
 		Core: Core{
 			Audit:   cfg.AuditCore,

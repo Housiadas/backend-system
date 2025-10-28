@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/Housiadas/backend-system/internal/app/service/userapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/user_usecase"
 	"github.com/Housiadas/backend-system/internal/common/apitest"
 	"github.com/Housiadas/backend-system/internal/common/dbtest"
 	"github.com/Housiadas/backend-system/pkg/errs"
@@ -34,15 +34,15 @@ func Test_API_User_Update_200(t *testing.T) {
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusOK,
-			Input: &userapp.UpdateUser{
+			Input: &user_usecase.UpdateUser{
 				Name:            dbtest.StringPointer("Jack Housi"),
 				Email:           dbtest.StringPointer("chris@housi2.com"),
 				Department:      dbtest.StringPointer("IT0"),
 				Password:        dbtest.StringPointer("123"),
 				PasswordConfirm: dbtest.StringPointer("123"),
 			},
-			GotResp: &userapp.User{},
-			ExpResp: &userapp.User{
+			GotResp: &user_usecase.User{},
+			ExpResp: &user_usecase.User{
 				ID:          sd.Users[0].ID.String(),
 				Name:        "Jack Housi",
 				Email:       "chris@housi2.com",
@@ -53,12 +53,12 @@ func Test_API_User_Update_200(t *testing.T) {
 				DateUpdated: sd.Users[0].DateUpdated.Format(time.RFC3339),
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(*userapp.User)
+				gotResp, exists := got.(*user_usecase.User)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(*userapp.User)
+				expResp := exp.(*user_usecase.User)
 				gotResp.DateUpdated = expResp.DateUpdated
 
 				return cmp.Diff(gotResp, expResp)
@@ -70,11 +70,11 @@ func Test_API_User_Update_200(t *testing.T) {
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusOK,
-			Input: &userapp.UpdateUserRole{
+			Input: &user_usecase.UpdateUserRole{
 				Roles: []string{"USER"},
 			},
-			GotResp: &userapp.User{},
-			ExpResp: &userapp.User{
+			GotResp: &user_usecase.User{},
+			ExpResp: &user_usecase.User{
 				ID:          sd.Admins[0].ID.String(),
 				Name:        sd.Admins[0].Name.String(),
 				Email:       sd.Admins[0].Email.Address,
@@ -85,12 +85,12 @@ func Test_API_User_Update_200(t *testing.T) {
 				DateUpdated: sd.Admins[0].DateUpdated.Format(time.RFC3339),
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(*userapp.User)
+				gotResp, exists := got.(*user_usecase.User)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(*userapp.User)
+				expResp := exp.(*user_usecase.User)
 				gotResp.DateUpdated = expResp.DateUpdated
 
 				return cmp.Diff(gotResp, expResp)
@@ -121,7 +121,7 @@ func Test_API_User_Update_400(t *testing.T) {
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusBadRequest,
-			Input: &userapp.UpdateUser{
+			Input: &user_usecase.UpdateUser{
 				Email:           dbtest.StringPointer("bill@"),
 				PasswordConfirm: dbtest.StringPointer("jack"),
 			},
@@ -137,7 +137,7 @@ func Test_API_User_Update_400(t *testing.T) {
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusBadRequest,
-			Input: &userapp.UpdateUserRole{
+			Input: &user_usecase.UpdateUserRole{
 				Roles: []string{"BAD ROLE"},
 			},
 			GotResp: &errs.Error{},
@@ -195,7 +195,7 @@ func Test_API_User_Update_401(t *testing.T) {
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
-			Input: &userapp.UpdateUser{
+			Input: &user_usecase.UpdateUser{
 				Name:            dbtest.StringPointer("Chris Housi"),
 				Email:           dbtest.StringPointer("chris@housi.com"),
 				Department:      dbtest.StringPointer("IT0"),
@@ -214,7 +214,7 @@ func Test_API_User_Update_401(t *testing.T) {
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
-			Input: &userapp.UpdateUserRole{
+			Input: &user_usecase.UpdateUserRole{
 				Roles: []string{"ADMIN"},
 			},
 			GotResp: &errs.Error{},
