@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/Housiadas/backend-system/internal/app/service/auditapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/audit_usecase"
 	"github.com/Housiadas/backend-system/internal/common/apitest"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/page"
@@ -38,8 +38,8 @@ func Test_API_Audit_Query_200(t *testing.T) {
 			Token:      sd.Admins[0].Token,
 			StatusCode: http.StatusOK,
 			Method:     http.MethodGet,
-			GotResp:    &page.Result[auditapp.Audit]{},
-			ExpResp: &page.Result[auditapp.Audit]{
+			GotResp:    &page.Result[audit_usecase.Audit]{},
+			ExpResp: &page.Result[audit_usecase.Audit]{
 				Metadata: page.Metadata{
 					FirstPage:   1,
 					CurrentPage: 1,
@@ -50,12 +50,12 @@ func Test_API_Audit_Query_200(t *testing.T) {
 				Data: toAppAudits(sd.Admins[0].Audits),
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(*page.Result[auditapp.Audit])
+				gotResp, exists := got.(*page.Result[audit_usecase.Audit])
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(*page.Result[auditapp.Audit])
+				expResp := exp.(*page.Result[audit_usecase.Audit])
 
 				for i := range gotResp.Data {
 					if gotResp.Data[i].Timestamp == expResp.Data[i].Timestamp {

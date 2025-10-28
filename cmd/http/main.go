@@ -4,8 +4,6 @@ import (
 	"context"
 	"expvar"
 	"fmt"
-	"github.com/Housiadas/backend-system/internal/app/repository/auditrepo"
-	"github.com/Housiadas/backend-system/internal/core/service/auditcore"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,10 +12,12 @@ import (
 
 	_ "github.com/Housiadas/backend-system/docs"
 	"github.com/Housiadas/backend-system/internal/app/handlers"
-	"github.com/Housiadas/backend-system/internal/app/repository/productrepo"
-	"github.com/Housiadas/backend-system/internal/app/repository/userrepo"
+	"github.com/Housiadas/backend-system/internal/app/repository/audit_repo"
+	"github.com/Housiadas/backend-system/internal/app/repository/product_repo"
+	"github.com/Housiadas/backend-system/internal/app/repository/user_repo"
 	ctxPck "github.com/Housiadas/backend-system/internal/common/context"
 	"github.com/Housiadas/backend-system/internal/config"
+	"github.com/Housiadas/backend-system/internal/core/service/auditcore"
 	"github.com/Housiadas/backend-system/internal/core/service/authcore"
 	"github.com/Housiadas/backend-system/internal/core/service/productcore"
 	"github.com/Housiadas/backend-system/internal/core/service/usercore"
@@ -26,7 +26,7 @@ import (
 	"github.com/Housiadas/backend-system/pkg/keystore"
 	"github.com/Housiadas/backend-system/pkg/logger"
 	"github.com/Housiadas/backend-system/pkg/otel"
-	"github.com/Housiadas/backend-system/pkg/sqldb"
+	"github.com/Housiadas/backend-system/pkg/pgsql"
 )
 
 var build = "develop"
@@ -98,7 +98,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	// App Starting
 	// -------------------------------------------------------------------------
-	log.Info(ctx, "starting service", "version", cfg.Version.Build)
+	log.Info(ctx, "starting usecase", "version", cfg.Version.Build)
 	defer log.Info(ctx, "shutdown complete")
 
 	log.BuildInfo(ctx)
@@ -108,7 +108,7 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	// Initialize Database
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing database", "host port", cfg.DB.Host)
-	db, err := sqldb.Open(sqldb.Config{
+	db, err := pgsql.Open(pgsql.Config{
 		User:         cfg.DB.User,
 		Password:     cfg.DB.Password,
 		Host:         cfg.DB.Host,
@@ -167,9 +167,9 @@ func run(ctx context.Context, cfg config.Config, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	log.Info(ctx, "startup", "status", "initializing internal layer")
 
-	auditCore := auditcore.NewCore(log, auditrepo.NewStore(log, db))
-	userCore := usercore.NewCore(log, userrepo.NewStore(log, db))
-	productCore := productcore.NewCore(log, userCore, productrepo.NewStore(log, db))
+	auditCore := auditcore.NewCore(log, audit_repo.NewStore(log, db))
+	userCore := usercore.NewCore(log, user_repo.NewStore(log, db))
+	productCore := productcore.NewCore(log, userCore, product_repo.NewStore(log, db))
 
 	// Load the private keys files from disk. We can assume some system api like
 	// Vault has created these files already. How that happens is not our concern.

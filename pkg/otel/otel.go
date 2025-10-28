@@ -31,7 +31,7 @@ type Config struct {
 	Probability    float64
 }
 
-// InitTracing configures open telemetry to be used with the service.
+// InitTracing configures open telemetry to be used with the usecase.
 func InitTracing(cfg Config) (trace.TracerProvider, func(ctx context.Context), error) {
 
 	// WARNING: The current settings are using defaults which may not be
@@ -125,7 +125,7 @@ func AddSpan(ctx context.Context, spanName string, keyValues ...attribute.KeyVal
 }
 
 // AddTraceToRequest adds the current trace id to the request so it
-// can be delivered to the service being called.
+// can be delivered to the usecase being called.
 func AddTraceToRequest(ctx context.Context, r *http.Request) {
 	hc := propagation.HeaderCarrier(r.Header)
 	otel.GetTextMapPropagator().Inject(ctx, hc)

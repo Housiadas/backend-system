@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Housiadas/backend-system/internal/app/service/userapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/user_usecase"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/web"
 )
@@ -15,12 +15,12 @@ import (
 // @Tags 		 User
 // @Accept       json
 // @Produce      json
-// @Param        request body userapp.NewUser true "User data"
-// @Success      200  {object}  userapp.User
+// @Param        request body user_usecase.NewUser true "User data"
+// @Success      200  {object}  user_usecase.User
 // @Failure      500  {object}  errs.Error
 // @Router       /user [post]
 func (h *Handler) userCreate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
-	var app userapp.NewUser
+	var app user_usecase.NewUser
 	if err := web.Decode(r, &app); err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
@@ -39,12 +39,12 @@ func (h *Handler) userCreate(ctx context.Context, _ http.ResponseWriter, r *http
 // @Tags 		 User
 // @Accept       json
 // @Produce      json
-// @Param        request body userapp.UpdateUser true "User data"
-// @Success      200  {object}  userapp.User
+// @Param        request body user_usecase.UpdateUser true "User data"
+// @Success      200  {object}  user_usecase.User
 // @Failure      500  {object}  errs.Error
 // @Router       /user/{user_id} [put]
 func (h *Handler) userUpdate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
-	var app userapp.UpdateUser
+	var app user_usecase.UpdateUser
 	if err := web.Decode(r, &app); err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
@@ -63,12 +63,12 @@ func (h *Handler) userUpdate(ctx context.Context, _ http.ResponseWriter, r *http
 // @Tags 		 User
 // @Accept       json
 // @Produce      json
-// @Param        request body userapp.UpdateUserRole true "User data"
-// @Success      200  {object}  userapp.User
+// @Param        request body user_usecase.UpdateUserRole true "User data"
+// @Success      200  {object}  user_usecase.User
 // @Failure      500  {object}  errs.Error
 // @Router       /user/role/{user_id} [put]
 func (h *Handler) updateRole(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
-	var app userapp.UpdateUserRole
+	var app user_usecase.UpdateUserRole
 	if err := web.Decode(r, &app); err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
@@ -104,7 +104,7 @@ func (h *Handler) userDelete(ctx context.Context, _ http.ResponseWriter, _ *http
 // @Tags		 User
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  userapp.UserPageResult
+// @Success      200  {object}  user_usecase.UserPageResult
 // @Failure      500  {object}  errs.Error
 // @Router       /user [get]
 func (h *Handler) userQuery(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
@@ -124,7 +124,7 @@ func (h *Handler) userQuery(ctx context.Context, _ http.ResponseWriter, r *http.
 // @Tags		 User
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  userapp.User
+// @Success      200  {object}  user_usecase.User
 // @Failure      500  {object}  errs.Error
 // @Router       /user/{user_id} [get]
 func (h *Handler) userQueryByID(ctx context.Context, _ http.ResponseWriter, _ *http.Request) web.Encoder {
@@ -136,10 +136,10 @@ func (h *Handler) userQueryByID(ctx context.Context, _ http.ResponseWriter, _ *h
 	return usr
 }
 
-func userParseQueryParams(r *http.Request) userapp.AppQueryParams {
+func userParseQueryParams(r *http.Request) user_usecase.AppQueryParams {
 	values := r.URL.Query()
 
-	return userapp.AppQueryParams{
+	return user_usecase.AppQueryParams{
 		Page:             values.Get("page"),
 		Rows:             values.Get("rows"),
 		OrderBy:          values.Get("orderBy"),

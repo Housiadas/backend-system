@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/Housiadas/backend-system/internal/app/service/productapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/product_usecase"
 	"github.com/Housiadas/backend-system/internal/common/dbtest"
 	"github.com/Housiadas/backend-system/pkg/errs"
 )
@@ -34,13 +34,13 @@ func Test_Product_Update_200(t *testing.T) {
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusOK,
-			Input: &productapp.UpdateProduct{
+			Input: &product_usecase.UpdateProduct{
 				Name:     dbtest.StringPointer("Guitar"),
 				Cost:     dbtest.FloatPointer(10.34),
 				Quantity: dbtest.IntPointer(10),
 			},
-			GotResp: &productapp.Product{},
-			ExpResp: &productapp.Product{
+			GotResp: &product_usecase.Product{},
+			ExpResp: &product_usecase.Product{
 				ID:          sd.Users[0].Products[0].ID.String(),
 				UserID:      sd.Users[0].ID.String(),
 				Name:        "Guitar",
@@ -50,12 +50,12 @@ func Test_Product_Update_200(t *testing.T) {
 				DateUpdated: sd.Users[0].Products[0].DateCreated.Format(time.RFC3339),
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(*productapp.Product)
+				gotResp, exists := got.(*product_usecase.Product)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(*productapp.Product)
+				expResp := exp.(*product_usecase.Product)
 				gotResp.DateUpdated = expResp.DateUpdated
 
 				return cmp.Diff(gotResp, expResp)
@@ -86,7 +86,7 @@ func Test_Product_Update_400(t *testing.T) {
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusBadRequest,
-			Input: &productapp.UpdateProduct{
+			Input: &product_usecase.UpdateProduct{
 				Cost:     dbtest.FloatPointer(-1.0),
 				Quantity: dbtest.IntPointer(0),
 			},
@@ -145,7 +145,7 @@ func Test_Product_Update_401(t *testing.T) {
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
-			Input: &productapp.UpdateProduct{
+			Input: &product_usecase.UpdateProduct{
 				Name:     dbtest.StringPointer("Guitar"),
 				Cost:     dbtest.FloatPointer(10.34),
 				Quantity: dbtest.IntPointer(10),

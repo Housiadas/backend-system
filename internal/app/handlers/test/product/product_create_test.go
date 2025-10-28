@@ -1,7 +1,7 @@
 package product_test
 
 import (
-	"github.com/Housiadas/backend-system/internal/app/service/productapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/product_usecase"
 	"github.com/Housiadas/backend-system/internal/common/apitest"
 	"net/http"
 	"testing"
@@ -31,25 +31,25 @@ func Test_Product_Create_200(t *testing.T) {
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
-			Input: &productapp.NewProduct{
+			Input: &product_usecase.NewProduct{
 				Name:     "Guitar",
 				Cost:     10.34,
 				Quantity: 10,
 			},
-			GotResp: &productapp.Product{},
-			ExpResp: &productapp.Product{
+			GotResp: &product_usecase.Product{},
+			ExpResp: &product_usecase.Product{
 				Name:     "Guitar",
 				UserID:   sd.Users[0].ID.String(),
 				Cost:     10.34,
 				Quantity: 10,
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(*productapp.Product)
+				gotResp, exists := got.(*product_usecase.Product)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(*productapp.Product)
+				expResp := exp.(*product_usecase.Product)
 
 				expResp.ID = gotResp.ID
 				expResp.DateCreated = gotResp.DateCreated
@@ -83,7 +83,7 @@ func Test_Product_Create_400(t *testing.T) {
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
-			Input:      &productapp.NewProduct{},
+			Input:      &product_usecase.NewProduct{},
 			GotResp:    &errs.Error{},
 			ExpResp:    errs.Newf(errs.InvalidArgument, "validation: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"cost\",\"error\":\"cost is a required field\"},{\"field\":\"quantity\",\"error\":\"quantity is a required field\"}]"),
 			CmpFunc: func(got any, exp any) string {

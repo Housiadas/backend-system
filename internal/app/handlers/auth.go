@@ -9,14 +9,14 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 
-	"github.com/Housiadas/backend-system/internal/app/service/userapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/user_usecase"
 	"github.com/Housiadas/backend-system/internal/core/service/authcore"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/web"
 )
 
 func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *http.Request) web.Encoder {
-	var requestData userapp.AuthenticateUser
+	var requestData user_usecase.AuthenticateUser
 	if err := web.Decode(r, &requestData); err != nil {
 		return errs.New(errs.FailedPrecondition, err)
 	}
@@ -40,7 +40,7 @@ func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *ht
 	claims := authcore.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   usr.ID,
-			Issuer:    "service project",
+			Issuer:    "usecase project",
 			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(8 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		},

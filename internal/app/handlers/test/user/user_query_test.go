@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/Housiadas/backend-system/internal/app/service/userapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/user_usecase"
 	"github.com/Housiadas/backend-system/internal/common/apitest"
 	"github.com/Housiadas/backend-system/internal/core/domain/user"
 	"github.com/Housiadas/backend-system/pkg/errs"
@@ -49,8 +49,8 @@ func Test_API_User_Query_200(t *testing.T) {
 			Token:      sd.Admins[0].Token,
 			StatusCode: http.StatusOK,
 			Method:     http.MethodGet,
-			GotResp:    &page.Result[userapp.User]{},
-			ExpResp: &page.Result[userapp.User]{
+			GotResp:    &page.Result[user_usecase.User]{},
+			ExpResp: &page.Result[user_usecase.User]{
 				Data: toAppUsers(usrs),
 				Metadata: page.Metadata{
 					FirstPage:   1,
@@ -89,7 +89,7 @@ func Test_API_User_Query_BY_ID_200(t *testing.T) {
 			Token:      sd.Users[0].Token,
 			StatusCode: http.StatusOK,
 			Method:     http.MethodGet,
-			GotResp:    &userapp.User{},
+			GotResp:    &user_usecase.User{},
 			ExpResp:    toAppUserPtr(sd.Users[0].User),
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)

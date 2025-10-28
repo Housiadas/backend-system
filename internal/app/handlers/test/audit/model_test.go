@@ -3,12 +3,12 @@ package audit_test
 import (
 	"time"
 
-	"github.com/Housiadas/backend-system/internal/app/service/auditapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/audit_usecase"
 	"github.com/Housiadas/backend-system/internal/core/domain/audit"
 )
 
-func toAppAudit(bus audit.Audit) auditapp.Audit {
-	return auditapp.Audit{
+func toAppAudit(bus audit.Audit) audit_usecase.Audit {
+	return audit_usecase.Audit{
 		ID:        bus.ID.String(),
 		ObjID:     bus.ObjID.String(),
 		ObjEntity: bus.ObjEntity.String(),
@@ -21,8 +21,8 @@ func toAppAudit(bus audit.Audit) auditapp.Audit {
 	}
 }
 
-func toAppAudits(audits []audit.Audit) []auditapp.Audit {
-	app := make([]auditapp.Audit, len(audits))
+func toAppAudits(audits []audit.Audit) []audit_usecase.Audit {
+	app := make([]audit_usecase.Audit, len(audits))
 	for i, adt := range audits {
 		app[i] = toAppAudit(adt)
 	}

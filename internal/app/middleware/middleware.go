@@ -14,7 +14,7 @@ import (
 	"github.com/Housiadas/backend-system/internal/core/service/productcore"
 	"github.com/Housiadas/backend-system/internal/core/service/usercore"
 	"github.com/Housiadas/backend-system/pkg/logger"
-	"github.com/Housiadas/backend-system/pkg/sqldb"
+	"github.com/Housiadas/backend-system/pkg/pgsql"
 )
 
 var (
@@ -27,7 +27,7 @@ var (
 type Config struct {
 	Log     *logger.Logger
 	Tracer  trace.Tracer
-	Tx      *sqldb.DBBeginner
+	Tx      *pgsql.DBBeginner
 	Auth    *authcore.Auth
 	User    *usercore.Core
 	Product *productcore.Core
@@ -37,7 +37,7 @@ type Middleware struct {
 	Bus    Business
 	Log    *logger.Logger
 	Tracer trace.Tracer
-	Tx     *sqldb.DBBeginner
+	Tx     *pgsql.DBBeginner
 }
 
 type Business struct {

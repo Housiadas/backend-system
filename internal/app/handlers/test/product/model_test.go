@@ -3,12 +3,12 @@ package product_test
 import (
 	"time"
 
-	"github.com/Housiadas/backend-system/internal/app/service/productapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/product_usecase"
 	"github.com/Housiadas/backend-system/internal/core/domain/product"
 )
 
-func toAppProduct(prd product.Product) productapp.Product {
-	return productapp.Product{
+func toAppProduct(prd product.Product) product_usecase.Product {
+	return product_usecase.Product{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
 		Name:        prd.Name.String(),
@@ -19,13 +19,13 @@ func toAppProduct(prd product.Product) productapp.Product {
 	}
 }
 
-func toAppProductPtr(prd product.Product) *productapp.Product {
+func toAppProductPtr(prd product.Product) *product_usecase.Product {
 	appPrd := toAppProduct(prd)
 	return &appPrd
 }
 
-func toAppProducts(prds []product.Product) []productapp.Product {
-	items := make([]productapp.Product, len(prds))
+func toAppProducts(prds []product.Product) []product_usecase.Product {
+	items := make([]product_usecase.Product, len(prds))
 	for i, prd := range prds {
 		items[i] = toAppProduct(prd)
 	}

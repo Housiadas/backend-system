@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/Housiadas/backend-system/internal/app/service/productapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/product_usecase"
 	"github.com/Housiadas/backend-system/internal/core/domain/product"
 	"github.com/Housiadas/backend-system/pkg/errs"
 	"github.com/Housiadas/backend-system/pkg/page"
@@ -43,8 +43,8 @@ func Test_Product_Query_200(t *testing.T) {
 			Token:      sd.Admins[0].Token,
 			StatusCode: http.StatusOK,
 			Method:     http.MethodGet,
-			GotResp:    &page.Result[productapp.Product]{},
-			ExpResp: &page.Result[productapp.Product]{
+			GotResp:    &page.Result[product_usecase.Product]{},
+			ExpResp: &page.Result[product_usecase.Product]{
 				Data: toAppProducts(prds),
 				Metadata: page.Metadata{
 					FirstPage:   1,
@@ -83,7 +83,7 @@ func Test_Product_Query_By_ID_200(t *testing.T) {
 			Token:      sd.Users[0].Token,
 			StatusCode: http.StatusOK,
 			Method:     http.MethodGet,
-			GotResp:    &productapp.Product{},
+			GotResp:    &product_usecase.Product{},
 			ExpResp:    toAppProductPtr(sd.Users[0].Products[0]),
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)

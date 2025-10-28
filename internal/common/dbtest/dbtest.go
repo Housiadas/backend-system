@@ -15,7 +15,7 @@ import (
 	"github.com/Housiadas/backend-system/pkg/docker"
 	"github.com/Housiadas/backend-system/pkg/logger"
 	"github.com/Housiadas/backend-system/pkg/otel"
-	"github.com/Housiadas/backend-system/pkg/sqldb"
+	"github.com/Housiadas/backend-system/pkg/pgsql"
 )
 
 const (
@@ -57,7 +57,7 @@ func New(t *testing.T, testName string) *Database {
 	t.Logf("Name    : %s\n", c.Name)
 	t.Logf("Host: %s\n", c.HostPort)
 
-	dbM, err := sqldb.Open(sqldb.Config{
+	dbM, err := pgsql.Open(pgsql.Config{
 		User:       DBUser,
 		Password:   DBPassword,
 		Host:       c.HostPort,
@@ -71,7 +71,7 @@ func New(t *testing.T, testName string) *Database {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := sqldb.StatusCheck(ctx, dbM); err != nil {
+	if err := pgsql.StatusCheck(ctx, dbM); err != nil {
 		t.Fatalf("[TEST]: status check database: %v", err)
 	}
 
@@ -91,7 +91,7 @@ func New(t *testing.T, testName string) *Database {
 
 	// -------------------------------------------------------------------------
 
-	db, err := sqldb.Open(sqldb.Config{
+	db, err := pgsql.Open(pgsql.Config{
 		User:       DBUser,
 		Password:   DBPassword,
 		Host:       c.HostPort,

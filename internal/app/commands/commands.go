@@ -7,7 +7,7 @@ import (
 
 	"github.com/Housiadas/backend-system/internal/config"
 	"github.com/Housiadas/backend-system/pkg/logger"
-	"github.com/Housiadas/backend-system/pkg/sqldb"
+	"github.com/Housiadas/backend-system/pkg/pgsql"
 )
 
 // ErrHelp provides context that help was given.
@@ -21,7 +21,7 @@ type Config struct {
 }
 
 type Command struct {
-	DB      sqldb.Config
+	DB      pgsql.Config
 	Log     *logger.Logger
 	Version config.Version
 	Auth    config.Auth
@@ -35,7 +35,7 @@ func New(
 	serviceName string,
 ) *Command {
 	return &Command{
-		DB: sqldb.Config{
+		DB: pgsql.Config{
 			User:         cfg.DB.User,
 			Password:     cfg.DB.Password,
 			Host:         cfg.DB.Host,

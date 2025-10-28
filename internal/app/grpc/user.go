@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	userV1 "github.com/Housiadas/backend-system/gen/go/github.com/Housiadas/backend-system/gen/user/v1"
-	"github.com/Housiadas/backend-system/internal/app/service/userapp"
+	"github.com/Housiadas/backend-system/internal/app/usecase/user_usecase"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -36,13 +36,13 @@ func (s *Server) GetUserById(
 	}, nil
 }
 
-func toUserQueryParams(req *userV1.GetUserByIdRequest) userapp.AppQueryParams {
-	return userapp.AppQueryParams{
+func toUserQueryParams(req *userV1.GetUserByIdRequest) user_usecase.AppQueryParams {
+	return user_usecase.AppQueryParams{
 		ID: req.Id,
 	}
 }
 
-func toProtoUser(user userapp.User) (*userV1.User, error) {
+func toProtoUser(user user_usecase.User) (*userV1.User, error) {
 	dateCreated, err := time.Parse(time.RFC3339, user.DateCreated)
 	if err != nil {
 		return &userV1.User{}, err

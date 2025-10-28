@@ -14,7 +14,7 @@ import (
 	"github.com/Housiadas/backend-system/pkg/order"
 	"github.com/Housiadas/backend-system/pkg/otel"
 	"github.com/Housiadas/backend-system/pkg/page"
-	"github.com/Housiadas/backend-system/pkg/sqldb"
+	"github.com/Housiadas/backend-system/pkg/pgsql"
 )
 
 // Core manages the set of APIs for product access.
@@ -41,7 +41,7 @@ func NewCore(
 
 // NewWithTx constructs a new internal value that will use the
 // specified transaction in any store-related calls.
-func (c *Core) NewWithTx(tx sqldb.CommitRollbacker) (*Core, error) {
+func (c *Core) NewWithTx(tx pgsql.CommitRollbacker) (*Core, error) {
 	storer, err := c.storer.NewWithTx(tx)
 	if err != nil {
 		return nil, err
